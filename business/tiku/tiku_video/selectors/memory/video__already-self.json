@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "route": "/video/already-self",
+  "saved_at": 1782448140.6650822,
+  "entries": {
+    "click|点击最近一条数据的查看": {
+      "method": "role",
+      "role": "button",
+      "name": "查 看",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"查 看\"]",
+      "success_count": 3,
+      "created_at": 1782172752.177461,
+      "updated_at": 1782439817.3953128,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    }
+  }
+}

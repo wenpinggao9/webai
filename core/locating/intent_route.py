@@ -75,11 +75,32 @@ def is_tree_node(intent: str) -> bool:
 
 
 def is_date_picker(intent: str) -> bool:
+    if is_date_panel_selection(intent):
+        return True
     if any(w in intent for w in ("日期选择", "日期范围", "日期控件", "时间选择", "日期框")):
         return True
     return any(w in intent for w in ("日期", "时间")) and any(
         w in intent for w in ("选择", "点击", "填写", "输入")
     )
+
+
+def is_date_panel_selection(intent: str) -> bool:
+    """在已展开日历面板内点选具体日期 (非点触发器)."""
+    if not intent:
+        return False
+    if any(k in intent for k in ("日期面板", "日历面板", "日期弹窗", "日历")):
+        return True
+    if re.search(r"\d{4}[-/]\d{1,2}[-/]\d{1,2}", intent) and "面板" in intent:
+        return True
+    return False
+
+
+def is_date_panel_end_side(intent: str) -> bool:
+    return any(k in (intent or "") for k in ("结束日期", "结束时间", "end date", "End date"))
+
+
+def is_date_panel_start_side(intent: str) -> bool:
+    return any(k in (intent or "") for k in ("开始日期", "开始时间", "start date", "Start date"))
 
 
 def is_switch_in_row(intent: str) -> bool:

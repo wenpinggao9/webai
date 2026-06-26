@@ -15,6 +15,8 @@ from playwright.sync_api import sync_playwright
 
 from . import codegen
 from .business_loader import BusinessLoader
+from .ports.business.accel_store import resolve_accel_dir, seed_business_accel_from_global
+from .ports.business.plan_store import build_plan_entry, save_case_file_actions
 from .execution import ActionDispatcher, PlaywrightRunner
 from .execution.cross_case_session import refresh_page_on_role_reentry
 from .execution.script_helpers import (
@@ -42,13 +44,14 @@ from .locating.accel_paths import (
     selector_memory_path,
 )
 from .observability import ObservabilityCollector
-from .output import FileManager
+from .output import FileManager, publish_project_report
 from .parser import parse_case
 from .planning import ActionPlanner, strip_duplicate_menu_clicks, sanitize_planned_roles
 from .planning.page_nav import should_preserve_page_on_case_start
 from .preprocess import PreconditionExpander, sort_cases
 from .parser import ExecutionBlock
 from .preprocess.step_format import (
+    build_case_origin_snapshot,
     build_execution_blocks,
     flatten_case_for_planning,
     prepare_execution_plan,
@@ -61,6 +64,7 @@ from .skill_loader import load_skill_text, format_skills_for_decider
 from .variable_substitution import substitute_in_list, format_session_context
 from .execution.session_ops import enrich_session_actions
 from .execution.optional_step import tag_optional_actions_from_steps
+from .foundation.layout import EXECUTION_TRACE_FILE, LEGACY_GLOBAL_ACCEL_DIR, OBSERVABILITY_FILE
 from .watermark import load_watermark_config
 from .report import build_report_data, save_batch_overview
 
@@ -83,6 +87,8 @@ class UITestAgent:
         configure_skill_path(skill_path)
         skill_text = load_skill_text(skill_path)
         skill_decider_prompt = format_skills_for_decider(skill_path)
+        self._skill_decider_prompt = skill_decider_prompt
+        self._skill_path = skill_path
         self.precondition = PreconditionExpander(self.llm, self.prompts)
         self.planner = ActionPlanner(self.llm, self.prompts, skill_text=skill_text)
         self.navigator = Navigator(self.console)
@@ -99,10 +105,16 @@ class UITestAgent:
         # 【多系统扩展】Profile 管理器
         self.profile_mgr = ProfileManager(config)
 
-        # 步骤⑨ 智能加速层: L1 短期缓存 (30min TTL + 落盘), L2 长期记忆
-        accel = self.root / "智能加速"
-        accel_cfg = config.get("acceleration", {})
-        migrated = migrate_legacy_accel_layout(accel)
+        # 步骤⑨ 智能加速层（默认全局路径，run_tests 发现业务后重绑定）
+        self._setup_acceleration(self.root / LEGACY_GLOBAL_ACCEL_DIR)
+        # 步骤⑩⑫ 可靠性组件
+        self.readiness = ReadinessChecker(self.llm, self.prompts)
+        self.post_checker = PostStepChecker(self.llm, self.prompts, console=self.console)
+
+    def _setup_acceleration(self, accel_dir: Path) -> None:
+        """初始化或重绑定 L1/L2/L4 加速层到指定目录."""
+        accel_cfg = self.config.get("acceleration", {})
+        migrated = migrate_legacy_accel_layout(accel_dir)
         if migrated:
             self.console.print(
                 f"[dim]智能加速目录已迁移: {', '.join(migrated)}[/dim]",
@@ -111,28 +123,27 @@ class UITestAgent:
         l2_ttl = int(accel_cfg.get("l2_ttl_days", 10)) * 24 * 3600
         self.cache = SelectorCache(
             ttl_s=l1_ttl,
-            path=selector_cache_path(accel),
+            path=selector_cache_path(accel_dir),
             self_heal=bool(accel_cfg.get("l1_self_heal", True)),
         )
-        self.memory = SelectorMemory(selector_memory_path(accel), ttl_s=l2_ttl)
+        self.memory = SelectorMemory(accel_dir, ttl_s=l2_ttl)
         self.learner = CompositeStructureLearner(
-            accel_dir=accel,
+            accel_dir=accel_dir,
             similarity_threshold=float(accel_cfg.get("l4_similarity_threshold", 0.6)),
         )
-        self.decider = LLMElementDecider(
-            self.llm, self.prompts,
-            skill_prompt=skill_decider_prompt,
-            skill_path=skill_path,
-        )
+        if not hasattr(self, "decider"):
+            self.decider = LLMElementDecider(
+                self.llm, self.prompts,
+                skill_prompt=getattr(self, "_skill_decider_prompt", ""),
+                skill_path=getattr(self, "_skill_path", None),
+            )
         self.resolver = LocatorResolver(
             self.decider, cache=self.cache, memory=self.memory,
             learner=self.learner, console=self.console,
-            dom_limit=int(config.get("locating", {}).get("dom_limit", 80)),
-            intent_window=bool(config.get("locating", {}).get("intent_window", True)),
+            dom_limit=int(self.config.get("locating", {}).get("dom_limit", 80)),
+            intent_window=bool(self.config.get("locating", {}).get("intent_window", True)),
         )
-        # 步骤⑩⑫ 可靠性组件
-        self.readiness = ReadinessChecker(self.llm, self.prompts)
-        self.post_checker = PostStepChecker(self.llm, self.prompts, console=self.console)
+        self._accel_dir = accel_dir
 
     def _route_llm(self, stage: str, system: str, user: str, raw: str) -> None:
         """步骤⑲: 把 LLM 调用归集到当前用例的可观测性收集器."""
@@ -154,12 +165,23 @@ class UITestAgent:
         if base_url or biz.get_apis() or biz.get_enums():
             self.profile_mgr.profiles[biz.system_dir.name] = biz.build_system_profile()
 
-    def run_tests(self, test_file: str | Path) -> dict[str, Any]:
+    def run_tests(self, test_file: str | Path, *, env_file: str | Path | None = None) -> dict[str, Any]:
         # 【业务目录】从用例路径向上自动发现业务配置
         biz = BusinessLoader()
-        biz_loaded = biz.discover(test_file)
+        biz_loaded = biz.discover(test_file, env_file=env_file)
         if biz_loaded:
-            self.console.print(f"[cyan]业务: {biz.system_dir.name} | 项目: {biz.project_dir.name}[/cyan]")
+            proj_name = biz.project_dir.name if biz.project_dir else "-"
+            self.console.print(f"[cyan]{biz.display_path()}[/cyan]")
+            if biz.get_base_url():
+                self.console.print(f"[dim]环境: {biz.get_base_url()}[/dim]")
+            if biz.get_roles():
+                self.console.print(f"[dim]角色: {', '.join(biz.get_roles().keys())}[/dim]")
+            accel_dir = resolve_accel_dir(biz.system_dir, self.root)
+            seeded = seed_business_accel_from_global(self.root / LEGACY_GLOBAL_ACCEL_DIR, accel_dir)
+            if seeded:
+                self.console.print(f"[dim]加速记忆已就绪: {accel_dir.relative_to(self.root)}[/dim]")
+            if getattr(self, "_accel_dir", None) != accel_dir:
+                self._setup_acceleration(accel_dir)
             # 注入业务知识到 ProfileManager
             self._inject_business(biz)
 
@@ -178,7 +200,10 @@ class UITestAgent:
         import time as _time
         batch_start = _time.time()
         fm = FileManager(self.root)
-        self.console.print(f"[cyan]批次目录: {fm.batch_dir}[/cyan]")
+        try:
+            self.console.print(f"[dim]执行目录: {fm.batch_dir.relative_to(self.root)}[/dim]")
+        except ValueError:
+            self.console.print(f"[dim]执行目录: {fm.batch_dir}[/dim]")
 
         case_results = []
         session_vars: dict[str, Any] = {}   # 跨用例共享变量池 (api_call 返回值等)
@@ -212,6 +237,21 @@ class UITestAgent:
                             pass
                 browser.close()
 
+        if (
+            biz_loaded
+            and biz.project_dir
+            and not getattr(self, "_from_actions_mode", False)
+        ):
+            plan_entries = [r["plan_entry"] for r in case_results if r.get("plan_entry")]
+            if plan_entries:
+                stem = Path(test_file).stem
+                out_path = save_case_file_actions(biz.project_dir, stem, plan_entries)
+                try:
+                    rel = out_path.relative_to(self.root)
+                except ValueError:
+                    rel = out_path
+                self.console.print(f"[cyan]动作规划已写入: {rel}[/cyan]")
+
         # 持久化智能加速层 (L1 短期缓存 + L2 记忆 + L4 学习)
         self.cache.save()
         self.memory.save()
@@ -225,7 +265,7 @@ class UITestAgent:
         batch_ms = int((_time.time() - batch_start) * 1000)
         batch_duration = f"{batch_ms / 1000:.1f}秒" if batch_ms >= 1000 else f"{batch_ms}ms"
         try:
-            ov_json, ov_html = save_batch_overview(
+            _ov_json, ov_html = save_batch_overview(
                 fm.batch_dir,
                 source_file=str(test_file),
                 case_results=case_results,
@@ -234,14 +274,26 @@ class UITestAgent:
                 batch_timestamp=fm.batch_dir.name,
                 locating_stats=stats,
             )
-            self.console.print(f"[cyan]批次报告: {ov_html}[/cyan]")
+            report_html = ov_html
+            if biz_loaded and biz.project_dir:
+                try:
+                    _, report_html = publish_project_report(
+                        biz.project_dir,
+                        fm.batch_dir,
+                        project_root=self.root,
+                    )
+                except Exception as mirror_err:  # noqa: BLE001
+                    self.console.print(f"[yellow]业务报告写入失败: {mirror_err}[/yellow]")
+            try:
+                report_display = report_html.relative_to(self.root)
+            except ValueError:
+                report_display = report_html
+            self.console.print(f"[cyan]批次报告: {report_display}[/cyan]")
         except Exception as e:  # noqa: BLE001
             self.console.print(f"[yellow]批次报告生成失败: {e}[/yellow]")
-        suite_path = codegen.generate_suite_script(
+        codegen.generate_suite_script(
             fm.batch_dir, [r["case_id"] for r in case_results], self.root,
         )
-        if suite_path:
-            self.console.print(f"[cyan]批次套件: {suite_path}[/cyan]")
         summary = {
             "总数": len(case_results),
             "通过数": passed,
@@ -260,6 +312,8 @@ class UITestAgent:
         batch_session_state: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         self.console.rule(f"[bold cyan]用例 {case.case_id}")
+
+        origin_snapshot = build_case_origin_snapshot(case)
 
         # 步骤⑲ 每条用例独立的可观测性收集器
         obs = ObservabilityCollector()
@@ -457,10 +511,18 @@ class UITestAgent:
             cross_session = self.runner_cfg.get("cross_case_session", False)
             exec_blocks, by_blocks = prepare_execution_plan(case)
 
-            # 模式 2: 预规划动作注入, 跳过 LLM 规划
+            # 预规划：仅 API 注入或 run.py --from-actions 显式加载，默认每次走 LLM 规划
             preplanned = getattr(self, "_preplanned_actions", None)
+            file_map = getattr(self, "_file_preplanned_map", None) or {}
+            if not preplanned:
+                preplanned = file_map.get(case.case_id)
             if preplanned:
-                self.console.print(f"  [cyan]预规划模式: 使用 {len(preplanned)} 个预定义动作[/cyan]")
+                if case.case_id in file_map:
+                    self.console.print(
+                        f"  [cyan]预规划模式: 从文件加载 {len(preplanned)} 个动作[/cyan]"
+                    )
+                else:
+                    self.console.print(f"  [cyan]预规划模式: 使用 {len(preplanned)} 个预定义动作[/cyan]")
                 actions = preplanned
                 raw = ""
                 flatten_case_for_planning(case)
@@ -484,7 +546,9 @@ class UITestAgent:
 
                 if not actions:
                     self.console.print("[yellow]预规划动作为空, 跳过执行[/yellow]")
-                    return self._case_result_summary(case, [], False, case_start)
+                    return self._finish_case_result(
+                        case, results, False, case_start, origin_snapshot, actions,
+                    )
 
                 self.resolver.set_trace(trace)
                 dispatcher, runner = self._build_runner(
@@ -562,7 +626,9 @@ class UITestAgent:
 
                 if not actions:
                     self.console.print("[yellow]规划结果为空, 跳过执行[/yellow]")
-                    return self._case_result_summary(case, [], False, case_start)
+                    return self._finish_case_result(
+                        case, results, False, case_start, origin_snapshot, actions,
+                    )
 
                 self.resolver.set_trace(trace)
                 dispatcher, runner = self._build_runner(
@@ -642,8 +708,8 @@ class UITestAgent:
                         pass
             # 步骤⑲ 可观测性落盘 + 步骤⑳ 临时资源清理
             cd = fm.case_dir(case.case_id)
-            obs.save(cd / "可观测性.json")
-            trace.save(cd / "执行追踪.json")
+            obs.save(cd / OBSERVABILITY_FILE)
+            trace.save(cd / EXECUTION_TRACE_FILE)
             self._cur_obs = None
             self.resources.cleanup()
 
@@ -684,12 +750,37 @@ class UITestAgent:
                 idempotent_skip_intents=idempotent_skip,
             )
 
-        return self._case_result_summary(
-            case, results, passed, case_start,
+        return self._finish_case_result(
+            case, results, passed, case_start, origin_snapshot, actions, fm=fm,
         )
 
+    def _finish_case_result(
+        self,
+        case,
+        results: list,
+        passed: bool,
+        case_start: float,
+        origin_snapshot: dict[str, Any],
+        actions: list,
+        fm: FileManager | None = None,
+    ) -> dict[str, Any]:
+        case_out_dir = fm.case_dir(case.case_id) if fm else None
+        summary = self._case_result_summary(
+            case, results, passed, case_start, case_out_dir=case_out_dir,
+        )
+        if actions and not getattr(self, "_from_actions_mode", False):
+            summary["plan_entry"] = build_plan_entry(case, origin_snapshot, actions)
+        else:
+            summary["plan_entry"] = None
+        return summary
+
     def _case_result_summary(
-        self, case, results: list, passed: bool, case_start: float,
+        self,
+        case,
+        results: list,
+        passed: bool,
+        case_start: float,
+        case_out_dir=None,
     ) -> dict[str, Any]:
         import time as _time
         total_ms = int((_time.time() - case_start) * 1000)
@@ -700,6 +791,7 @@ class UITestAgent:
         exec_time = f"{total_ms / 1000:.1f}秒" if total_ms >= 1000 else f"{total_ms}ms"
         report_data = build_report_data(
             case.case_id, results, total_ms,
+            out_dir=case_out_dir,
             feature_titles=list(case.module_path or []),
             locating_stats=self.resolver.case_locating_stats(),
         ) if results else {"details": [], "total_steps": 0, "passed": 0, "failed": 0}

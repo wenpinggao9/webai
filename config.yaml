@@ -93,6 +93,13 @@ acceleration:
   page_ready_guard: true       # DOM 抽取前 PageReadyGuard + DOM stable wait
   dialog_retrigger: true       # intent 指向弹窗按钮但无弹窗时重触发
 
+# 提测交付包 export_handoff — 加速记忆快照策略（工程级，业务 selectors/ 下不再放 manifest.yaml）
+delivery:
+  accel:
+    include_l2: true    # L2 页面 route 记忆（默认交付）
+    include_l4: true    # L4 页面结构（默认交付）
+    include_l1: false   # L1 短期缓存（默认不交付，会话级）
+
 # 步骤⑨ L5 元素决策 — DOM 窗口 (L5大模型 子步骤, 在 L3规则/L4学习 之后)
 locating:
   dom_limit: 120          # 喂给 L5 element_decide LLM 的候选节点上限 (大上下文模型可调 120~150)

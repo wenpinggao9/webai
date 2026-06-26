@@ -16,6 +16,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Set
 
+from .intent_route import is_date_panel_selection
+
 logger = logging.getLogger(__name__)
 
 
@@ -509,9 +511,9 @@ class IntentRuleEngine:
             if action_type not in rule.action_types:
                 continue
             # 下拉选项/展开类 intent 禁止回退到全页 text= 点击（易误点表格等同名文案）
-            if rule.name == "generic_text_click" and re.search(
-                r"下拉选项|下拉框.*展开|展开.*下拉",
-                intent,
+            if rule.name == "generic_text_click" and (
+                re.search(r"下拉选项|下拉框.*展开|展开.*下拉", intent)
+                or is_date_panel_selection(intent)
             ):
                 continue
             m = rule.intent_pattern.search(intent)

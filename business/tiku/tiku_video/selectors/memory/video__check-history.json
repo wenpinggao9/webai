@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "route": "/video/check-history",
+  "saved_at": 1782448140.6650822,
+  "entries": {
+    "click|在筛选区点击类型下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '类型')]]//div[contains(@class,'ant-select')])[1]",
+      "method": "css",
+      "success_count": 7,
+      "created_at": 1782208481.7828832,
+      "updated_at": 1782448032.079284,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击前审": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"前审\")])[1]",
+      "method": "css",
+      "success_count": 7,
+      "created_at": 1782208496.7052958,
+      "updated_at": 1782448037.158429,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击大学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学\")])[1]",
+      "method": "css",
+      "success_count": 7,
+      "created_at": 1782208525.084556,
+      "updated_at": 1782448053.4471118,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击举报/放弃": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"举报/放弃\")])[1]",
+      "method": "css",
+      "success_count": 6,
+      "created_at": 1782208553.160309,
+      "updated_at": 1782448068.973739,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在筛选区点击审核时间日期选择框": {
+      "method": "css",
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "input#submitTimeRange",
+      "success_count": 6,
+      "created_at": 1782208585.214915,
+      "updated_at": 1782448079.659122,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击页面空白区域关闭日期选择器弹窗": {
+      "method": "role",
+      "role": "button",
+      "name": "重 置",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"重 置\"]",
+      "success_count": 1,
+      "created_at": 1782208713.495754,
+      "updated_at": 1782208713.495754,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击全部题目": {
+      "method": "role",
+      "role": "link",
+      "name": "欢迎",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=link[name=\"欢迎\"]",
+      "success_count": 1,
+      "created_at": 1782369731.0079339,
+      "updated_at": 1782369731.0079339,
+      "component_library": "generic",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "link",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择开始日期2026-06-22": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-22\")])[1]",
+      "method": "css",
+      "success_count": 4,
+      "created_at": 1782370164.004894,
+      "updated_at": 1782445448.175596,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择结束日期2026-06-23": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-23\")])[1]",
+      "method": "css",
+      "success_count": 4,
+      "created_at": 1782370174.417173,
+      "updated_at": 1782445460.2254798,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交进行查询": {
+      "method": "role",
+      "role": "button",
+      "name": "提 交",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
+      "success_count": 2,
+      "created_at": 1782370196.6293309,
+      "updated_at": 1782445474.173755,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交按钮进行查询": {
+      "method": "role",
+      "role": "button",
+      "name": "提 交",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
+      "success_count": 4,
+      "created_at": 1782373960.281214,
+      "updated_at": 1782448112.89087,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择开始日期2026-06-26": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-26\")])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782439970.501313,
+      "updated_at": 1782439970.501313,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择结束日期2026-06-26": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-26\")])[1]",
+      "method": "css",
+      "success_count": 2,
+      "created_at": 1782439981.066719,
+      "updated_at": 1782448100.566782,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|关闭当前打开的日期选择面板，点击页面空白区域收起日期面板": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@class,'ant-picker-cell-in-view') and not(contains(@class,'ant-picker-cell-disabled'))])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782439998.803377,
+      "updated_at": 1782439998.803377,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择开始日期2026-06-25": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-25\")])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782448089.825258,
+      "updated_at": 1782448089.825258,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    }
+  }
+}

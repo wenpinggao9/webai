@@ -51,6 +51,42 @@ def info_from_recommended_selector(sel: str, nth: int = 0) -> dict:
     return infer_from_selector(s, nth=nth)
 
 
+def pick_valid_locator_info(
+    page: Any,
+    candidates: list[str],
+    *,
+    exclude: Optional[set[str]] = None,
+) -> Optional[dict]:
+    """在页面上验证候选, 返回第一个可见元素的 locator_info (含 nth)."""
+    from .playwright_api import info_key, resolve_locator
+
+    excl = exclude or set()
+    for raw in candidates:
+        sel = (raw or "").strip()
+        if not sel or sel in excl:
+            continue
+        base = info_from_recommended_selector(sel)
+        key = info_key(base)
+        if key in excl:
+            continue
+        try:
+            loc = resolve_locator(page, base)
+            count = loc.count()
+        except Exception:
+            continue
+        for i in range(min(count, 16)):
+            try:
+                item = loc.nth(i)
+                if item.is_visible():
+                    out = dict(base)
+                    if i:
+                        out["nth"] = i
+                    return out
+            except Exception:
+                continue
+    return None
+
+
 def pick_valid_selector(
     page: Any,
     candidates: list[str],
@@ -58,18 +94,10 @@ def pick_valid_selector(
     exclude: Optional[set[str]] = None,
 ) -> Optional[str]:
     """在页面上验证 skill 候选, 返回第一个可见 selector."""
-    excl = exclude or set()
-    for raw in candidates:
-        sel = (raw or "").strip()
-        if not sel or sel in excl:
-            continue
-        info = info_from_recommended_selector(sel)
-        key = info.get("selector") or sel
-        if key in excl:
-            continue
-        if validate_locator(page, info):
-            return sel
-    return None
+    info = pick_valid_locator_info(page, candidates, exclude=exclude)
+    if not info:
+        return None
+    return str(info.get("selector") or "").strip() or None
 
 
 def extract_target_text_from_intent(intent: str) -> Optional[str]:
@@ -148,6 +176,8 @@ def resolve_component_type(
     action_type: Optional[str],
 ) -> Optional[str]:
     """DOM 推断优先, 其次 intent 关键词路由."""
+    if intent_route.is_date_panel_selection(intent):
+        return "date_picker"
     return (
         infer_component_type_from_dom(items, intent, action_type)
         or detect_component_type_from_intent(intent, action_type)
@@ -169,7 +199,7 @@ def _invoke_build_helper(skill_name: str, items: list[dict], intent: str, target
         if skill_name == "build_tree_node_selector":
             return invoke_skill("build_tree_node_selector", items, intent, target_text)
         if skill_name == "build_date_picker_selector":
-            return invoke_skill("build_date_picker_selector", items, intent, target_text)
+            return invoke_skill("build_date_picker_selector", items, intent)
         if skill_name == "build_fill_input_selector":
             return invoke_skill("build_fill_input_selector", items, intent, target_text)
     except Exception:
@@ -187,6 +217,25 @@ def build_selector_via_skill(
     exclude: Optional[set[str]] = None,
 ) -> Optional[str]:
     """调用 build_* skill 并在页面上验证候选."""
+    info = resolve_locator_info_via_skill(
+        skill_name, items, intent,
+        target_text=target_text, page=page, exclude=exclude,
+    )
+    if not info:
+        return None
+    return str(info.get("selector") or "").strip() or None
+
+
+def resolve_locator_info_via_skill(
+    skill_name: str,
+    items: list[dict],
+    intent: str,
+    *,
+    target_text: str = "",
+    page: Any = None,
+    exclude: Optional[set[str]] = None,
+) -> Optional[dict]:
+    """调用 build_* skill, 返回第一个页面可见的 locator_info (含 nth)."""
     result = _invoke_build_helper(skill_name, items, intent, target_text)
     if not result:
         return None
@@ -197,8 +246,8 @@ def build_selector_via_skill(
     if not candidates:
         return None
     if page is None:
-        return str(candidates[0]).strip() or None
-    return pick_valid_selector(page, candidates, exclude=exclude)
+        return info_from_recommended_selector(str(candidates[0]).strip())
+    return pick_valid_locator_info(page, candidates, exclude=exclude)
 
 
 def dispatch_skill(

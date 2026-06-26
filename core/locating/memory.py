@@ -18,9 +18,17 @@ from .normalize import (
     normalize_url,
     normalize_url_legacy,
 )
-from .playwright_api import info_key, normalize_info
-
-# 压缩阈值: success_count <= 1 且 created_at 超过此秒数则删除
+from .accel_paths import (
+    L2_GENERIC_FILE,
+    SELECTOR_MEMORY_FILE,
+    l2_generic_path,
+    l2_pages_dir,
+    l2_route_path,
+    migrate_l2_monolith_to_routes,
+    resolve_accel_dir_from_memory_arg,
+    selector_memory_path,
+)
+from .playwright_api import normalize_info
 _COMPRESS_STALE_SECONDS = 14 * 24 * 3600  # 14 天
 _FILE_VERSION = 1
 
@@ -82,21 +90,100 @@ def _detect_component_library(items: list[dict]) -> str:
 
 
 class SelectorMemory:
-    """中期记忆库: 文件持久化 + 评分 + 压缩清理."""
+    """中期记忆库: L2_pages 按 route 分文件 + _generic.json."""
 
-    def __init__(self, path: str | Path, ttl_s: int = 0) -> None:
-        del ttl_s  # 不再用 TTL, 改用压缩淘汰
-        self.path = Path(path)
-        self._store: dict[str, dict] = {}       # page_entries
-        self._generic_store: dict[str, dict] = {}  # generic_entries
+    def __init__(self, path_or_accel: str | Path, ttl_s: int = 0) -> None:
+        del ttl_s
+        self._accel_dir = resolve_accel_dir_from_memory_arg(path_or_accel)
+        self.path = l2_pages_dir(self._accel_dir)  # 兼容属性
+        self._store: dict[str, dict] = {}
+        self._generic_store: dict[str, dict] = {}
+        self._loaded_routes: set[str] = set()
+        self._dirty_routes: set[str] = set()
         self._stats_lookups = 0
         self._stats_hits = 0
         self._stats_generic_lookups = 0
         self._stats_generic_hits = 0
-        self._load()
+        self._load_all()
         self._compress()
 
-    # ── Key 构建 ──────────────────────────────────────────────
+    def _full_key(self, url: str, action_type: str, intent: str) -> str:
+        return self._key(url, action_type, intent)
+
+    def _route_of_key(self, full_key: str) -> str:
+        return str(full_key).split("|", 1)[0]
+
+    def _ensure_route_loaded(self, url: str) -> str:
+        route = normalize_url(url)
+        if route in self._loaded_routes:
+            return route
+        self._load_route_file(route)
+        self._loaded_routes.add(route)
+        return route
+
+    def _load_route_file(self, route: str) -> None:
+        fp = l2_route_path(self._accel_dir, route)
+        if not fp.is_file():
+            return
+        try:
+            data = json.loads(fp.read_text(encoding="utf-8"))
+            entries = data.get("entries") or {}
+            for short_key, entry in entries.items():
+                if not isinstance(entry, dict):
+                    continue
+                if entry.get("success_count", 0) <= 0:
+                    continue
+                self._store[f"{route}|{short_key}"] = entry
+        except Exception:
+            pass
+
+    def _load_all(self) -> None:
+        migrate_l2_monolith_to_routes(self._accel_dir)
+        pages = l2_pages_dir(self._accel_dir)
+        if not pages.is_dir():
+            return
+        for fp in pages.glob("*.json"):
+            if fp.name in (SELECTOR_MEMORY_FILE, L2_GENERIC_FILE):
+                continue
+            if fp.name.endswith(".bak"):
+                continue
+            try:
+                data = json.loads(fp.read_text(encoding="utf-8"))
+            except Exception:
+                continue
+            route = data.get("route")
+            if not route:
+                stem = fp.stem.replace("__", "/")
+                route = "/" + stem if stem != "root" else "/"
+            self._loaded_routes.add(route)
+            for short_key, entry in (data.get("entries") or {}).items():
+                if isinstance(entry, dict) and entry.get("success_count", 0) > 0:
+                    self._store[f"{route}|{short_key}"] = entry
+        self._load_generic()
+
+    def _load_generic(self) -> None:
+        gp = l2_generic_path(self._accel_dir)
+        if not gp.is_file():
+            monolith = selector_memory_path(self._accel_dir)
+            if monolith.is_file():
+                try:
+                    data = json.loads(monolith.read_text(encoding="utf-8"))
+                    for k, v in (data.get("generic_entries") or {}).items():
+                        if v.get("success_count", 0) > 0:
+                            self._generic_store[k] = v
+                except Exception:
+                    pass
+            return
+        try:
+            data = json.loads(gp.read_text(encoding="utf-8"))
+            for k, v in (data.get("generic_entries") or {}).items():
+                if isinstance(v, dict) and v.get("success_count", 0) > 0:
+                    self._generic_store[k] = v
+        except Exception:
+            pass
+
+    def _mark_dirty(self, url: str) -> None:
+        self._dirty_routes.add(normalize_url(url))
 
     def _key(self, url: str, action_type: str, intent: str) -> str:
         return f"{normalize_url(url)}|{action_type}|{normalize_intent(intent)}"
@@ -115,6 +202,7 @@ class SelectorMemory:
         return [primary, legacy]
 
     def _get_entry(self, url: str, action_type: str, intent: str) -> Optional[dict]:
+        self._ensure_route_loaded(url)
         for k in self._keys_for_lookup(url, action_type, intent):
             e = self._store.get(k)
             if e and e.get("success_count", 0) > 0:
@@ -170,7 +258,7 @@ class SelectorMemory:
             self._decrement(url, action_type, intent)
             return None
 
-        if self._validate_selector(page, selector):
+        if self._validate_locator_info(page, info):
             k = self._migrate_to_canonical(url, action_type, intent)
             e = self._store.get(k)
             if not e:
@@ -227,6 +315,7 @@ class SelectorMemory:
                 "selector_type": selector_type,
                 "node_signature": sig,
             }
+        self._mark_dirty(url)
 
     def record_failure(
         self,
@@ -304,6 +393,9 @@ class SelectorMemory:
         comp_type = resolve_component_type(items, intent, action_type)
         if not comp_type:
             return None
+        # 日期控件由 L3 build_date_picker_selector 按字段名定位; 通用 text/placeholder 易误点 label
+        if comp_type == "date_picker":
+            return None
 
         self._stats_generic_lookups += 1
         lib = component_library
@@ -324,7 +416,7 @@ class SelectorMemory:
             if not selector:
                 continue
             info = info_from_recommended_selector(selector)
-            if self._validate_selector(page, info.get("selector", "")):
+            if self._validate_locator_info(page, info):
                 self._stats_generic_hits += 1
                 info["component_library"] = try_lib
                 info["component_type"] = comp_type
@@ -391,19 +483,25 @@ class SelectorMemory:
         e["updated_at"] = time.time()
         if e["success_count"] <= 0:
             self._store.pop(k, None)
+            self._mark_dirty(url)
+
+    @staticmethod
+    def _validate_locator_info(page: Any, info: dict) -> bool:
+        """验证定位 info 在当前页面是否匹配到至少 1 个可见元素."""
+        from .normalize import validate_selector
+
+        if not page or not info:
+            return False
+        return validate_selector(page, normalize_info(info))
 
     @staticmethod
     def _validate_selector(page: Any, selector: str) -> bool:
-        """验证 selector 在当前页面是否匹配到至少 1 个可见元素."""
+        """兼容旧调用: 从 selector 字符串推断 method 后校验."""
         if not page or not selector:
             return False
-        try:
-            loc = page.locator(selector)
-            if loc.count() >= 1:
-                return bool(loc.first.is_visible())
-            return False
-        except Exception:
-            return False
+        return SelectorMemory._validate_locator_info(
+            page, normalize_info({"selector": selector}),
+        )
 
     def _compress(self) -> None:
         """删除 success_count <= 1 且 created_at 超过 14 天的条目."""
@@ -426,54 +524,51 @@ class SelectorMemory:
         for k in stale_generic:
             del self._generic_store[k]
 
-    # ── 持久化 ─────────────────────────────────────────────────
-
-    def _load(self) -> None:
-        if not self.path.exists():
-            return
-        try:
-            raw = self.path.read_text(encoding="utf-8")
-            data = json.loads(raw)
-
-            # 新格式
-            if "page_entries" in data:
-                for k, v in data.get("page_entries", {}).items():
-                    if v.get("success_count", 0) > 0:
-                        self._store[k] = v
-                for k, v in data.get("generic_entries", {}).items():
-                    if v.get("success_count", 0) > 0:
-                        self._generic_store[k] = v
-            else:
-                # 旧格式迁移: 平铺 → page_entries
-                for k, v in data.items():
-                    if not isinstance(v, dict):
-                        continue
-                    # 旧字段名 → 新字段名
-                    if "score" in v and "success_count" not in v:
-                        v["success_count"] = v.pop("score")
-                    if "ts" in v and "created_at" not in v:
-                        ts = v.pop("ts")
-                        v["created_at"] = ts
-                        v["updated_at"] = ts
-                    if "component_library" not in v:
-                        v["component_library"] = "unknown"
-                    if "node_signature" not in v:
-                        v["node_signature"] = {}
-                    if v.get("success_count", 0) > 0:
-                        self._store[k] = v
-        except Exception:
-            pass
+    # ── 持久化（按 route 分文件）────────────────────────────────
 
     def save(self) -> None:
         self._compress()
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        data = {
-            "version": _FILE_VERSION,
-            "saved_at": time.time(),
-            "page_entries": self._store,
-            "generic_entries": self._generic_store,
+        pages_dir = l2_pages_dir(self._accel_dir)
+        pages_dir.mkdir(parents=True, exist_ok=True)
+
+        routes_to_save = self._dirty_routes | {
+            self._route_of_key(k) for k in self._store
         }
-        self.path.write_text(
-            json.dumps(data, ensure_ascii=False, indent=2),
+        now = time.time()
+        for route in routes_to_save:
+            prefix = f"{route}|"
+            entries: dict[str, dict] = {}
+            for full_key, entry in self._store.items():
+                if not full_key.startswith(prefix):
+                    continue
+                short = full_key[len(prefix):]
+                if entry.get("success_count", 0) > 0:
+                    entries[short] = entry
+            fp = l2_route_path(self._accel_dir, route)
+            if entries:
+                fp.write_text(
+                    json.dumps(
+                        {"version": _FILE_VERSION, "route": route, "saved_at": now, "entries": entries},
+                        ensure_ascii=False,
+                        indent=2,
+                    ),
+                    encoding="utf-8",
+                )
+            elif fp.is_file():
+                fp.unlink()
+
+        gp = l2_generic_path(self._accel_dir)
+        gp.parent.mkdir(parents=True, exist_ok=True)
+        gp.write_text(
+            json.dumps(
+                {
+                    "version": _FILE_VERSION,
+                    "saved_at": now,
+                    "generic_entries": self._generic_store,
+                },
+                ensure_ascii=False,
+                indent=2,
+            ),
             encoding="utf-8",
         )
+        self._dirty_routes.clear()

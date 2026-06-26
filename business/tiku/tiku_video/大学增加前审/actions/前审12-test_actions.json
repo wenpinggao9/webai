@@ -1,0 +1,198 @@
+{
+  "cases": [
+    {
+      "case_id": "vip_前审_012",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员点击「审核历史」",
+          "筛选「类型」为「前审」，「学段」为「大学」，「审核行为」为「举报/放弃」",
+          "在筛选区点击「审核时间」日期选择框，在'审核时间'日期面板中选择开始日期2026-06-22，在'审核时间'日期面板中选择结束日期2026-06-23",
+          "「提交」进行查询"
+        ],
+        "expectations": [
+          "当前总数大于0"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'审核历史'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'类型'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'前审'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学段'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'审核行为'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'举报/放弃'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'审核时间'日期选择框"
+        },
+        {
+          "type": "click",
+          "intent": "在'审核时间'日期面板中选择开始日期2026-06-22"
+        },
+        {
+          "type": "click",
+          "intent": "在'审核时间'日期面板中选择结束日期2026-06-23"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮进行查询"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证当前总数大于0",
+          "value": ">0"
+        }
+      ],
+      "action_count": 12
+    },
+    {
+      "case_id": "vip_前审_001",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员从「全部题目」中筛选来源：策略",
+          "学段选择「大学」",
+          "学科选择「数学」",
+          "点击「提交」查看结果"
+        ],
+        "expectations": [
+          "查询到的列表中存在工单ID=146665171",
+          "工单ID=146665171的生产状态为「已退场」"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'来源'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'策略'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学段'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'数学'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证列表中存在工单ID为146665171的记录",
+          "value": "146665171"
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证工单ID为146665171的生产状态为已退场",
+          "value": "146665171",
+          "extras": {
+            "column": "生产状态",
+            "expected": "已退场",
+            "row_key_column": "工单ID"
+          }
+        }
+      ],
+      "action_count": 10
+    },
+    {
+      "case_id": "vip_前审_016",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员点击「全部题目」",
+          "选择「工单ID」，并输入 146487944",
+          "「提交」查看结果",
+          "点击 工单ID为 146487944 的「日志」"
+        ],
+        "expectations": [
+          "日志末尾包含行为「前审领取」和「前审举报」"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'工单ID'作为搜索类型"
+        },
+        {
+          "type": "fill",
+          "intent": "在筛选区搜索框输入工单ID",
+          "value": "146487944"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮"
+        },
+        {
+          "type": "click",
+          "intent": "点击工单ID为146487944的'日志'",
+          "extras": {
+            "row_key": "146487944",
+            "button": "日志",
+            "row_key_column": "工单ID"
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证日志末尾包含行为'前审领取'",
+          "value": "前审领取"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证日志末尾包含行为'前审举报'",
+          "value": "前审举报"
+        }
+      ],
+      "action_count": 7
+    }
+  ],
+  "total_cases": 3
+}

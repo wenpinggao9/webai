@@ -1,0 +1,298 @@
+{
+  "version": 1,
+  "route": "/video/wait-preview",
+  "saved_at": 1782448140.6650822,
+  "entries": {
+    "click|点击侧栏菜单待前审进入待前审列表页面": {
+      "method": "role",
+      "role": "menuitem",
+      "name": "待前审",
+      "exact": true,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=menuitem[name=\"待前审\"]",
+      "success_count": 5,
+      "created_at": 1782129762.0115871,
+      "updated_at": 1782205226.349216,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "menuitem",
+        "class_pattern": ""
+      }
+    },
+    "click|点击领取按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"领取\")",
+      "method": "role",
+      "role": "button",
+      "name": "领取",
+      "exact": false,
+      "success_count": 13,
+      "created_at": 1782146590.337204,
+      "updated_at": 1782447555.445107,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击待前审页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"待前审\"",
+      "method": "text",
+      "name": "待前审",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782172549.43009,
+      "updated_at": 1782172549.43009,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击查看": {
+      "method": "role",
+      "role": "button",
+      "name": "查 看",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"查 看\"]",
+      "success_count": 8,
+      "created_at": 1782172626.22586,
+      "updated_at": 1782447872.407688,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击已审核页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"已审核\"",
+      "method": "text",
+      "name": "已审核",
+      "exact": true,
+      "success_count": 3,
+      "created_at": 1782172736.983582,
+      "updated_at": 1782439805.049469,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏菜单待前审进入待前审页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"待前审\"",
+      "method": "text",
+      "name": "待前审",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782179244.245891,
+      "updated_at": 1782179244.245891,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击已审核页面标签进入已审核页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"已审核\"",
+      "method": "text",
+      "name": "已审核",
+      "exact": true,
+      "success_count": 3,
+      "created_at": 1782179397.7167401,
+      "updated_at": 1782442594.494275,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在待前审页面点击领取题目按钮": {
+      "method": "role",
+      "role": "button",
+      "name": "领取题目",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"领取题目\"]",
+      "success_count": 3,
+      "created_at": 1782186675.526876,
+      "updated_at": 1782439712.493116,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击待前审进入前审列表页": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"待前审\"",
+      "method": "text",
+      "name": "待前审",
+      "exact": true,
+      "success_count": 5,
+      "created_at": 1782352417.192338,
+      "updated_at": 1782447808.298401,
+      "component_library": "generic",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在待前审页面点击领取题目": {
+      "method": "role",
+      "role": "button",
+      "name": "领取题目",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"领取题目\"]",
+      "success_count": 1,
+      "created_at": 1782352474.304747,
+      "updated_at": 1782352474.304747,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击查看按钮": {
+      "method": "role",
+      "role": "button",
+      "name": "查 看",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"查 看\"]",
+      "success_count": 1,
+      "created_at": 1782352487.013085,
+      "updated_at": 1782352487.013085,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击已审核页面进入已审核列表": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"已审核\"",
+      "method": "text",
+      "name": "已审核",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782352556.44308,
+      "updated_at": 1782352556.44308,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击领取题目按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"领取题目\")",
+      "method": "role",
+      "role": "button",
+      "name": "领取题目",
+      "exact": false,
+      "success_count": 3,
+      "created_at": 1782437588.58713,
+      "updated_at": 1782447860.469745,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击已审核页面标签切换到已审核页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"已审核\"",
+      "method": "text",
+      "name": "已审核",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782437682.8504908,
+      "updated_at": 1782437682.8504908,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击已审核页面切换到已审核列表": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"已审核\"",
+      "method": "text",
+      "name": "已审核",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782447948.332663,
+      "updated_at": 1782447948.332663,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    }
+  }
+}

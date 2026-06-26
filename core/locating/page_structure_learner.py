@@ -23,10 +23,9 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-logger = logging.getLogger(__name__)
+from .accel_paths import page_structure_legacy_path, page_structure_path
 
-# 结构学习存储目录
-_STRUCTURE_DIR_NAME = "page_structure_learner"
+logger = logging.getLogger(__name__)
 
 # DOM 签名相似度阈值：Jaccard > 0.6 视为相似
 _SIMILARITY_THRESHOLD = 0.6
@@ -795,10 +794,9 @@ class PageStructureLearner:
 
     def save_to_file(self, output_dir: Path) -> None:
         """持久化到 JSON 文件"""
-        struct_dir = output_dir / _STRUCTURE_DIR_NAME
+        struct_file = page_structure_path(output_dir)
         try:
-            struct_dir.mkdir(parents=True, exist_ok=True)
-            struct_file = struct_dir / "page_structure_learner.json"
+            struct_file.parent.mkdir(parents=True, exist_ok=True)
             data = {
                 "version": 1,
                 "saved_at": time.time(),
@@ -831,10 +829,18 @@ class PageStructureLearner:
 
     def load_from_file(self, output_dir: Path) -> None:
         """从 JSON 文件加载"""
-        struct_file = output_dir / _STRUCTURE_DIR_NAME / "page_structure_learner.json"
-        if not struct_file.exists():
-            logger.debug("structure_learner 无历史文件: %s", struct_file)
-            return
+        struct_file = page_structure_path(output_dir)
+        if not struct_file.is_file():
+            legacy = page_structure_legacy_path(output_dir)
+            if legacy.is_file():
+                struct_file = legacy
+            else:
+                old = output_dir / "page_structure_learner" / "page_structure_learner.json"
+                if old.is_file():
+                    struct_file = old
+                else:
+                    logger.debug("structure_learner 无历史文件: %s", struct_file)
+                    return
 
         try:
             raw = struct_file.read_text(encoding="utf-8")

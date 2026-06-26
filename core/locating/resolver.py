@@ -1,7 +1,7 @@
 """步骤⑨ 元素定位五级降级链编排器.
 
 顺序: L1缓存 → L2记忆 → L3规则(+build_* skill) → L4学习(Composite) → L5大模型.
-- L2 内含通用模板子策略 (lookup_generic); L1 含自愈分支.
+- L2 为 selectors/memory/ (页面记忆 + _generic.json); L1 含自愈分支.
 - L1/L2 可在 DOM 抽取前短路命中 (dispatcher try_acceleration_only).
 - L1/L2 命中后校验可用; 失效则自愈, 自愈失败清除条目降级.
 - L3 规则: IntentRuleEngine + build_* skill, 不经 LLM.
@@ -15,8 +15,8 @@ from typing import Any, Optional
 
 from rich.console import Console
 
-from ..execution.trace import dom_console_print_enabled
-from ..dom.semantic_dom import (
+from ..runtime.execution.trace import dom_console_print_enabled
+from ..understanding.dom.semantic_dom import (
     build_locator_info,
     dom_index_from_items,
     dom_index_from_picked_indices,
@@ -28,6 +28,8 @@ from .llm_decider import LLMElementDecider
 from .intent_route import (
     is_ant_radio_option,
     is_checkbox,
+    is_date_picker,
+    is_date_panel_selection,
     is_dropdown_option,
     is_tree_checkbox,
     is_unsafe_dropdown_option_selector,
@@ -40,6 +42,11 @@ from .playwright_api import info_key
 from .resolve_trace import ResolveChain
 from .selector_type import infer_selector_type
 from .composite_learner import CompositeStructureLearner
+from .date_picker_guard import (
+    is_strong_date_picker_selector,
+    is_weak_date_label_text_selector,
+    is_weak_date_placeholder_for_intent,
+)
 from .locate_observability import summarize_locating_stats
 from .intent_window import pick_intent_window_indices
 from .skill_resolver import (
@@ -47,6 +54,7 @@ from .skill_resolver import (
     extract_target_text_from_intent,
     info_from_recommended_selector,
     resolve_component_type,
+    resolve_locator_info_via_skill,
     try_auto_skill_selector,
 )
 
@@ -113,6 +121,28 @@ def _needs_radio_selector_upgrade(info: dict, intent: str) -> bool:
     if not is_ant_radio_option(intent or ""):
         return False
     return not _is_strong_radio_selector(info.get("selector") or "")
+
+
+def _needs_date_picker_selector_upgrade(info: dict, intent: str) -> bool:
+    """日期 intent 且 selector 为裸 placeholder 或字段 label text, 需 skill 升级."""
+    if not is_date_picker(intent or ""):
+        return False
+    sel = info_key(info)
+    if is_weak_date_placeholder_for_intent(sel, intent):
+        return True
+    if is_weak_date_label_text_selector(sel, intent):
+        return True
+    return not is_strong_date_picker_selector(sel)
+
+
+def _should_skip_date_picker_backfill(info: dict, intent: str) -> bool:
+    """裸 placeholder / label text 不回填, 避免污染 L1/L2."""
+    if not is_date_picker(intent or ""):
+        return False
+    sel = info_key(info)
+    if is_weak_date_placeholder_for_intent(sel, intent):
+        return True
+    return is_weak_date_label_text_selector(sel, intent)
 
 
 class LocatorResolver:
@@ -205,7 +235,7 @@ class LocatorResolver:
         *,
         skip_heuristics: bool = False,
     ) -> Optional[dict]:
-        """仅 L1/L2 (含 L2 通用模板); L1 命中时跳过 DOM 抽取 (对齐 V3 cache 短路)."""
+        """仅 L1/L2; L1 命中时跳过 DOM 抽取 (对齐 V3 cache 短路)."""
         chain = ResolveChain(
             intent=intent,
             action_type=action_type,
@@ -274,9 +304,17 @@ class LocatorResolver:
 
         if self.memory:
             info = self.memory.lookup_validate(page, url, action_type, intent)
-            if not info:
-                chain.add("L2记忆", "未命中")
-            elif info_key(info) in excl:
+            if info and info_key(info) not in excl:
+                info, upgraded, upgrade_label = self._maybe_upgrade_component_selector(
+                    page, intent, info, semantic_items,
+                )
+                if upgraded:
+                    chain.add("L2记忆", f"{upgrade_label}升级", info_key(info))
+                self._backfill_l1(url, action_type, intent, info)
+                if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆"):
+                    chain.mark_hit("L2记忆", info_key(info))
+                    return self._tag_and_track(info, "L2记忆")
+            elif info and info_key(info) in excl:
                 chain.add("L2记忆", "跳过(已排除)", info_key(info))
                 info = self.memory.get(url, action_type, intent)
                 if info:
@@ -287,40 +325,33 @@ class LocatorResolver:
                     if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆"):
                         chain.mark_hit("L2记忆", info_key(info))
                         return self._tag_and_track(info, "L2记忆")
-            else:
-                info, upgraded, upgrade_label = self._maybe_upgrade_component_selector(
-                    page, intent, info, semantic_items,
-                )
-                if upgraded:
-                    chain.add("L2记忆", f"{upgrade_label}升级", info_key(info))
-                self._backfill_l1(url, action_type, intent, info)
-                if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆"):
-                    chain.mark_hit("L2记忆", info_key(info))
-                    return self._tag_and_track(info, "L2记忆")
 
-        skip_generic = skip_heuristics or is_dropdown_option(intent)
-        if self.memory and not skip_generic:
-            gen_items = semantic_items
-            if not gen_items:
-                gen_items = extract_semantic_items(
-                    page, dialog_first=True, stable=True,
-                    selectors=self._framework_selectors, profile="locate",
-                )
-            gen_info = self.memory.lookup_generic(
-                page, action_type, intent, gen_items,
-                component_library=self._detect_component_library(),
+            skip_generic = (
+                skip_heuristics or is_dropdown_option(intent) or is_date_picker(intent)
             )
-            if not gen_info:
-                chain.add("L2记忆", "通用·未命中")
-            elif info_key(gen_info) in excl:
-                chain.add("L2记忆", "通用·跳过(已排除)", info_key(gen_info))
-            else:
-                self._backfill_l1(url, action_type, intent, gen_info)
-                if not self._reject_unsafe_accel_hit(intent, gen_info, chain, "L2记忆"):
-                    chain.mark_hit("L2记忆", info_key(gen_info), note="通用模板")
-                    return self._tag_and_track(gen_info, "L2记忆")
-        elif self.memory and skip_generic and is_dropdown_option(intent):
-            chain.add("L2记忆", "通用·跳过(下拉option)")
+            if not skip_generic:
+                gen_items = semantic_items
+                if not gen_items:
+                    gen_items = extract_semantic_items(
+                        page, dialog_first=True, stable=True,
+                        selectors=self._framework_selectors, profile="locate",
+                    )
+                gen_info = self.memory.lookup_generic(
+                    page, action_type, intent, gen_items,
+                    component_library=self._detect_component_library(),
+                )
+                if gen_info and info_key(gen_info) not in excl:
+                    self._backfill_l1(url, action_type, intent, gen_info)
+                    if not self._reject_unsafe_accel_hit(intent, gen_info, chain, "L2记忆"):
+                        chain.mark_hit("L2记忆", info_key(gen_info))
+                        return self._tag_and_track(gen_info, "L2记忆")
+                elif gen_info and info_key(gen_info) in excl:
+                    chain.add("L2记忆", "跳过(已排除)", info_key(gen_info))
+            elif is_dropdown_option(intent):
+                if not any(s.get("level") == "L2记忆" for s in chain.steps):
+                    chain.add("L2记忆", "跳过(下拉option)")
+            if not any(s.get("level") == "L2记忆" for s in chain.steps):
+                chain.add("L2记忆", "未命中")
 
         return None
 
@@ -368,8 +399,6 @@ class LocatorResolver:
             prefetched_note = "已在短路路径尝试" if acceleration_prefetched else "跳过(重试)"
             chain.add("L1缓存", prefetched_note)
             chain.add("L2记忆", prefetched_note)
-            if skip_heuristics:
-                chain.add("L2记忆", f"通用·{prefetched_note}")
 
         # L3 大模型 — 优先复用已抽取的 semantic_items (共用 DOM)
         if semantic_items:
@@ -384,8 +413,26 @@ class LocatorResolver:
 
         # 规则: V3 IntentRuleEngine → skill; LLM 用意图窗口或前 N 条
         rule_items = source_items
-        run_l3_rules = not skip_heuristics or is_dropdown_option(intent)
+        run_l3_rules = (
+            not skip_heuristics
+            or is_dropdown_option(intent)
+            or is_date_panel_selection(intent)
+        )
         if run_l3_rules:
+            skill_first = (
+                is_date_picker(intent)
+                and not is_dropdown_option(intent)
+            )
+            if skill_first:
+                rule_info = self._try_rule_skill_resolve(
+                    page, intent, action_type, rule_items, excl, chain,
+                )
+                if rule_info is not None:
+                    self._backfill(url, action_type, intent, rule_info, semantic_items=rule_items)
+                    chain.mark_hit("L3规则", rule_info.get("selector") or "")
+                    self._emit_chain(chain)
+                    return self._tag_and_track(rule_info, "L3规则")
+
             intent_rule_info = self._try_intent_rule_resolve(
                 page, intent, action_type, rule_items, excl, chain,
             )
@@ -395,14 +442,15 @@ class LocatorResolver:
                 self._emit_chain(chain)
                 return self._tag_and_track(intent_rule_info, "L3规则")
 
-            rule_info = self._try_rule_skill_resolve(
-                page, intent, action_type, rule_items, excl, chain,
-            )
-            if rule_info is not None:
-                self._backfill(url, action_type, intent, rule_info, semantic_items=rule_items)
-                chain.mark_hit("L3规则", rule_info.get("selector") or "")
-                self._emit_chain(chain)
-                return self._tag_and_track(rule_info, "L3规则")
+            if not skill_first:
+                rule_info = self._try_rule_skill_resolve(
+                    page, intent, action_type, rule_items, excl, chain,
+                )
+                if rule_info is not None:
+                    self._backfill(url, action_type, intent, rule_info, semantic_items=rule_items)
+                    chain.mark_hit("L3规则", rule_info.get("selector") or "")
+                    self._emit_chain(chain)
+                    return self._tag_and_track(rule_info, "L3规则")
         else:
             chain.add("L3规则", "跳过(重试)")
 
@@ -578,6 +626,9 @@ class LocatorResolver:
                 note=self.rule_engine.last_matched_rule() or "intent_rule_engine",
             )
             return None
+        if is_weak_date_label_text_selector(info_key(info), intent):
+            chain.add("L3规则", "跳过(日期label)", info_key(info))
+            return None
         rule_name = self.rule_engine.last_matched_rule() or "intent_rule_engine"
         chain.add("L3规则", "命中", info_key(info), note=rule_name)
         return info
@@ -599,15 +650,14 @@ class LocatorResolver:
         if not skill_name:
             return None
         target = extract_target_text_from_intent(intent) or ""
-        sel = build_selector_via_skill(
+        info = resolve_locator_info_via_skill(
             skill_name, items, intent,
             target_text=target, page=page, exclude=excl,
         )
-        if not sel:
+        if not info:
             chain.add("L3规则", "未命中", note=skill_name)
             return None
-        info = info_from_recommended_selector(sel)
-        if info_key(info) in excl or not validate_selector(page, info):
+        if info_key(info) in excl:
             chain.add("L3规则", "校验失败", info_key(info), note=skill_name)
             return None
         chain.add("L3规则", "命中", info_key(info), note=skill_name)
@@ -626,6 +676,8 @@ class LocatorResolver:
             upgrade_plans.append(("build_radio_selector", "单选"))
         if _needs_checkbox_selector_upgrade(info, intent):
             upgrade_plans.append((_checkbox_upgrade_skill(intent), "复选框"))
+        if _needs_date_picker_selector_upgrade(info, intent):
+            upgrade_plans.append(("build_date_picker_selector", "日期"))
         if not upgrade_plans:
             return info, False, ""
 
@@ -708,6 +760,12 @@ class LocatorResolver:
             self._emit_backfill(
                 url, action_type, intent, info,
                 skipped=True, reason="单选/复选框弱 selector 不回填",
+            )
+            return
+        if _should_skip_date_picker_backfill(info, intent):
+            self._emit_backfill(
+                url, action_type, intent, info,
+                skipped=True, reason="日期裸 placeholder/label text 不回填",
             )
             return
         wrote_l1 = bool(self.cache)

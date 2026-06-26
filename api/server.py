@@ -70,7 +70,7 @@ def health() -> dict[str, str]:
 async def plan_actions(
     file: UploadFile = File(..., description="用例文件 (.md)"),
     case_index: int = Form(0, description="用例索引 (从 0 开始), -1 表示全部"),
-    case_path: str = Form("", description="用例原始路径, 用于加载业务知识/API, 如 业务/vip视频/大学增加前审/cases/xxx.md"),
+    case_path: str = Form("", description="Case path for domain knowledge/API, e.g. business/vip_video/大学增加前审/cases/xxx.md"),
 ) -> dict[str, Any]:
     """动作规划评估: 上传用例 → 返回规划动作列表 (不执行)."""
 
@@ -85,10 +85,13 @@ async def plan_actions(
     # 业务路径自动发现: 按文件名在 业务/ 目录下搜索匹配
     biz_path = case_path.strip() if case_path.strip() else ""
     if not biz_path:
-        # 搜索 业务/**/<filename>
-        for p in (PROJECT_ROOT / "业务").rglob(file.filename or ""):
-            if p.is_file():
-                biz_path = str(p)
+        from core.foundation.layout import BUSINESS_DIR, LEGACY_BUSINESS_DIR
+        for biz_root_name in (BUSINESS_DIR, LEGACY_BUSINESS_DIR):
+            for p in (PROJECT_ROOT / biz_root_name).rglob(file.filename or ""):
+                if p.is_file():
+                    biz_path = str(p)
+                    break
+            if biz_path:
                 break
     if not biz_path:
         biz_path = str(PROJECT_ROOT / file.filename)
@@ -110,7 +113,7 @@ async def plan_actions(
             for case in cases:
                 actions, origin = _plan_one_case(case, llm, prompts, skill_text, biz_path)
                 results.append({
-                    "case_id": case.case_id,
+                    **_case_plan_meta(case),
                     "origin_case": origin,
                     "actions": [_dump_action(a) for a in actions],
                     "action_count": len(actions),
@@ -122,7 +125,7 @@ async def plan_actions(
             case = cases[case_index]
             actions, origin = _plan_one_case(case, llm, prompts, skill_text, biz_path)
             return {
-                "case_id": case.case_id,
+                **_case_plan_meta(case),
                 "case_index": case_index,
                 "origin_case": origin,
                 "actions": [_dump_action(a) for a in actions],
@@ -130,6 +133,15 @@ async def plan_actions(
             }
     finally:
         _safe_unlink(temp_path)
+
+
+def _case_plan_meta(case) -> dict[str, Any]:
+    """规划响应中的用例元信息 (case_id 后紧跟 module / priority)."""
+    return {
+        "case_id": case.case_id,
+        "module": case.resolved_module,
+        "priority": case.priority or "",
+    }
 
 
 def _dump_action(a) -> dict:

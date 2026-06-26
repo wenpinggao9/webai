@@ -2,11 +2,10 @@
 """从 可观测性.json 回放 LLM 调用, 对比「代码内置旧提示词」与「prompts/*.md 新提示词」.
 
 用法:
-  python tools/prompt_replay.py 输出/UI测试/20260609_144659/电商_购物_下单_001/可观测性.json
-  python tools/prompt_replay.py 输出/UI测试 --stages post_check,readiness --limit 3
-  python tools/prompt_replay.py 输出/UI测试 --dry-run
+  python tools/prompt_replay.py output/ui_runs/20260609_144659/case_001/observability.json
+  python tools/prompt_replay.py output/ui_runs --stages post_check,readiness --limit 3
 
-报告输出到 输出/提示词回放/<时间戳>/report.md 与 results.json
+报告输出到 output/prompt_replay/<timestamp>/report.md 与 results.json
 """
 from __future__ import annotations
 
@@ -32,7 +31,17 @@ from core.preprocess.case_sort import _DEFAULT_SYSTEM as OLD_CASE_SORT  # noqa: 
 from core.preprocess.precondition import _DEFAULT_SYSTEM as OLD_PRECONDITION  # noqa: E402
 from core.readiness.pre_check import _DEFAULT_SYSTEM as OLD_READINESS  # noqa: E402
 from core.locating.llm_decider import _DEFAULT_SYSTEM as OLD_ELEMENT_DECIDE  # noqa: E402
-from core.skill_loader import load_skill_text  # noqa: E402
+from core.foundation.layout import (  # noqa: E402
+    LEGACY_OBSERVABILITY_FILE,
+    LEGACY_OUTPUT_DIR,
+    LEGACY_PROMPT_REPLAY_DIR,
+    LEGACY_UI_RUNS_DIR,
+    OBSERVABILITY_FILE,
+    OUTPUT_DIR,
+    PROMPT_REPLAY_DIR,
+    UI_RUNS_DIR,
+    observability_file,
+)
 
 REPLAY_STAGES = (
     "action_plan",
@@ -72,9 +81,14 @@ class ReplaySample:
 
 def _discover_obs_files(target: Path) -> list[Path]:
     if target.is_file():
-        return [target] if target.name == "可观测性.json" else []
+        if target.name in (OBSERVABILITY_FILE, LEGACY_OBSERVABILITY_FILE):
+            return [target]
+        return []
     if target.is_dir():
-        return sorted(target.rglob("可观测性.json"))
+        found: list[Path] = []
+        for name in (OBSERVABILITY_FILE, LEGACY_OBSERVABILITY_FILE):
+            found.extend(sorted(target.rglob(name)))
+        return found
     return []
 
 
@@ -311,7 +325,7 @@ def main() -> int:
                     help="逗号分隔的环节名")
     ap.add_argument("--limit", type=int, default=5, help="每个文件每个环节最多回放条数")
     ap.add_argument("--dry-run", action="store_true", help="只收集样本并解析历史 raw, 不调 LLM")
-    ap.add_argument("--output", default="", help="报告目录, 默认 输出/提示词回放/<时间戳>")
+    ap.add_argument("--output", default="", help="报告目录, 默认 output/prompt_replay/<时间戳>")
     args = ap.parse_args()
 
     args.stages = [s.strip() for s in args.stages.split(",") if s.strip()]
@@ -347,7 +361,7 @@ def main() -> int:
     _replay_samples(samples, llm, prompts, skill_text, args.dry_run)
 
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = Path(args.output) if args.output else ROOT / "输出" / "提示词回放" / ts
+    out_dir = Path(args.output) if args.output else ROOT / OUTPUT_DIR / PROMPT_REPLAY_DIR / ts
     out_dir.mkdir(parents=True, exist_ok=True)
 
     report_md = _render_markdown(samples, args, out_dir)

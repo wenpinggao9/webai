@@ -1,0 +1,156 @@
+{
+  "version": 1,
+  "saved_at": 1782448140.6664279,
+  "pages": {
+    "/video/welcome": {
+      "route": "/video/welcome",
+      "component_library": "ant-design",
+      "dom_signature": "f7d3860c632dd771",
+      "rules": {
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "text=\"{text}\"",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 6,
+          "failure_count": 3
+        }
+      },
+      "learned_at": 1782142954.8372102,
+      "updated_at": 1782442476.741385,
+      "hit_count": 2
+    },
+    "/video/all-question": {
+      "route": "/video/all-question",
+      "component_library": "ant-design",
+      "dom_signature": "d61534c80fe554de",
+      "rules": {
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "role=button[name=\"{text}\"]",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        },
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "text=\"{text}\"",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 5,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782143045.140954,
+      "updated_at": 1782352297.546272,
+      "hit_count": 0
+    },
+    "/video/wait-preview": {
+      "route": "/video/wait-preview",
+      "component_library": "ant-design",
+      "dom_signature": "3c2b02433c09b159",
+      "rules": {
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "button:has-text(\"{text}\")",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 6,
+          "failure_count": 0
+        },
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "text=\"{text}\"",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 14,
+          "failure_count": 9
+        }
+      },
+      "learned_at": 1782146590.337551,
+      "updated_at": 1782447948.332918,
+      "hit_count": 2
+    },
+    "/video/detail": {
+      "route": "/video/detail",
+      "component_library": "ant-design",
+      "dom_signature": "400e4082dbbacdd1",
+      "rules": {
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "text=\"{text}\"",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 7,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782172644.151975,
+      "updated_at": 1782447885.3425221,
+      "hit_count": 4
+    },
+    "/video/already-self": {
+      "route": "/video/already-self",
+      "component_library": "ant-design",
+      "dom_signature": "e750686f86233baa",
+      "rules": {
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "role=button[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782172752.178855,
+      "updated_at": 1782172752.178855,
+      "hit_count": 0
+    },
+    "/video/check-history": {
+      "route": "/video/check-history",
+      "component_library": "ant-design",
+      "dom_signature": "ee9d24215c12b009",
+      "rules": {
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "xpath=(//td[contains(@title, \"{text}\")])[1]",
+          "selector_type": "xpath",
+          "anchor_type": "text",
+          "success_count": 10,
+          "failure_count": 2
+        },
+        "click|dropdown_trigger": {
+          "action_type": "click",
+          "component_type": "dropdown_trigger",
+          "selector_template": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"{text}\")])[1]",
+          "selector_type": "xpath",
+          "anchor_type": "class",
+          "success_count": 3,
+          "failure_count": 0
+        },
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "role=button[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 3,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782208481.7840261,
+      "updated_at": 1782448089.8266501,
+      "hit_count": 7
+    }
+  }
+}

@@ -1,0 +1,249 @@
+{
+  "version": 1,
+  "route": "/video/all-question",
+  "saved_at": 1782448140.6650822,
+  "entries": {
+    "click|在筛选区点击来源下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"来源\")]]//*[@role='combobox'])[1]",
+      "method": "css",
+      "success_count": 21,
+      "created_at": 1782121380.9641411,
+      "updated_at": 1782447190.527145,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击策略": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"策略\")])[1]",
+      "method": "css",
+      "success_count": 21,
+      "created_at": 1782121397.6158369,
+      "updated_at": 1782447195.730191,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在筛选区点击学段下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学段\")]]//*[@role='combobox'])[1]",
+      "method": "css",
+      "success_count": 21,
+      "created_at": 1782121410.135294,
+      "updated_at": 1782447205.782738,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击大学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学\")])[1]",
+      "method": "css",
+      "success_count": 20,
+      "created_at": 1782121426.30214,
+      "updated_at": 1782447210.842669,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在筛选区点击学科下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学科\")]]//*[@role='combobox'])[1]",
+      "method": "css",
+      "success_count": 23,
+      "created_at": 1782121437.823912,
+      "updated_at": 1782447221.320908,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击数学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"数学\")])[1]",
+      "method": "css",
+      "success_count": 23,
+      "created_at": 1782121454.60553,
+      "updated_at": 1782447227.126326,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击小学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"小学\")])[1]",
+      "method": "css",
+      "success_count": 7,
+      "created_at": 1782123227.7173781,
+      "updated_at": 1782447493.1138701,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交按钮查看结果": {
+      "method": "role",
+      "role": "button",
+      "name": "提 交",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
+      "success_count": 13,
+      "created_at": 1782138143.025463,
+      "updated_at": 1782447241.605678,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
+      "method": "role",
+      "role": "button",
+      "name": "提 交",
+      "exact": false,
+      "success_count": 15,
+      "created_at": 1782143045.139819,
+      "updated_at": 1782447507.8412428,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击工单id作为搜索类型": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"工单ID\"",
+      "method": "text",
+      "name": "工单ID",
+      "exact": true,
+      "success_count": 13,
+      "created_at": 1782144900.1370492,
+      "updated_at": 1782447767.0738502,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "fill|在筛选区搜索框输入工单id": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "input#searchText",
+      "method": "css",
+      "success_count": 15,
+      "created_at": 1782138240.9022899,
+      "updated_at": 1782447778.2431731,
+      "component_library": "ant-design",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击全部题目": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"全部题目\"",
+      "method": "text",
+      "name": "全部题目",
+      "exact": true,
+      "success_count": 9,
+      "created_at": 1782172484.3599591,
+      "updated_at": 1782447757.3368802,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击审核历史": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"审核历史\"",
+      "method": "text",
+      "name": "审核历史",
+      "exact": true,
+      "success_count": 7,
+      "created_at": 1782179485.832546,
+      "updated_at": 1782448018.549429,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在筛选区点击工单id作为搜索类型": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"工单ID\"",
+      "method": "text",
+      "name": "工单ID",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782205519.0492082,
+      "updated_at": 1782205519.0492082,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    }
+  }
+}

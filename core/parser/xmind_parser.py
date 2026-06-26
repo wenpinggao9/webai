@@ -1,13 +1,5 @@
-"""步骤① 解析器 —— XMind 用例解析 (留桩, 阶段E 补全).
-
-4 层 topic 结构: 根 → 一级模块 → 二级模块 → 用例编号 → 步骤/预期/依赖.
-"""
-from __future__ import annotations
-
-from pathlib import Path
-
-from .schema import ParsedCase
-
-
-def parse_xmind(path: str | Path) -> list[ParsedCase]:
-    raise NotImplementedError("XMind 解析将在阶段E 实现, 当前请使用 .md 用例")
+"""兼容层 → core.pipeline.parser.xmind_parser"""
+import sys as _sys
+from importlib import import_module as _import_module
+_target = _import_module("core.pipeline.parser.xmind_parser")
+_sys.modules[__name__] = _target

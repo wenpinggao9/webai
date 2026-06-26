@@ -1,10 +1,14 @@
 .env
+business/**/project.env
+business/**/.env
+business/**/.env.local
 __pycache__/
 *.pyc
 .venv/
 venv/
-reports/
-输出/
+output/
+business/**/reports/
+legacy_accel/
 .DS_Store
 .idea/
 .vscode/

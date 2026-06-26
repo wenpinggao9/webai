@@ -910,9 +910,11 @@ def _extract_date_picker_field_from_intent(intent: str) -> str:
 
     # 优先匹配完整短语
     for pattern in (
+        r"在\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期面板",
         r"在\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期范围",
         r"在\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期选择",
         r"在\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期框",
+        r"(?:点击|选择|填写|输入)\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期选择框",
         r"(?:点击|选择|填写|输入)\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期选择",
         r"(?:点击|选择|填写|输入)\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*日期范围",
         r"在\s*[\"']?([^\"'\s，。]{1,20})[\"']?\s*时间选择",
@@ -928,6 +930,69 @@ def _extract_date_picker_field_from_intent(intent: str) -> str:
             if 1 <= len(lab) <= 20:
                 return lab
     return ""
+
+
+_EN_MONTH_ABBR = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+_DATE_PANEL_CLASS_HINTS = (
+    "ant-picker-dropdown", "ant-picker-body", "ant-picker-content",
+    "ant-picker-panel", "ant-picker-cell", "ant-picker-cell-inner",
+    "el-date-table", "el-picker-panel", "el-date-picker", "el-picker-panel",
+    "rc-picker-dropdown", "rc-picker-panel", "mx-datepicker", "datepicker-popup",
+)
+
+
+def _parse_iso_date_parts(date_val: str) -> Optional[tuple[int, int, int]]:
+    m = re.match(r"^(\d{4})-(\d{1,2})-(\d{1,2})$", (date_val or "").strip())
+    if not m:
+        return None
+    return int(m.group(1)), int(m.group(2)), int(m.group(3))
+
+
+def _month_markers_for_parts(year: int, month: int) -> List[str]:
+    markers = [
+        f"{year}年{month}月",
+        f"{year}-{month:02d}",
+        f"{year}/{month:02d}",
+    ]
+    if 1 <= month <= 12:
+        markers.append(f"{year}年{_EN_MONTH_ABBR[month - 1]}")
+        markers.append(_EN_MONTH_ABBR[month - 1])
+    return markers
+
+
+def _intent_is_panel_date_selection(intent: str) -> bool:
+    if not intent:
+        return False
+    if any(k in intent for k in ("日期面板", "日历面板", "日期弹窗", "日历")):
+        return True
+    if _extract_date_value_from_intent(intent) and "面板" in intent:
+        return True
+    return False
+
+
+def _detect_date_panel_from_dom(semantic_dom: List[SemanticNode]) -> bool:
+    day_cell_count = 0
+    has_month_header = False
+
+    for node in semantic_dom:
+        cls_blob = str(node.get("class") or "").lower()
+        if any(hint in cls_blob for hint in _DATE_PANEL_CLASS_HINTS):
+            return True
+
+        text = (node.get("text") or "").strip()
+        if re.search(r"\d{4}\s*年", text) or re.search(r"\d{4}[-/]\d{1,2}", text):
+            has_month_header = True
+        if any(mon in text for mon in _EN_MONTH_ABBR):
+            has_month_header = True
+
+        tag = (node.get("tag") or "").lower()
+        if tag == "td" and re.fullmatch(r"\d{1,2}", text):
+            day = int(text)
+            if 1 <= day <= 31:
+                day_cell_count += 1
+
+    return day_cell_count >= 14 or (day_cell_count >= 7 and has_month_header)
 
 
 def build_fill_input_selector(
@@ -1031,84 +1096,14 @@ def build_date_picker_selector(
     semantic_dom: List[SemanticNode],
     intent: str,
 ) -> Dict[str, Any]:
-    """基于 intent + 语义 DOM 构建 Ant Design 日期选择器 selector 候选。
+    """基于 intent + 语义 DOM 构建日期选择器 selector 候选 (适配器链)."""
+    from .date_picker_adapters import build_date_picker_candidates
 
-    覆盖两种场景:
-    1. 点击触发器展开面板: ant-picker / ant-picker-range
-    2. 在面板中选择日期: td.ant-picker-cell[title="YYYY-MM-DD"]
-    """
-    field = _extract_date_picker_field_from_intent(intent or "")
-
-    is_ant = _detect_ant_design_from_dom(semantic_dom)
-
-    # 检测是否已展开日期面板
-    has_date_panel = any(
-        cls in (
-            "ant-picker-dropdown", "ant-picker-body", "ant-picker-content",
-            "ant-picker-panel", "ant-picker-cell", "ant-picker-cell-inner",
-        )
-        for node in semantic_dom
-        for cls in str(node.get("class") or "").lower().split()
-    )
-
-    candidates: List[str] = []
-
-    if has_date_panel:
-        # 场景2: 面板已展开，选择具体日期
-        date_val = _extract_date_value_from_intent(intent)
-        te = _escape_xpath_literal(date_val) if date_val else None
-
-        if date_val and te:
-            # td[title="YYYY-MM-DD"].ant-picker-cell-in-view — 最精确，仅匹配当前可见月的单元格
-            candidates.extend([
-                f"(//td[contains(@title, {te}) and contains(@class,'ant-picker-cell-in-view')])[1]",
-                f"(//td[contains(@title, {te}) and contains(@class,'ant-picker-cell')])[1]",
-                # 兜底: 通过 ant-picker-dropdown 限定范围（面板 teleported 到 body，外层可能被截断）
-                f"(//div[contains(@class,'ant-picker-dropdown')]//td[contains(@title, {te}) and contains(@class,'ant-picker-cell')])[1]",
-            ])
-
-        # 无具体日期时的兜底：优先 in-view 非禁用单元格
-        candidates.extend([
-            "(//td[contains(@class,'ant-picker-cell-in-view') and not(contains(@class,'ant-picker-cell-disabled'))])[1]",
-            "(//div[contains(@class,'ant-picker-dropdown')]//td[contains(@class,'ant-picker-cell-in-view')])[1]",
-            "(//div[contains(@class,'ant-picker-cell-inner')])[1]",
-        ])
-    else:
-        # 场景1: 点击触发器展开面板
-        if not field:
-            return {"selector": None, "candidates": [], "field_label": ""}
-
-        te = _escape_xpath_literal(field.strip())
-
-        if is_ant:
-            candidates.extend([
-                f"(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), {te})]]//div[contains(@class,'ant-picker'))[1]",
-                f"(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), {te})]]//input[contains(@class,'ant-picker-input'))[1]",
-                f"(//label[contains(normalize-space(.), {te})]/ancestor::div[contains(@class,'ant-form-item')]//div[contains(@class,'ant-picker'))[1]",
-            ])
-            candidates.extend([
-                f"(//div[contains(@class,'ant-picker')]//input[contains(@placeholder, {te})])[1]",
-            ])
-            candidates.extend([
-                "(//div[contains(@class,'ant-picker'))[1]",
-                "(//div[contains(@class,'ant-picker-range'))[1]",
-            ])
-        else:
-            candidates.extend([
-                f"(//input[contains(@placeholder, {te}) and ancestor::div[contains(@class,'picker') or contains(@class,'date'))])[1]",
-                f"(//label[contains(normalize-space(.), {te})]/following-sibling::*//input[contains(@class,'date') or contains(@class,'picker'))])[1]",
-                "(//input[@type='date'])[1]",
-            ])
-
-    deduped: List[str] = []
-    for s in candidates:
-        if s and s not in deduped:
-            deduped.append(s)
-
+    result = build_date_picker_candidates(semantic_dom, intent or "")
     return {
-        "selector": deduped[0] if deduped else None,
-        "candidates": deduped,
-        "field_label": field or "",
+        "selector": result.get("selector"),
+        "candidates": result.get("candidates") or [],
+        "field_label": result.get("field_label") or "",
     }
 
 

@@ -8,9 +8,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Optional
 
-from ..dom import DomIndex
-from ..llm import LLMAdapter, PromptLoader
-from ..skill_loader import get_component_structure
+from ..understanding.dom import DomIndex
+from ..foundation.llm import LLMAdapter, PromptLoader
+from ..foundation.skill_loader import get_component_structure
 from .action_type_filter import filter_items_by_action_type, item_matches_action_type
 from .decide_result import DecideResult
 from .fallback_resolve import fallback_resolve_index
@@ -406,7 +406,7 @@ class LLMElementDecider:
         idx: int,
     ) -> dict:
         if items and len(items) != len(dom.selectors):
-            from ..dom.semantic_dom import build_locator_info
+            from ..understanding.dom.semantic_dom import build_locator_info
             return build_locator_info(items[idx])
         return dom.selectors[idx]
 

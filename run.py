@@ -1,10 +1,11 @@
 """UI 自动化框架 CLI 入口.
 
-单用例:  python run.py 业务/vip视频/大学增加前审/cases/大学增加前审case.md
-批量目录: python run.py 业务/vip视频/大学增加前审/cases/
+单用例:  python run.py business/tiku/tiku_video/大学增加前审/cases/前审1.md
+批量目录: python run.py business/tiku/tiku_video/大学增加前审/cases/
 
-流程: 解析(Markdown) → 排序 → 前置展开 → 登录 → 导航 → 动作规划
-      → 语义DOM → 五级定位 → 分发执行 → 报告.
+默认: 每次执行均走动作规划 + 执行，规划结果写入 actions/<用例文件名>_actions.json
+预规划执行: python run.py .../cases/测试用例.md --from-actions
+API 预规划: POST /api/v1/ui-test/run-preplanned
 """
 from __future__ import annotations
 
@@ -15,6 +16,8 @@ from pathlib import Path
 import yaml
 
 from core.agent import UITestAgent
+from core.business_loader import BusinessLoader
+from core.ports.business.plan_store import load_preplanned_map_for_file
 
 
 def load_config(path: Path) -> dict:
@@ -31,30 +34,60 @@ def discover_cases(path: Path) -> list[Path]:
     raise FileNotFoundError(path)
 
 
+def _prepare_from_actions(agent: UITestAgent, case_file: Path, env_file: str | None) -> bool:
+    """加载 actions/<stem>_actions.json 到 agent，供预规划执行."""
+    biz = BusinessLoader()
+    if not biz.discover(str(case_file), env_file=env_file) or not biz.project_dir:
+        print(f"无法发现业务目录: {case_file}", file=sys.stderr)
+        return False
+    stem = case_file.stem
+    plan_map = load_preplanned_map_for_file(biz.project_dir, stem)
+    if not plan_map:
+        from core.ports.business.plan_store import case_file_actions_path
+        expected = case_file_actions_path(biz.project_dir, stem)
+        print(f"未找到预规划文件: {expected}", file=sys.stderr)
+        return False
+    agent._file_preplanned_map = plan_map
+    agent._from_actions_mode = True
+    print(f"预规划模式: 已加载 {len(plan_map)} 条用例动作 ({stem}_actions.json)")
+    return True
+
+
 def main() -> int:
-    # 入口只负责参数解析、配置加载和用例调度, 具体执行逻辑交给 UITestAgent.
     ap = argparse.ArgumentParser()
     ap.add_argument("target", help="用例文件(.md)或目录")
     ap.add_argument("--config", default="config.yaml")
+    ap.add_argument(
+        "--env-file",
+        default=None,
+        help="Override project.env path for this run",
+    )
+    ap.add_argument(
+        "--from-actions",
+        action="store_true",
+        help="从 actions/<用例文件名>_actions.json 读取规划并执行，跳过 LLM 规划",
+    )
     args = ap.parse_args()
 
-    # 以 run.py 所在目录作为项目根目录, 避免从其他 cwd 启动时找不到配置/资源.
     root = Path(__file__).parent
     config = load_config(root / args.config)
 
-    # target 可以是单个用例文件, 也可以是用例目录.
     cases = discover_cases(Path(args.target))
     if not cases:
         print(f"未发现 .md 用例: {args.target}", file=sys.stderr)
         return 2
 
-    # Agent 内部负责登录、导航、动作规划、元素定位、执行和报告生成.
     agent = UITestAgent(config, project_root=root)
 
-    # 批量执行时只要任意用例失败, 整体进程返回非 0, 便于 CI/脚本判断.
     any_failed = False
     for case_file in cases:
-        summary = agent.run_tests(str(case_file))
+        agent._file_preplanned_map = {}
+        agent._from_actions_mode = False
+        agent._preplanned_actions = None
+        if args.from_actions:
+            if not _prepare_from_actions(agent, case_file, args.env_file):
+                return 2
+        summary = agent.run_tests(str(case_file), env_file=args.env_file)
         if summary["失败数"] > 0:
             any_failed = True
 
