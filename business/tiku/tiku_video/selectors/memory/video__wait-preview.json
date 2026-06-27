@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/wait-preview",
-  "saved_at": 1782448140.6650822,
+  "saved_at": 1782528956.001751,
   "entries": {
     "click|点击侧栏菜单待前审进入待前审列表页面": {
       "method": "role",
@@ -291,6 +291,46 @@
         "tag": "",
         "text": "",
         "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在待前审列表页点击领取题目": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"领取题目\")",
+      "method": "role",
+      "role": "button",
+      "name": "领取题目",
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782463425.358619,
+      "updated_at": 1782528774.526958,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击学科为化学一行的查看按钮": {
+      "method": "role",
+      "role": "button",
+      "name": "查 看",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"查 看\"]",
+      "success_count": 2,
+      "created_at": 1782463452.197133,
+      "updated_at": 1782528794.760105,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
         "class_pattern": ""
       }
     }

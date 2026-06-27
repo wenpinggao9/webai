@@ -610,7 +610,7 @@ def export_delivery_package(
     report_html_by_stem = {item["file"]: str(item["report_html"]) for item in reports}
 
     direction = find_direction_dir(system_dir)
-    base_url, roles = resolve_project_runtime(
+    base_url, api_base_url, roles = resolve_project_runtime(
         system_dir, project_dir, direction_dir=direction,
     )
     case_files = _build_case_file_summaries(

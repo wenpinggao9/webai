@@ -259,8 +259,14 @@ class LocatorResolver:
         info: dict,
         chain: ResolveChain,
         layer: str,
+        action_type: str = "",
     ) -> bool:
         """True → 拒绝该 L1/L2 命中 (继续降级)."""
+        from .upload_resolver import is_unsafe_upload_selector
+
+        if action_type == "upload" and is_unsafe_upload_selector(info):
+            chain.add(layer, "跳过(upload非file input)", info_key(info))
+            return True
         sel = info_key(info)
         if is_unsafe_dropdown_option_selector(intent, sel):
             chain.add(layer, "跳过(下拉option禁bare text)", sel)
@@ -286,21 +292,27 @@ class LocatorResolver:
             elif info_key(info) in excl:
                 chain.add("L1缓存", "跳过(已排除)", info_key(info))
             else:
-                from_cache_heal = bool(info.pop("_from_cache_heal", False))
-                info, upgraded, upgrade_label = self._maybe_upgrade_component_selector(
-                    page, intent, info, semantic_items,
-                )
-                if upgraded:
-                    label = "L1自愈" if from_cache_heal else "L1缓存"
-                    chain.add(label, f"{upgrade_label}升级", info_key(info))
-                    self.cache.put(url, action_type, intent, info, node=info)
-                if from_cache_heal:
-                    chain.mark_hit("L1缓存", info_key(info), note="自愈")
-                    if not self._reject_unsafe_accel_hit(intent, info, chain, "L1缓存"):
+                from .upload_resolver import is_unsafe_upload_selector
+
+                if action_type == "upload" and is_unsafe_upload_selector(info):
+                    chain.add("L1缓存", "跳过(upload非file input)", info_key(info))
+                    self.cache.evict(url, action_type, intent)
+                else:
+                    from_cache_heal = bool(info.pop("_from_cache_heal", False))
+                    info, upgraded, upgrade_label = self._maybe_upgrade_component_selector(
+                        page, intent, info, semantic_items,
+                    )
+                    if upgraded:
+                        label = "L1自愈" if from_cache_heal else "L1缓存"
+                        chain.add(label, f"{upgrade_label}升级", info_key(info))
+                        self.cache.put(url, action_type, intent, info, node=info)
+                    if from_cache_heal:
+                        chain.mark_hit("L1缓存", info_key(info), note="自愈")
+                        if not self._reject_unsafe_accel_hit(intent, info, chain, "L1缓存", action_type):
+                            return self._tag_and_track(info, "L1缓存")
+                    elif not self._reject_unsafe_accel_hit(intent, info, chain, "L1缓存", action_type):
+                        chain.mark_hit("L1缓存", info_key(info))
                         return self._tag_and_track(info, "L1缓存")
-                elif not self._reject_unsafe_accel_hit(intent, info, chain, "L1缓存"):
-                    chain.mark_hit("L1缓存", info_key(info))
-                    return self._tag_and_track(info, "L1缓存")
 
         if self.memory:
             info = self.memory.lookup_validate(page, url, action_type, intent)
@@ -311,7 +323,7 @@ class LocatorResolver:
                 if upgraded:
                     chain.add("L2记忆", f"{upgrade_label}升级", info_key(info))
                 self._backfill_l1(url, action_type, intent, info)
-                if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆"):
+                if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆", action_type):
                     chain.mark_hit("L2记忆", info_key(info))
                     return self._tag_and_track(info, "L2记忆")
             elif info and info_key(info) in excl:
@@ -322,7 +334,7 @@ class LocatorResolver:
                         page, intent, info, semantic_items,
                     )
                     self._backfill_l1(url, action_type, intent, info)
-                    if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆"):
+                    if not self._reject_unsafe_accel_hit(intent, info, chain, "L2记忆", action_type):
                         chain.mark_hit("L2记忆", info_key(info))
                         return self._tag_and_track(info, "L2记忆")
 
@@ -342,7 +354,7 @@ class LocatorResolver:
                 )
                 if gen_info and info_key(gen_info) not in excl:
                     self._backfill_l1(url, action_type, intent, gen_info)
-                    if not self._reject_unsafe_accel_hit(intent, gen_info, chain, "L2记忆"):
+                    if not self._reject_unsafe_accel_hit(intent, gen_info, chain, "L2记忆", action_type):
                         chain.mark_hit("L2记忆", info_key(gen_info))
                         return self._tag_and_track(gen_info, "L2记忆")
                 elif gen_info and info_key(gen_info) in excl:
@@ -386,6 +398,16 @@ class LocatorResolver:
             chain.add("定位链", "跳过(assert_text)")
             self._emit_chain(chain)
             return None
+
+        if action_type == "upload":
+            from .upload_resolver import try_resolve_upload_file_input
+
+            upload_info = try_resolve_upload_file_input(page, intent, excl)
+            if upload_info:
+                chain.mark_hit("file_input", info_key(upload_info))
+                self._backfill(url, action_type, intent, upload_info)
+                self._emit_chain(chain)
+                return self._tag_and_track(upload_info, "file_input")
 
         if not skip_acceleration:
             hit = self._resolve_acceleration_layers(

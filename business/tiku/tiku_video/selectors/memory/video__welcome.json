@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/welcome",
-  "saved_at": 1782448140.6650822,
+  "saved_at": 1782528956.001751,
   "entries": {
     "click|点击侧栏菜单全部题目进入全部题目页面": {
       "nth": 0,
@@ -10,9 +10,9 @@
       "method": "text",
       "name": "全部题目",
       "exact": true,
-      "success_count": 13,
+      "success_count": 17,
       "created_at": 1782142954.8364859,
-      "updated_at": 1782447176.496015,
+      "updated_at": 1782527932.144662,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -47,9 +47,9 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 2,
+      "success_count": 4,
       "created_at": 1782146569.792053,
-      "updated_at": 1782174960.159202,
+      "updated_at": 1782528752.886831,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -107,6 +107,44 @@
       "success_count": 1,
       "created_at": 1782442476.7410161,
       "updated_at": 1782442476.7410161,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏菜单任务中心进入任务中心页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"任务中心\"",
+      "method": "text",
+      "name": "任务中心",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782468845.2002492,
+      "updated_at": 1782468845.2002492,
+      "component_library": "generic",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏菜单待上传进入待上传页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"待上传\"",
+      "method": "text",
+      "name": "待上传",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782478567.2587671,
+      "updated_at": 1782478567.2587671,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {

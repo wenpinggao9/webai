@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "saved_at": 1782448140.6664279,
+  "saved_at": 1782528956.010828,
   "pages": {
     "/video/welcome": {
       "route": "/video/welcome",
       "component_library": "ant-design",
-      "dom_signature": "f7d3860c632dd771",
+      "dom_signature": "d71b6a8ed95a0b2f",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -13,18 +13,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 6,
+          "success_count": 8,
           "failure_count": 3
         }
       },
       "learned_at": 1782142954.8372102,
-      "updated_at": 1782442476.741385,
-      "hit_count": 2
+      "updated_at": 1782478567.259179,
+      "hit_count": 4
     },
     "/video/all-question": {
       "route": "/video/all-question",
       "component_library": "ant-design",
-      "dom_signature": "d61534c80fe554de",
+      "dom_signature": "724031ab9d9086ab",
       "rules": {
         "click|button": {
           "action_type": "click",
@@ -43,24 +43,33 @@
           "anchor_type": "text",
           "success_count": 5,
           "failure_count": 0
+        },
+        "click|dropdown_trigger": {
+          "action_type": "click",
+          "component_type": "dropdown_trigger",
+          "selector_template": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"{text}\")])[1]",
+          "selector_type": "xpath",
+          "anchor_type": "class",
+          "success_count": 1,
+          "failure_count": 0
         }
       },
       "learned_at": 1782143045.140954,
-      "updated_at": 1782352297.546272,
+      "updated_at": 1782457782.154432,
       "hit_count": 0
     },
     "/video/wait-preview": {
       "route": "/video/wait-preview",
       "component_library": "ant-design",
-      "dom_signature": "3c2b02433c09b159",
+      "dom_signature": "6521539b1af8abe1",
       "rules": {
         "click|button": {
           "action_type": "click",
           "component_type": "button",
-          "selector_template": "button:has-text(\"{text}\")",
+          "selector_template": "role=button[name=\"{text}\"]",
           "selector_type": "role",
           "anchor_type": "text",
-          "success_count": 6,
+          "success_count": 8,
           "failure_count": 0
         },
         "click|generic": {
@@ -74,13 +83,13 @@
         }
       },
       "learned_at": 1782146590.337551,
-      "updated_at": 1782447948.332918,
-      "hit_count": 2
+      "updated_at": 1782463452.197966,
+      "hit_count": 4
     },
     "/video/detail": {
       "route": "/video/detail",
       "component_library": "ant-design",
-      "dom_signature": "400e4082dbbacdd1",
+      "dom_signature": "7dd10d5eea12e998",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -88,13 +97,22 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 7,
+          "success_count": 11,
+          "failure_count": 0
+        },
+        "click|dropdown_trigger": {
+          "action_type": "click",
+          "component_type": "dropdown_trigger",
+          "selector_template": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"{text}\")])[1]",
+          "selector_type": "xpath",
+          "anchor_type": "class",
+          "success_count": 2,
           "failure_count": 0
         }
       },
       "learned_at": 1782172644.151975,
-      "updated_at": 1782447885.3425221,
-      "hit_count": 4
+      "updated_at": 1782528867.390713,
+      "hit_count": 8
     },
     "/video/already-self": {
       "route": "/video/already-self",
@@ -151,6 +169,52 @@
       "learned_at": 1782208481.7840261,
       "updated_at": 1782448089.8266501,
       "hit_count": 7
+    },
+    "/video/taskindex": {
+      "route": "/video/taskindex",
+      "component_library": "ant-design",
+      "dom_signature": "4348a764c86d9b23",
+      "rules": {
+        "click|input": {
+          "action_type": "click",
+          "component_type": "input",
+          "selector_template": "xpath=(//input[contains(@placeholder, '学科')])[1]",
+          "selector_type": "xpath",
+          "anchor_type": "placeholder",
+          "success_count": 1,
+          "failure_count": 0
+        },
+        "click|dropdown_trigger": {
+          "action_type": "click",
+          "component_type": "dropdown_trigger",
+          "selector_template": ".ant-select-dropdown:visible .ant-select-item-option-content:has-text(\"{text}\")",
+          "selector_type": "role",
+          "anchor_type": "class",
+          "success_count": 1,
+          "failure_count": 0
+        },
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "button:has-text(\"{text}\")",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        },
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "label.ant-radio-wrapper:has-text(\"{text}\")",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782468911.066154,
+      "updated_at": 1782468976.227916,
+      "hit_count": 0
     }
   }
 }

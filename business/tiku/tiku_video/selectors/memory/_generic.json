@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "saved_at": 1782448140.6650822,
+  "saved_at": 1782528956.001751,
   "generic_entries": {
     "ant-design|dropdown_option": {
       "selector_template": "text=\"{text}\"",
       "selector_type": "css",
       "component_library": "ant-design",
       "component_type": "dropdown_option",
-      "success_count": 5,
-      "created_at": 1782352495.578816,
-      "updated_at": 1782447885.3421838
+      "success_count": 1,
+      "created_at": 1782528815.3165371,
+      "updated_at": 1782528815.3165371
     },
     "ant-design|select_trigger": {
       "selector_template": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '{text}')]]//div[contains(@class,'ant-select')])[1]",
@@ -19,6 +19,15 @@
       "success_count": 1,
       "created_at": 1782208481.7831628,
       "updated_at": 1782208481.7831628
+    },
+    "ant-design|radio": {
+      "selector_template": "label.ant-radio-wrapper:has-text(\"{text}\")",
+      "selector_type": "css",
+      "component_library": "ant-design",
+      "component_type": "radio",
+      "success_count": 1,
+      "created_at": 1782468976.227504,
+      "updated_at": 1782468976.227504
     }
   }
 }

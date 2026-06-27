@@ -49,9 +49,95 @@ def test_resolve_project_runtime_env_over_yaml(tmp_path):
         "base_url": "https://from-yaml.test",
         "roles": {"admin": {"username": "old", "verify_code": "000"}},
     }
-    base, roles = resolve_project_runtime(None, proj, yaml_fallback=yaml_cfg)
+    base, api_base, roles = resolve_project_runtime(None, proj, yaml_fallback=yaml_cfg)
     assert base == "https://from-env.test"
+    assert api_base == "https://from-env.test"
     assert roles["qa"]["username"] == "u1"
+
+
+def test_resolve_project_runtime_derives_api_base_from_base_url(tmp_path):
+    proj = tmp_path / "proj"
+    (proj / "cases").mkdir(parents=True)
+    (proj / PROJECT_ENV_FILE).write_text(
+        "BASE_URL=https://www-gwp11-bc.suanshubang.com/video\n",
+        encoding="utf-8",
+    )
+    base, api_base, _ = resolve_project_runtime(None, proj)
+    assert base == "https://www-gwp11-bc.suanshubang.com/video"
+    assert api_base == "https://www-gwp11-bc.suanshubang.com"
+
+
+def test_substitute_env_placeholders_keeps_runtime_vars():
+    from core.business.env import substitute_env_placeholders
+
+    env = {"VPSCORE_BASE_URL": "https://wendamis.test"}
+    kb = {
+        "apis": {
+            "query_work": {"base_url": "${VPSCORE_BASE_URL}", "params": {"workId": "${workId}"}},
+        }
+    }
+    out = substitute_env_placeholders(kb, env)
+    assert out["apis"]["query_work"]["base_url"] == "https://wendamis.test"
+    assert out["apis"]["query_work"]["params"]["workId"] == "${workId}"
+
+
+def test_business_loader_resolves_api_hosts_from_env(tmp_path):
+    system = tmp_path / "tiku_video"
+    project = system / "demo"
+    cases = project / "cases"
+    cases.mkdir(parents=True)
+    (system / DOMAIN_KNOWLEDGE_FILE).write_text(
+        "---\n"
+        "apis:\n"
+        "  deliver:\n"
+        "    base_url: ${VPSAPI_BASE_URL}\n"
+        "    url: /vpsapi/api/deliver\n"
+        "  query_work:\n"
+        "    base_url: ${VPSCORE_BASE_URL}\n"
+        "    url: /vpscore/api/workInfo\n"
+        "---\n",
+        encoding="utf-8",
+    )
+    (project / PROJECT_ENV_FILE).write_text(
+        "BASE_URL=https://ui.test/video\n"
+        "VPSAPI_BASE_URL=https://vpsapi.test\n"
+        "VPSCORE_BASE_URL=https://vpscore.test\n"
+        "admin_USERNAME=a\nadmin_VERIFY_CODE=1\n",
+        encoding="utf-8",
+    )
+    case_file = cases / "case1.md"
+    case_file.write_text("#### c1\n\n##### 步骤\n\n1. 点击\n", encoding="utf-8")
+
+    biz = BusinessLoader()
+    assert biz.discover(case_file)
+    assert biz.get_api_base_url() == "https://vpsapi.test"
+    profile = biz.build_system_profile()
+    assert profile.apis["deliver"].base_url == "https://vpsapi.test"
+    assert profile.apis["query_work"].base_url == "https://vpscore.test"
+
+
+def test_resolve_project_runtime_vpsapi_base_url_priority(tmp_path):
+    proj = tmp_path / "proj"
+    (proj / "cases").mkdir(parents=True)
+    (proj / PROJECT_ENV_FILE).write_text(
+        "BASE_URL=https://ui.test/video\n"
+        "VPSAPI_BASE_URL=https://vpsapi.test\n"
+        "API_BASE_URL=https://api.test\n",
+        encoding="utf-8",
+    )
+    _, api_base, _ = resolve_project_runtime(None, proj)
+    assert api_base == "https://vpsapi.test"
+
+
+def test_resolve_project_runtime_api_base_url_env_override(tmp_path):
+    proj = tmp_path / "proj"
+    (proj / "cases").mkdir(parents=True)
+    (proj / PROJECT_ENV_FILE).write_text(
+        "BASE_URL=https://ui.test/video\nAPI_BASE_URL=https://api.test\n",
+        encoding="utf-8",
+    )
+    _, api_base, _ = resolve_project_runtime(None, proj)
+    assert api_base == "https://api.test"
 
 
 def test_business_loader_discover_env(tmp_path):
@@ -70,6 +156,7 @@ def test_business_loader_discover_env(tmp_path):
     biz = BusinessLoader()
     assert biz.discover(case_file)
     assert biz.get_base_url() == "https://ui.test"
+    assert biz.get_api_base_url() == "https://ui.test"
     assert biz.get_roles()["admin"]["username"] == "a"
     assert biz.accel_dir == system / ACCEL_MEMORY_DIR
 
@@ -125,10 +212,10 @@ def test_resolve_project_runtime_direction_env_overrides(tmp_path):
     (project / "cases").mkdir(parents=True)
     (direction / ".env").write_text("BASE_URL=https://direction.test\n", encoding="utf-8")
     (system / ".env").write_text("BASE_URL=https://system.test\n", encoding="utf-8")
-    base, _ = resolve_project_runtime(system, project, direction_dir=direction)
+    base, _, _ = resolve_project_runtime(system, project, direction_dir=direction)
     assert base == "https://system.test"
     (project / PROJECT_ENV_FILE).write_text("BASE_URL=https://project.test\n", encoding="utf-8")
-    base, _ = resolve_project_runtime(system, project, direction_dir=direction)
+    base, _, _ = resolve_project_runtime(system, project, direction_dir=direction)
     assert base == "https://project.test"
 
 

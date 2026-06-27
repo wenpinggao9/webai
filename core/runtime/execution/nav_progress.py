@@ -14,6 +14,22 @@ _NAV_SUCCESS = frozenset({
     "resource_id_changed", "returned_to_list", "route_changed",
 })
 
+# 路由/列表上下文切换后, 下一步须做就绪检查 (与 intent 文案无关)
+_NAV_REQUIRES_READINESS = frozenset({
+    "route_changed", "resource_id_changed", "returned_to_list",
+})
+
+# 列表/路由切换不做后校验导航短路, 须看 DOM (含阻断弹窗)
+_NAV_NO_POST_SHORTCUT = frozenset({
+    "route_changed", "returned_to_list",
+})
+
+
+def navigation_outcome_requires_readiness(outcome: str | None) -> bool:
+    """上一步若发生页面路由/上下文切换, 下一步强制就绪检查."""
+    o = (outcome or "").strip()
+    return o in _NAV_REQUIRES_READINESS
+
 # 与 entity_discover._ID_QUERY_KEY_RE 对齐, 供浏览器端 wait_for_function 使用
 _ENTITY_KEY_JS = r"/^(?:uniq|work|order|task|entity|record)?id$|_id$/i"
 _LOOKS_LIKE_ID_JS = r"/^\d+$/.test(v) || (v.length >= 4 && /\d/.test(v))"

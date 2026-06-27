@@ -118,6 +118,8 @@ class ActionDispatcher:
         llm: Optional[Any] = None,              # LLM 实例, 用于语义断言
         console: Optional[Any] = None,
         prompts: Optional[Any] = None,          # PromptLoader
+        resource_manager: Optional[Any] = None,
+        case_resources: Optional[dict[str, Any]] = None,
         *,
         page_ready_guard: bool = True,
         dialog_retrigger: bool = True,
@@ -136,6 +138,8 @@ class ActionDispatcher:
         self._llm_instance = llm
         self.console = console
         self._prompts = prompts
+        self._resource_manager = resource_manager
+        self._case_resources = case_resources or {}
         self.popup_recovery_steps: list[PlannedAction] = []
         self.feature_titles: list[str] = []
         self._popup_dismiss_used = False
@@ -867,6 +871,23 @@ class ActionDispatcher:
             if ex.get("row_key") or parse_table_row_click(action.intent or "", ex):
                 if row_note:
                     action.resolve_hint = row_note
+        if action.type == "upload":
+            from ...locating.upload_resolver import try_resolve_upload_file_input
+
+            upload_info = try_resolve_upload_file_input(
+                self.page,
+                action.intent or "",
+                exclude=set(action.exclude_selectors or []),
+            )
+            if upload_info:
+                if self.trace:
+                    self.trace.emit(
+                        "locate_chain",
+                        intent=action.intent,
+                        hit_level="file_input",
+                        hit_selector=upload_info.get("selector"),
+                    )
+                return self._locate_from_info(action, upload_info)
         # L1/L2 命中短路: 跳过 DOM 抽取 (对齐 V3)
         skip_accel = bool(getattr(action, "skip_acceleration", False))
         if not skip_accel:
@@ -1039,9 +1060,31 @@ class ActionDispatcher:
             loc.press(action.value or "Enter", timeout=timeout)
             return True, f"按键 {action.value}{suffix}"
         if t == "upload":
-            loc.set_input_files(action.value or "", timeout=timeout)
-            return True, f"上传 {action.value}{suffix}"
+            file_path, err = self._resolve_upload_path(action)
+            if err:
+                return False, err
+            loc.set_input_files(file_path, timeout=timeout)
+            return True, f"上传 {file_path}{suffix}"
         return False, f"未支持的已定位动作: {t}"
+
+    def _resolve_upload_path(self, action: PlannedAction) -> tuple[str, Optional[str]]:
+        """把 upload value (资源别名/文件名) 解析为本地绝对路径."""
+        raw = (action.value or "").strip()
+        if self._resource_manager is not None:
+            path = self._resource_manager.resolve_upload(raw, self._case_resources)
+            if path:
+                return path, None
+        if raw:
+            from pathlib import Path
+
+            p = Path(raw)
+            if p.is_file():
+                return str(p.resolve()), None
+            rooted = Path(self._resource_manager.root if self._resource_manager else ".") / raw
+            if rooted.is_file():
+                return str(rooted.resolve()), None
+        label = raw or "(空)"
+        return "", f"找不到上传资源: {label}"
 
     _NEW_TAB_INTENT_RE = re.compile(r"查看|新标签|新窗口|新开")
 

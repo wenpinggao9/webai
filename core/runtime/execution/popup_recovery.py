@@ -40,6 +40,14 @@ def reset_action_for_popup_retry(action: PlannedAction) -> None:
     action.resolve_hint = None
 
 
+def page_has_blocking_dialog(page: Any) -> bool:
+    """页面上是否存在可见阻断层 (modal/dialog), 与业务模块无关."""
+    try:
+        return page.locator(_DIALOG_VISIBLE).count() > 0
+    except Exception:
+        return False
+
+
 def try_dismiss_blocking_dialog(page: Any, timeout: int = 10000) -> bool:
     """规则关弹窗: 红线/协议类 dialog — 若存在则勾选 checkbox 并点确认."""
     try:

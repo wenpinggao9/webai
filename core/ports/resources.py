@@ -22,6 +22,22 @@ from ..foundation.layout import (
 from ..pipeline.parser import CaseResource
 
 
+def _discover_business_resource_dirs(root: Path) -> list[Path]:
+    """扫描 business 下各层项目 resources/ 目录 (1~4 级子路径)."""
+    resource_dir_names = (RESOURCES_DIR, TEST_RESOURCES_DIR, LEGACY_TEST_RESOURCES_DIR)
+    found: list[Path] = []
+    seen: set[Path] = set()
+    for biz_name in (BUSINESS_DIR, LEGACY_BUSINESS_DIR):
+        for res_name in resource_dir_names:
+            for depth in ("*", "*/*", "*/*/*", "*/*/*/*"):
+                pattern = f"{biz_name}/{depth}/{res_name}"
+                for d in root.glob(pattern):
+                    if d.is_dir() and d not in seen:
+                        seen.add(d)
+                        found.append(d)
+    return found
+
+
 class ResourceManager:
     """统一解析用例资源名、上传临时文件、本地路径和项目资产文件."""
 
@@ -35,16 +51,24 @@ class ResourceManager:
             self.root / TEST_RESOURCES_DIR,
             self.root / LEGACY_TEST_RESOURCES_DIR,
         ]
-        resource_dir_names = (RESOURCES_DIR, TEST_RESOURCES_DIR, LEGACY_TEST_RESOURCES_DIR)
-        for biz_name in (BUSINESS_DIR, LEGACY_BUSINESS_DIR):
-            for res_name in resource_dir_names:
-                for d in self.root.glob(f"{biz_name}/*/{res_name}"):
-                    if d.is_dir():
-                        self.asset_dirs.append(d)
-                for d in self.root.glob(f"{biz_name}/*/*/{res_name}"):
-                    if d.is_dir():
-                        self.asset_dirs.append(d)
+        self.asset_dirs.extend(_discover_business_resource_dirs(self.root))
+        self._project_asset_dir: Optional[Path] = None
         self._temp_files: list[Path] = []
+
+    def set_project_asset_dir(self, path: str | Path | None) -> None:
+        """当前业务项目 resources/ 优先于全局扫描目录."""
+        if path is None:
+            self._project_asset_dir = None
+            return
+        p = Path(path)
+        self._project_asset_dir = p if p.is_dir() else None
+
+    def _asset_search_dirs(self) -> list[Path]:
+        dirs: list[Path] = []
+        if self._project_asset_dir is not None:
+            dirs.append(self._project_asset_dir)
+        dirs.extend(self.asset_dirs)
+        return dirs
 
     def resolve(self, name_or_path: str, case_resources: Optional[dict[str, CaseResource]] = None) -> Optional[str]:
         """把资源名/路径解析为真实文件绝对路径; 找不到返回 None."""
@@ -76,11 +100,22 @@ class ResourceManager:
 
     def _search_assets(self, filename: str) -> Optional[str]:
         """在预设资产目录中按文件名查找资源."""
-        for d in self.asset_dirs:
+        for d in self._asset_search_dirs():
             cand = d / filename
             if cand.exists():
-                return str(cand)
+                return str(cand.resolve())
         return None
+
+    def resolve_upload(
+        self,
+        value: str,
+        case_resources: Optional[dict[str, CaseResource]] = None,
+    ) -> Optional[str]:
+        """解析 upload 动作的 value (资源别名/文件名) 为本地文件绝对路径."""
+        raw = (value or "").strip()
+        if not raw:
+            return self.default_resource()
+        return self.resolve(raw, case_resources)
 
     def default_resource(self) -> str:
         """上传步骤无资源时的默认文件 (即时生成一个临时 txt)."""

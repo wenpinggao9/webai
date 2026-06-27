@@ -23,7 +23,7 @@ from ...foundation.layout import (
     first_existing,
 )
 from .accel_store import business_accel_dir
-from .env import resolve_project_runtime
+from .env import load_merged_project_env, resolve_project_runtime, substitute_env_placeholders
 
 
 class BusinessLoader:
@@ -38,6 +38,7 @@ class BusinessLoader:
         self.knowledge: dict[str, Any] = {}
         self.project_config: dict[str, Any] = {}
         self._base_url: str = ""
+        self._api_base_url: str = ""
         self._roles: dict[str, dict[str, str]] = {}
         self._extra_env_file: Path | None = None
 
@@ -61,8 +62,9 @@ class BusinessLoader:
         self.direction_dir = find_direction_dir(system_dir)
 
         kb_file = domain_knowledge_path(system_dir)
+        raw_knowledge: dict[str, Any] = {}
         if kb_file is not None:
-            self.knowledge = _parse_kb(kb_file.read_text(encoding="utf-8"))
+            raw_knowledge = _parse_kb(kb_file.read_text(encoding="utf-8"))
 
         self.project_dir = _find_project_dir(p, system_dir)
         yaml_cfg: dict[str, Any] = {}
@@ -74,7 +76,15 @@ class BusinessLoader:
                 yaml_cfg = yaml.safe_load(yaml_path.read_text(encoding="utf-8")) or {}
                 self.project_config = yaml_cfg
 
-        self._base_url, self._roles = resolve_project_runtime(
+        merged_env = load_merged_project_env(
+            self.system_dir,
+            self.project_dir,
+            direction_dir=self.direction_dir,
+            extra_env_file=self._extra_env_file,
+        )
+        self.knowledge = substitute_env_placeholders(raw_knowledge, merged_env)
+
+        self._base_url, self._api_base_url, self._roles = resolve_project_runtime(
             self.system_dir,
             self.project_dir,
             direction_dir=self.direction_dir,
@@ -94,6 +104,9 @@ class BusinessLoader:
 
     def get_base_url(self) -> str:
         return self._base_url
+
+    def get_api_base_url(self) -> str:
+        return self._api_base_url
 
     def get_login_page(self) -> dict[str, Any]:
         return self.knowledge.get("login_page", {})
@@ -143,7 +156,7 @@ class BusinessLoader:
         return SystemProfile(
             name=self.system_dir.name if self.system_dir else "default",
             base_url=self.get_base_url(),
-            api_base_url=self.get_knowledge().get("api_base_url", ""),
+            api_base_url=self.get_api_base_url(),
             database=self.get_knowledge().get("database", {}),
             apis=apis,
             enums=self.get_enums() or {},

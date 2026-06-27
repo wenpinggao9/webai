@@ -1,0 +1,572 @@
+{
+  "cases": [
+    {
+      "case_id": "大学前审_投放_013",
+      "module": "大学前审",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [
+          "投放策略来源、大学学段、大学化学学科的题目（1题），获取 orderId5"
+        ],
+        "steps": [
+          "管理员从「全部题目」中筛选来源：策略、学段:大学、学科:大学化学的题目"
+        ],
+        "expectations": [
+          "查询工单ID=${orderId5}生产状态为「待前审」"
+        ]
+      },
+      "actions": [
+        {
+          "type": "api_call",
+          "intent": "投放策略来源、大学学段、大学化学学科的题目（1题），获取orderId5"
+        },
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'全部题目'进入全部题目页面"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'来源'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'策略'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学段'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学化学'"
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证工单ID为${orderId5}的生产状态为待前审",
+          "value": "${orderId5}",
+          "extras": {
+            "column": "生产状态",
+            "expected": "待前审",
+            "row_key_column": "工单ID"
+          }
+        }
+      ],
+      "action_count": 9
+    },
+    {
+      "case_id": "大学前审_流程_014",
+      "module": "大学前审",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [
+          "前审老师A待领取列表为空"
+        ],
+        "format": "interleaved",
+        "blocks": [
+          {
+            "steps": [
+              "前审老师A从「待前审」列表页中「领取题目」"
+            ],
+            "expectations": [
+              "「待前审」列表不为空，且学科为化学"
+            ]
+          },
+          {
+            "steps": [
+              "点击学科为化学一行的「查看」按钮"
+            ],
+            "expectations": [
+              "打开前审任务详情页"
+            ]
+          },
+          {
+            "steps": [
+              "选择「水印题且可做」"
+            ],
+            "expectations": [
+              "审核原因选项下方展示「学科」筛选框，并且筛选框中默认为「大学化学」"
+            ]
+          },
+          {
+            "steps": [
+              "点击「学科」下拉框，并修改为「物理」"
+            ],
+            "expectations": []
+          },
+          {
+            "steps": [
+              "选择「题目无任何问题」"
+            ],
+            "expectations": [
+              "「水印题且可做」审核项的为未选中状态",
+              "「学科」框中展示依然是「物理」"
+            ]
+          },
+          {
+            "steps": [
+              "点击「学科：」下拉框"
+            ],
+            "expectations": [
+              "下拉选项包括：数学/物理/计算机/大学化学"
+            ]
+          },
+          {
+            "steps": [
+              "再次点击选项「大学化学」并「提交」"
+            ],
+            "expectations": [
+              "页面自动加载下一个任务的详情页或回到待前审页面"
+            ]
+          },
+          {
+            "steps": [
+              "点击「已审核」从列表中查看最近一条数据"
+            ],
+            "expectations": [
+              "'审核行为'为「审核通过」"
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'待前审'列表页"
+        },
+        {
+          "type": "click",
+          "intent": "在'待前审'列表页点击'领取题目'"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证'待前审'列表不为空",
+          "value": ">0"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'待前审'列表各行学科均包含'化学'",
+          "value": "化学"
+        },
+        {
+          "type": "click",
+          "intent": "点击学科为化学一行的'查看'按钮",
+          "extras": {
+            "row_key": "化学",
+            "row_key_column": "学科",
+            "button": "查看"
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面已打开前审任务详情页",
+          "value": "详情"
+        },
+        {
+          "type": "click",
+          "intent": "点击'水印题且可做'选项"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证审核原因选项下方展示'学科'筛选框",
+          "value": "学科"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'学科'筛选框中默认值为'大学化学'",
+          "value": "大学化学"
+        },
+        {
+          "type": "click",
+          "intent": "点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'物理'"
+        },
+        {
+          "type": "click",
+          "intent": "选择'题目无任何问题'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'水印题且可做'审核项为未选中状态",
+          "value": "水印题且可做",
+          "extras": {
+            "state": "unchecked"
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'学科'框中展示的值为'物理'",
+          "value": "物理"
+        },
+        {
+          "type": "click",
+          "intent": "点击'学科'下拉框"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证下拉选项包含'数学'",
+          "value": "数学"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证下拉选项包含'物理'",
+          "value": "物理"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证下拉选项包含'计算机'",
+          "value": "计算机"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证下拉选项包含'大学化学'",
+          "value": "大学化学"
+        },
+        {
+          "type": "click",
+          "intent": "点击选项'大学化学'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证提交后页面自动加载下一个任务的详情页或回到待前审页面",
+          "extras": {
+            "any_of": true,
+            "branches": [
+              {
+                "intent": "验证页面自动加载下一个任务的详情页",
+                "value": "详情"
+              },
+              {
+                "intent": "验证页面回到待前审页面",
+                "value": "待前审"
+              }
+            ]
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'已审核'"
+        },
+        {
+          "type": "click",
+          "intent": "点击列表中最近一条数据进行查看"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'审核行为'为'审核通过'",
+          "value": "审核通过"
+        }
+      ],
+      "action_count": 25
+    },
+    {
+      "case_id": "大学前审_查询工单_015",
+      "module": "大学前审",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员从「全部题目」中筛选学科:大学化学的题目"
+        ],
+        "expectations": [
+          "结果列表中存在生产状态为「待领取」的工单"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学化学'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证结果列表中存在生产状态为'待领取'的工单",
+          "value": "待领取"
+        }
+      ],
+      "action_count": 4
+    },
+    {
+      "case_id": "录制_流程_016",
+      "module": "录制",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "format": "interleaved",
+        "blocks": [
+          {
+            "steps": [
+              "大学录制老师（recording）在「任务中心」筛选「大学化学」学科"
+            ],
+            "expectations": [
+              "「领取」按钮高亮"
+            ]
+          },
+          {
+            "steps": [
+              "录制老师点击「领取题目」"
+            ],
+            "expectations": [
+              "待上传中的「领取题目」Tab列表数量大于0"
+            ]
+          },
+          {
+            "steps": [
+              "待完成任务详情页"
+            ],
+            "expectations": [
+              "展示题目内容、右下角有「提交视频」和「制作PPT」"
+            ]
+          },
+          {
+            "steps": [
+              "点击提交视频"
+            ],
+            "expectations": [
+              "弹出视频上传选择框"
+            ]
+          },
+          {
+            "steps": [
+              "上传资源「录制视频」"
+            ],
+            "expectations": [
+              "加载本地文件夹"
+            ]
+          },
+          {
+            "steps": [
+              "选择一个本地MP4文件"
+            ],
+            "expectations": [
+              "展示加载进度条"
+            ]
+          },
+          {
+            "steps": [
+              "加载完成并进行确认提交"
+            ],
+            "expectations": [
+              "返回待上传页面，详情展示「查看视频」和「提交任务」"
+            ]
+          },
+          {
+            "steps": [
+              "提交任务"
+            ],
+            "expectations": [
+              "待上传下的「领取题目」列表为空"
+            ]
+          },
+          {
+            "steps": [
+              "录制下选择「已上传」"
+            ],
+            "expectations": [
+              "状态默认选中为「待申诉」"
+            ]
+          },
+          {
+            "steps": [
+              "鼠标点击状态框空白处，点击「x」号将状态置为空并提交进行查询"
+            ],
+            "expectations": [
+              "最近一条数据是待自审状态，且为学段=大学，学科=大学化学学科"
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'任务中心'进入任务中心页面"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学化学'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'领取'按钮高亮可点击",
+          "value": "领取",
+          "extras": {
+            "state": "enabled"
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'领取题目'按钮"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证待上传中的'领取题目'Tab列表数量大于0",
+          "value": ">0"
+        },
+        {
+          "type": "click",
+          "intent": "点击'待完成任务详情页'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面展示题目内容",
+          "value": "题目"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面右下角存在'提交视频'按钮",
+          "value": "提交视频"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面右下角存在'制作PPT'按钮",
+          "value": "制作PPT"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交视频'按钮"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面弹出视频上传选择框",
+          "value": "视频上传"
+        },
+        {
+          "type": "upload",
+          "intent": "上传'录制视频'资源",
+          "value": "录制视频",
+          "extras": {
+            "field": "录制视频"
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面显示'加载本地文件夹'",
+          "value": "加载本地文件夹"
+        },
+        {
+          "type": "upload",
+          "intent": "上传一个本地MP4视频文件",
+          "value": "MP4文件",
+          "extras": {
+            "field": "上传文件"
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面展示加载进度条",
+          "value": "进度",
+          "extras": {
+            "any_of": true,
+            "branches": [
+              {
+                "intent": "验证页面包含进度条",
+                "value": "进度"
+              },
+              {
+                "intent": "验证页面包含加载中提示",
+                "value": "加载"
+              }
+            ]
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'确认提交'按钮"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证待上传页面展示'查看视频'",
+          "value": "查看视频"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证待上传页面展示'提交任务'",
+          "value": "提交任务"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证待上传下的'领取题目'列表为空",
+          "value": "0"
+        },
+        {
+          "type": "click",
+          "intent": "在录制下选择'已上传'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证状态默认选中为'待申诉'",
+          "value": "待申诉"
+        },
+        {
+          "type": "click",
+          "intent": "点击状态框中的'x'号清空已选状态"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮进行查询"
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证最近一条数据的状态为待自审",
+          "value": "1",
+          "extras": {
+            "row_key_column": "序号",
+            "column": "状态",
+            "expected": "待自审"
+          }
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证最近一条数据的学段为大学",
+          "value": "1",
+          "extras": {
+            "row_key_column": "序号",
+            "column": "学段",
+            "expected": "大学"
+          }
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证最近一条数据的学科为大学化学学科",
+          "value": "1",
+          "extras": {
+            "row_key_column": "序号",
+            "column": "学科",
+            "expected": "大学化学学科"
+          }
+        }
+      ],
+      "action_count": 28
+    }
+  ],
+  "total_cases": 4
+}

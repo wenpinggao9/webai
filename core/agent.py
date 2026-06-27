@@ -64,7 +64,7 @@ from .skill_loader import load_skill_text, format_skills_for_decider
 from .variable_substitution import substitute_in_list, format_session_context
 from .execution.session_ops import enrich_session_actions
 from .execution.optional_step import tag_optional_actions_from_steps
-from .foundation.layout import EXECUTION_TRACE_FILE, LEGACY_GLOBAL_ACCEL_DIR, OBSERVABILITY_FILE
+from .foundation.layout import EXECUTION_TRACE_FILE, LEGACY_GLOBAL_ACCEL_DIR, OBSERVABILITY_FILE, test_resources_path
 from .watermark import load_watermark_config
 from .report import build_report_data, save_batch_overview
 
@@ -327,6 +327,10 @@ class UITestAgent:
         login_cfg = dict(base_url=biz.get_base_url() if biz else profile.base_url)
         if biz:
             login_cfg.update(biz.get_login_page())
+            res_dir = test_resources_path(biz.project_dir) if biz.project_dir else None
+            self.resources.set_project_asset_dir(res_dir)
+        else:
+            self.resources.set_project_asset_dir(None)
 
         # 【前置条件分流】API 类前置 → 插入步骤文本供规划; runner 由 dispatcher 在 api_call 时懒加载
         if profile.apis and case.preconditions:
@@ -451,6 +455,16 @@ class UITestAgent:
             else:
                 login_kwargs["password"] = credential
                 login(pg, login_kwargs, force=True)
+            if biz:
+                from .runtime.session.role_setup import apply_role_setup
+
+                apply_role_setup(
+                    pg,
+                    role,
+                    biz.get_knowledge(),
+                    login_kwargs.get("base_url") or "",
+                    console=self.console,
+                )
             self.console.print(f"[dim]登录完成 role={role} url={pg.url}[/dim]")
             role_contexts[role] = (ctx, pg, pg)
             bring_page_to_front(pg)
@@ -868,6 +882,8 @@ class UITestAgent:
             page_capture=knowledge.get("page_capture"),
             page_ready_guard=bool(accel_cfg.get("page_ready_guard", True)),
             dialog_retrigger=bool(accel_cfg.get("dialog_retrigger", True)),
+            resource_manager=self.resources,
+            case_resources=dict(case.resources) if case and getattr(case, "resources", None) else None,
         )
         if session_vars:
             dispatcher.api_context.update(session_vars)

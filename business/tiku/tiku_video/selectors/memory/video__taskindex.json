@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "route": "/video/taskindex",
+  "saved_at": 1782528956.001751,
+  "entries": {
+    "click|在筛选区点击学科下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//input[contains(@placeholder, '学科')])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782468911.0657148,
+      "updated_at": 1782468911.0657148,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击大学化学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": ".ant-select-dropdown:visible .ant-select-item-option-content:has-text(\"大学化学\")",
+      "method": "role",
+      "role": "option",
+      "name": "大学化学",
+      "exact": false,
+      "success_count": 1,
+      "created_at": 1782468920.615156,
+      "updated_at": 1782468920.615156,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "option",
+        "class_pattern": ""
+      }
+    },
+    "click|点击领取题目按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"领取题目\")",
+      "method": "role",
+      "role": "button",
+      "name": "领取题目",
+      "exact": false,
+      "success_count": 1,
+      "created_at": 1782468955.364544,
+      "updated_at": 1782468955.364544,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击待上传列表标签或选项卡查看待上传列表": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "label.ant-radio-wrapper:has-text(\"待上传\")",
+      "method": "text",
+      "name": "待上传",
+      "exact": false,
+      "success_count": 1,
+      "created_at": 1782468976.227378,
+      "updated_at": 1782468976.227378,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    }
+  }
+}

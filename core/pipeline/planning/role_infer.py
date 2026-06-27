@@ -31,8 +31,11 @@ def infer_primary_role(
 
 
 def _case_role_text(case: ParsedCase) -> str:
-    """验证点、前置、步骤均可能写明执行主体."""
-    return " ".join(case.notes + case.preconditions + case.steps)
+    """验证点、前置、步骤、交错块操作均可能写明执行主体."""
+    parts = list(case.notes) + list(case.preconditions) + list(case.steps)
+    for block in getattr(case, "execution_blocks", None) or []:
+        parts.extend(block.operations)
+    return " ".join(parts)
 
 
 def _infer_from_text(text: str, roles: list[str]) -> Optional[str]:

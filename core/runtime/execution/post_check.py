@@ -189,21 +189,28 @@ def check_navigation_click_success(
     dispatch_ok: bool,
     action_type: str,
     dispatch_meta: Optional[dict[str, Any]] = None,
+    page: Any = None,
 ) -> Optional[bool]:
-    """click 已成功且 URL/导航结局表明进入详情页时本地判成功 (省 LLM)."""
+    """click 导航成功时的本地短路判定 — 仅依据 dispatch 信号与页面状态, 不解析 intent 文案."""
+    from .nav_progress import _NAV_NO_POST_SHORTCUT
+    from .popup_recovery import page_has_blocking_dialog
+
     if not dispatch_ok or (action_type or "").strip().lower() != "click":
         return None
     if _is_detail_page_form_intent(intent):
         return None
-    meta = dispatch_meta or {}
-    nav = str(meta.get("navigation_outcome") or "")
-    if nav in ("resource_id_changed", "route_changed", "returned_to_list"):
-        if _is_nav_to_detail_intent(intent):
-            return True
-    url_l = (url or "").lower()
-    if not any(marker in url_l for marker in _NAV_SUCCESS_URL_MARKERS):
+    if page is not None and page_has_blocking_dialog(page):
         return None
-    if _is_nav_to_detail_intent(intent):
+
+    meta = dispatch_meta or {}
+    nav = str(meta.get("navigation_outcome") or "").strip()
+    if nav in _NAV_NO_POST_SHORTCUT:
+        return None
+    if nav == "resource_id_changed":
+        return True
+
+    url_l = (url or "").lower()
+    if any(marker in url_l for marker in _NAV_SUCCESS_URL_MARKERS):
         return True
     return None
 
@@ -213,17 +220,6 @@ def _is_detail_page_form_intent(intent: str) -> bool:
     if re.search(r"详情页.*选择|在详情页选择|选择.*审核|审核原因", text):
         return True
     return "详情页" in text and "选择" in text
-
-
-def _is_nav_to_detail_intent(intent: str) -> bool:
-    text = intent or ""
-    if _is_detail_page_form_intent(text):
-        return False
-    if "查看" in text and "选择" not in text:
-        return True
-    if re.search(r"(进入|打开|加载).*(详情|任务)", text):
-        return True
-    return False
 
 
 def upgrade_submit_post_result(
@@ -321,7 +317,12 @@ class PostStepChecker:
             page_url = ""
 
         nav_ok = check_navigation_click_success(
-            action.intent or "", page_url, dispatch_ok, action.type, dispatch_meta,
+            action.intent or "",
+            page_url,
+            dispatch_ok,
+            action.type,
+            dispatch_meta,
+            page=page,
         )
         if nav_ok is True:
             return PostCheckResult(

@@ -1,16 +1,16 @@
 {
   "version": 1,
   "route": "/video/all-question",
-  "saved_at": 1782448140.6650822,
+  "saved_at": 1782528956.001751,
   "entries": {
     "click|在筛选区点击来源下拉框": {
       "nth": 0,
       "in_dialog": false,
       "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"来源\")]]//*[@role='combobox'])[1]",
       "method": "css",
-      "success_count": 21,
+      "success_count": 23,
       "created_at": 1782121380.9641411,
-      "updated_at": 1782447190.527145,
+      "updated_at": 1782527952.510863,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -24,9 +24,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"策略\")])[1]",
       "method": "css",
-      "success_count": 21,
+      "success_count": 23,
       "created_at": 1782121397.6158369,
-      "updated_at": 1782447195.730191,
+      "updated_at": 1782527971.092478,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -40,9 +40,9 @@
       "in_dialog": false,
       "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学段\")]]//*[@role='combobox'])[1]",
       "method": "css",
-      "success_count": 21,
+      "success_count": 23,
       "created_at": 1782121410.135294,
-      "updated_at": 1782447205.782738,
+      "updated_at": 1782527986.8761861,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -56,9 +56,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学\")])[1]",
       "method": "css",
-      "success_count": 20,
+      "success_count": 22,
       "created_at": 1782121426.30214,
-      "updated_at": 1782447210.842669,
+      "updated_at": 1782527997.6051478,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -72,9 +72,9 @@
       "in_dialog": false,
       "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学科\")]]//*[@role='combobox'])[1]",
       "method": "css",
-      "success_count": 23,
+      "success_count": 27,
       "created_at": 1782121437.823912,
-      "updated_at": 1782447221.320908,
+      "updated_at": 1782528012.307769,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -238,6 +238,23 @@
       "updated_at": 1782205519.0492082,
       "component_library": "ant-design",
       "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击大学化学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学化学\")])[1]",
+      "method": "css",
+      "success_count": 4,
+      "created_at": 1782457782.152359,
+      "updated_at": 1782528023.381539,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
       "node_signature": {
         "tag": "",
         "text": "",

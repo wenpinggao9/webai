@@ -1,6 +1,4 @@
 ---
-api_base_url: https://www-gwp11-bc.suanshubang.com
-
 login_page:
   username_placeholder: "请输入手机号"
   password_placeholder: "请输入验证码"
@@ -15,6 +13,7 @@ apis:
     keywords: ["查询TID", "可用TID", "查询可用题目"]
   
   deliver:
+    base_url: ${VPSAPI_BASE_URL}
     method: POST
     url: "/vpsapi/api/deliver"
     body: { tid: "${tid}", period: "${period}", subject: "${subject}", tags: {}, source: "${source}" }
@@ -38,7 +37,7 @@ apis:
         enum: { 策略: 0, 高单价: 7, 真人答疑: 3 }
   
   query_work:
-    base_url: https://wendamis-gwp11-cc.suanshubang.cc
+    base_url: ${VPSCORE_BASE_URL}
     method: GET
     url: "/vpscore/api/workInfo"
     params: { workId: "${workId}" }
@@ -46,6 +45,7 @@ apis:
     keywords: ["查询工单", "任务ID", "查询对应工单ID", "根据当前任务ID"]
   
   gpt_redirect:
+    base_url: ${VPSCORE_BASE_URL}
     method: POST
     url: "/vpscore/operate/callbackGPTDecision"
     body: { id: "${tid}", acquire: "0", reason: "GPT不再生产，废弃掉了" }
@@ -53,6 +53,7 @@ apis:
     keywords: ["GPT分流", "模拟分流"]
   
   type_in:
+    base_url: ${VPSCORE_BASE_URL}
     method: POST
     url: "/vpscore/operate/callbackTypeIn"
     params: { tid: "${tid}", success: 1, newTid: "650982395" }
@@ -60,11 +61,23 @@ apis:
     keywords: ["题干录入", "模拟录入"]
   
   timeout:
+    base_url: ${VPSCORE_BASE_URL}
     method: GET
     url: "/vpscore/mis/process"
     params: { orderId: "${orderId}", op: 7 }
     returns: []
-    keywords: ["超时", "超时流转"]
+    keywords: ["超时", "超时流转", "模拟超时"]
+
+# 角色登录后初始化（Cookie 域名取自项目 BASE_URL；账号在项目 .env）
+role_setup:
+  recording:
+    cookies:
+      - name: QCefClient
+        value: "1"
+    steps:
+      - goto: "/video/wait-upload"
+      - click: "返回首页"
+      - reload: true
 
 page_capture:
   workId: { from: url_query, key: uniqId }
@@ -73,9 +86,6 @@ enums:
   period: { 大学: 80, 小学: 1, 初中: 2, 高中: 3 }
   subject: { 数学: 2, 语文: 1, 英语: 3, 大学化学: 103, 大学物理: 4, 大学生物: 104 }
   source: { 策略: 0, 高单价: 7, 真人答疑: 3 }
-
-resources:
-  test_video: "/Users/zyb_1/Downloads/vip视频/vip4.mp4"
 
 database:
   host: 10.117.136.82

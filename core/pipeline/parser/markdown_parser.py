@@ -44,6 +44,7 @@ _SECTION_ALIASES: list[tuple[str, str]] = [
     ("目标系统", "target_system"),
     ("测试项目", "session_name"),
     ("使用角色", "role"),
+    ("角色", "role"),
 ]
 
 _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*)$")

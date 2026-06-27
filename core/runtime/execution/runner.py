@@ -149,6 +149,7 @@ class PlaywrightRunner:
         # prev_post_verify_ok: 就绪门控 (首步须做就绪检查)
         # ui_post_gate_open: 主步骤后校验失败后阻断后续 UI (recovery 失败不关闭)
         prev_post_verify_ok = False
+        prev_nav_outcome: Optional[str] = None
         ui_post_gate_open = True
         current_role: Optional[str] = None
         # 若首个动作已带 role, 预先切换, 避免 readiness/定位仍用上一用例的会话
@@ -205,7 +206,10 @@ class PlaywrightRunner:
                 if prev_post_verify_ok:
                     must_force_pre = self.readiness_checker.llm_force_pre_readiness(action)
                 if not should_skip_readiness_after_post_ok(
-                    action, prev_post_verify_ok, must_force_pre=must_force_pre,
+                    action,
+                    prev_post_verify_ok,
+                    must_force_pre=must_force_pre,
+                    prev_nav_outcome=prev_nav_outcome,
                 ):
                     seq, idx, skip_main = self._run_readiness_with_insert(
                         action, case_id, results, seq, actions, idx,
@@ -367,6 +371,11 @@ class PlaywrightRunner:
             results.append(r)
             if should_post_check(action):
                 prev_post_verify_ok = post_ok
+                if post_ok:
+                    meta = self.dispatcher.last_dispatch_meta or {}
+                    outcome = str(meta.get("navigation_outcome") or "").strip()
+                    if outcome:
+                        prev_nav_outcome = outcome
                 if not post_ok:
                     ui_post_gate_open = False
 

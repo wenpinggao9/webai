@@ -121,11 +121,16 @@ def should_skip_readiness_after_post_ok(
     last_post_ok: bool,
     *,
     must_force_pre: bool = False,
+    prev_nav_outcome: str | None = None,
 ) -> bool:
     """上一步后校验已通过且非推进类 → 跳过就绪检查."""
+    from ..execution.nav_progress import navigation_outcome_requires_readiness
+
     if not last_post_ok:
         return False
     if must_force_pre:
+        return False
+    if navigation_outcome_requires_readiness(prev_nav_outcome):
         return False
     return should_run_readiness(action)
 
