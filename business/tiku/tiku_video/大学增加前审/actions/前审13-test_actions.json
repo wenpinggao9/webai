@@ -1,6 +1,326 @@
 {
   "cases": [
     {
+      "case_id": "大学前审_流程_014",
+      "module": "大学前审",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [
+          "前审老师A待领取列表为空"
+        ],
+        "format": "interleaved",
+        "blocks": [
+          {
+            "steps": [
+              "前审老师A从「待前审」列表页中「领取题目」"
+            ],
+            "expectations": [
+              "「待前审」列表不为空，且学科为化学"
+            ]
+          },
+          {
+            "steps": [
+              "点击学科为化学一行的「查看」按钮"
+            ],
+            "expectations": [
+              "打开前审任务详情页"
+            ]
+          },
+          {
+            "steps": [
+              "选择「水印题且可做」"
+            ],
+            "expectations": [
+              "审核原因选项下方展示「学科」筛选框，并且筛选框中默认为「大学化学」"
+            ]
+          },
+          {
+            "steps": [
+              "点击「学科」下拉框，并修改为「物理」"
+            ],
+            "expectations": []
+          },
+          {
+            "steps": [
+              "选择「题目无任何问题」"
+            ],
+            "expectations": [
+              "「水印题且可做」审核项的为未选中状态",
+              "「学科」框中展示依然是「物理」"
+            ]
+          },
+          {
+            "steps": [
+              "点击「学科」下拉框，并修改为「大学化学」"
+            ],
+            "expectations": [
+              "学科框展示为「大学化学」"
+            ]
+          },
+          {
+            "steps": [
+              "点击「提交」"
+            ],
+            "expectations": [
+              "页面自动加载下一个任务的详情页或回到待前审页面"
+            ]
+          },
+          {
+            "steps": [
+              "点击「已审核」从列表中查看最近一条数据"
+            ],
+            "expectations": [
+              "'审核行为'为「审核通过」"
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'待前审'进入待前审列表页",
+          "extras": {
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/wait-preview"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "在'待前审'列表页点击'领取题目'"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证'待前审'列表不为空",
+          "value": ">0",
+          "extras": {
+            "codegen_assert": {
+              "kind": "list_count",
+              "op": ">",
+              "threshold": 0
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'待前审'列表各行学科均包含'化学'",
+          "value": "化学",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "化学"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击学科为'化学'一行的'查看'按钮",
+          "extras": {
+            "row_key": "化学",
+            "row_key_column": "学科",
+            "button": "查看",
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/detail/"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面已打开前审任务详情页",
+          "value": "详情",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "详情"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'水印题且可做'选项"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证审核原因选项下方展示'学科'筛选框",
+          "value": "学科",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "学科"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'学科'筛选框中默认值为'大学化学'",
+          "value": "大学化学",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "大学化学"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'物理'"
+        },
+        {
+          "type": "click",
+          "intent": "选择'题目无任何问题'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'水印题且可做'审核项为未选中状态",
+          "value": "水印题且可做",
+          "extras": {
+            "state": "unchecked",
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "水印题且可做"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'学科'框中展示的值为'物理'",
+          "value": "物理",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "物理"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学化学'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证学科框展示为'大学化学'",
+          "value": "大学化学",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "大学化学"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮",
+          "extras": {
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/wait-preview"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证提交后页面自动加载下一个任务的详情页或回到待前审页面",
+          "extras": {
+            "any_of": true,
+            "branches": [
+              {
+                "intent": "验证页面自动加载下一个任务的详情页",
+                "value": "详情"
+              },
+              {
+                "intent": "验证页面回到待前审页面",
+                "value": "待前审"
+              }
+            ],
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "待前审"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'已审核'",
+          "extras": {
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/already-self"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击列表中最近一条数据进行查看"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'审核行为'为'审核通过'",
+          "value": "审核通过",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "审核通过"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "大学前审_查询工单_015",
+      "module": "大学前审",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员从「全部题目」中筛选学科:大学化学的题目"
+        ],
+        "expectations": [
+          "结果列表中存在生产状态为「待领取」的工单"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'全部题目'进入全部题目页面",
+          "extras": {
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/all-question"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学化学'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证结果列表中存在生产状态为'待领取'的工单",
+          "value": "待领取",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "待领取"
+            }
+          }
+        }
+      ]
+    },
+    {
       "case_id": "录制_流程_016",
       "module": "录制",
       "priority": "P0",
@@ -10,7 +330,15 @@
         "blocks": [
           {
             "steps": [
-              "打开「待上传」页面"
+              "大学录制老师（recording）在「任务中心」筛选「大学化学」学科"
+            ],
+            "expectations": [
+              "「领取」按钮高亮"
+            ]
+          },
+          {
+            "steps": [
+              "录制老师点击「领取题目」后，打开「待上传」页面"
             ],
             "expectations": [
               "待上传页展示「领取题目」Tab，且已进入任务详情（页面含「题干」或「题目ID」）",
@@ -22,20 +350,12 @@
               "点击「提交视频」"
             ],
             "expectations": [
-              "弹出视频上传选择框"
+              "弹出视频上传弹窗"
             ]
           },
           {
             "steps": [
-              "点击「上传视频文件」"
-            ],
-            "expectations": [
-              "出现文件上传入口"
-            ]
-          },
-          {
-            "steps": [
-              "上传资源「录制视频」"
+              "上传资源「vip2.mp4」"
             ],
             "expectations": [
               "展示加载进度条"
@@ -43,7 +363,13 @@
           },
           {
             "steps": [
-              "加载完成并确认提交"
+              "等待视频上传完成（进度条走满或出现可点击的「确认」）"
+            ],
+            "expectations": []
+          },
+          {
+            "steps": [
+              "点击「确认」"
             ],
             "expectations": [
               "返回待上传页面，详情展示「查看视频」和「提交任务」"
@@ -51,15 +377,15 @@
           },
           {
             "steps": [
-              "提交任务"
+              "点击「提交任务」"
             ],
             "expectations": [
-              "「领取题目」Tab 下无待办任务"
+              "提交成功；无剩余待办时页面含「暂无题目」或「请去任务中心领题」，仍有多条待办时进入下一条任务详情（页面含「题干」或「题目ID」）"
             ]
           },
           {
             "steps": [
-              "选择「已上传」"
+              "点击左侧导航「已上传」进入已上传列表页"
             ],
             "expectations": [
               "状态默认选中为「待申诉」"
@@ -67,7 +393,21 @@
           },
           {
             "steps": [
-              "点击「状态」框中的「x」，并「提交」进行查询"
+              "悬停「状态」筛选框"
+            ],
+            "expectations": []
+          },
+          {
+            "steps": [
+              "点击「状态」框中的清除「×」"
+            ],
+            "expectations": [
+              "状态筛选已清空"
+            ]
+          },
+          {
+            "steps": [
+              "点击「提交」按钮进行查询"
             ],
             "expectations": [
               "最近一条数据为待自审，学段=大学，学科=大学化学"
@@ -76,6 +416,40 @@
         ]
       },
       "actions": [
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'任务中心'进入任务中心页面",
+          "extras": {
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/taskindex"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击学科下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学化学'"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证'领取'按钮高亮可点击",
+          "value": "领取",
+          "extras": {
+            "state": "enabled",
+            "codegen_assert": {
+              "kind": "button_enabled",
+              "text": "领取"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'领取题目'按钮"
+        },
         {
           "type": "click",
           "intent": "点击侧栏菜单'待上传'进入待上传页面",
@@ -111,12 +485,22 @@
                 "intent": "验证页面包含'题目ID'",
                 "value": "题目ID"
               }
-            ]
+            ],
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "题干"
+            }
           }
         },
         {
           "type": "assert_text",
-          "intent": "验证页面展示题目内容区域"
+          "intent": "验证页面展示题目内容区域",
+          "extras": {
+            "codegen_assert": {
+              "kind": "semantic_only",
+              "intent": "验证页面展示题目内容区域"
+            }
+          }
         },
         {
           "type": "assert_text",
@@ -138,6 +522,153 @@
               "kind": "literal",
               "text": "制作PPT"
             }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交视频'按钮",
+          "value": "提交视频 <i data-v-3b717b36=\"\" class=\"el-icon el-tooltip__trigger\" style=\"font"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面弹出视频上传弹窗",
+          "value": "视频上传",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "视频上传"
+            }
+          }
+        },
+        {
+          "type": "upload",
+          "intent": "上传资源'vip2.mp4'",
+          "value": "vip2.mp4"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证页面展示加载进度条",
+          "value": "进度",
+          "extras": {
+            "codegen_assert": {
+              "kind": "semantic_only",
+              "intent": "验证页面展示加载进度条"
+            }
+          }
+        },
+        {
+          "type": "wait",
+          "intent": "等待视频上传完成，进度条走满或出现可点击的'确认'按钮",
+          "value": "确认"
+        },
+        {
+          "type": "click",
+          "intent": "点击'确认'按钮"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证待上传页面展示'查看视频'",
+          "value": "查看视频",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "查看视频"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证待上传页面展示'提交任务'",
+          "value": "提交任务",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "提交任务"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交任务'",
+          "value": "提交任务 | navigation_outcome=returned_to_list"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证提交后页面不存在提交失败提示",
+          "value": "提交失败",
+          "extras": {
+            "codegen_assert": {
+              "kind": "negate_literal",
+              "text": "提交失败"
+            }
+          },
+          "negate": true
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证提交成功后页面结果：无剩余待办时显示暂无题目或请去任务中心领题，有剩余待办时进入下一条任务详情",
+          "extras": {
+            "any_of": true,
+            "branches": [
+              {
+                "intent": "验证页面包含暂无题目提示",
+                "value": "暂无题目"
+              },
+              {
+                "intent": "验证页面包含请去任务中心领题提示",
+                "value": "请去任务中心领题"
+              },
+              {
+                "intent": "验证页面包含题干表示进入下一条任务详情",
+                "value": "题干"
+              },
+              {
+                "intent": "验证页面包含题目ID表示进入下一条任务详情",
+                "value": "题目ID"
+              }
+            ],
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "暂无题目"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击左侧导航'已上传'进入已上传列表页",
+          "extras": {
+            "codegen_post_wait": {
+              "kind": "url_contains",
+              "fragment": "/video/already-upload"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证状态默认选中为'待申诉'",
+          "value": "待申诉",
+          "extras": {
+            "codegen_assert": {
+              "kind": "literal",
+              "text": "待申诉"
+            }
+          }
+        },
+        {
+          "type": "hover",
+          "intent": "悬停'状态'筛选框"
+        },
+        {
+          "type": "click",
+          "intent": "点击'状态'筛选框中的清除'×'按钮"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证状态筛选已清空，筛选框中不显示已选状态值",
+          "value": "",
+          "extras": {
+            "state": "empty",
+            "field": "状态"
           }
         }
       ]

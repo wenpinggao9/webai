@@ -51,6 +51,7 @@ from .script_helpers import (
     locate_button_in_table_row,
     parse_table_row_click,
     FIRST_TABLE_ROW_KEY,
+    perform_table_column_assert,
     recover_active_page,
     find_list_tab_anchor,
     find_newest_non_anchor_tab,
@@ -1091,12 +1092,11 @@ class ActionDispatcher:
     def _should_wait_post_submit_navigation(
         self, url_before: str, loc: Any, intent: str = "",
     ) -> bool:
-        """type=submit 且 URL 带资源 ID 时, 等待提交后的页面结局."""
-        if not _url_query_id(url_before):
-            return False
-        # intent 含「提交」时直接等待; 点击后 tab 可能已关闭导致 loc.evaluate 失败
+        """提交类点击后等待页面结局 (含列表内嵌详情: URL 不变但 DOM 会变)."""
         if "提交" in (intent or ""):
             return True
+        if not _url_query_id(url_before):
+            return False
         try:
             el_type = loc.evaluate(
                 "el => (el.getAttribute('type') || el.type || '').toLowerCase()"
@@ -1227,11 +1227,28 @@ class ActionDispatcher:
 
     def _wait_after_detail_submit(self, url_before: str) -> tuple[bool, str]:
         self._ensure_list_anchor()
+        flat_before = ""
+        dom_entity_before = ""
+        if _page_usable(self.page) and not is_detail_submission_url(url_before):
+            try:
+                flat_before = (self.page.inner_text("body") or "")[:6000]
+            except Exception:
+                flat_before = ""
+            from .submit_outcome import capture_submit_snapshot
+            snap = capture_submit_snapshot(
+                url=url_before,
+                flat_text=flat_before,
+                api_context=self.api_context,
+            )
+            dom_entity_before = snap.entity_id
+            if snap.context.value:
+                pass  # snapshot used by wait via dom_entity_before
         self.page, outcome, recovered = wait_after_detail_submit(
             self.page,
             list_anchor=self._list_tab_anchor,
             url_before=url_before,
             budget_ms=DEFAULT_SUBMIT_WAIT_MS,
+            dom_entity_before=dom_entity_before,
         )
         url_after = _url_safe(self.page) or ""
 
@@ -1284,13 +1301,15 @@ class ActionDispatcher:
                 flat_after = (self.page.inner_text("body") or "")[:6000]
             except Exception:
                 flat_after = ""
-        id_before, field_before = discover_active_entity(
-            self.api_context, url=url_before, flat_text="",
+        id_before, field_before = discover_page_entity(
+            self.api_context, url=url_before, flat_text=flat_before,
         )
         id_after, field_after = discover_page_entity(
             self.api_context, url=url_after, flat_text=flat_after,
         )
         entity_field = field_before or field_after or "entity"
+        from .submit_outcome import classify_submit_context
+        submit_ctx = classify_submit_context(url_before, flat_text=flat_before or flat_after)
         self.last_dispatch_meta = {
             "navigation_outcome": outcome,
             "url_before": url_before,
@@ -1301,6 +1320,7 @@ class ActionDispatcher:
             "entity_id_before": id_before,
             "entity_id_after": id_after,
             "entity_field": entity_field,
+            "submit_context": submit_ctx.value,
         }
         if not _page_alive(self.page) and is_detail_submission_url(url_before):
             self.last_dispatch_meta["detail_tab_closed"] = True
@@ -2001,53 +2021,50 @@ class ActionDispatcher:
         target_col = str(extras.get("column") or "").strip()
         expected = str(extras.get("expected") or extras.get("cell_value") or "").strip()
         match_all = bool(extras.get("match_all"))
-        if not row_key:
-            return False, "assert_table 缺少行标识 (value 或 extras.row_key)"
         if not target_col or not expected:
             return False, "assert_table 缺少 extras.column 或 extras.expected"
 
-        resolved_key, ops_hint = resolve_table_row_key(
-            row_key, self.api_context, self._session_ops_cfg,
+        from .session_ops import (
+            assert_table_row_position,
+            normalize_assert_table_first_row,
         )
-        if ops_hint and resolved_key != row_key:
-            row_key = resolved_key
 
-        tables = self.page.locator("table")
-        n_tables = tables.count()
-        for ti in range(n_tables):
-            table = tables.nth(ti)
-            headers = [h.strip() for h in table.locator("thead th, thead td").all_inner_texts()]
-            if not headers:
-                continue
-            if key_col not in headers or target_col not in headers:
-                continue
-            key_idx = headers.index(key_col)
-            col_idx = headers.index(target_col)
-            body_rows = table.locator("tbody tr")
-            from .session_ops import collect_table_rows_for_key, evaluate_table_column_assert
+        normalize_assert_table_first_row(action)
+        row_position = assert_table_row_position(action)
+        use_first_row = row_position is not None
+        if not use_first_row and not row_key:
+            return False, "assert_table 缺少行标识 (value 或 extras.row_key)"
 
-            matching = collect_table_rows_for_key(body_rows, key_idx, row_key)
-            ok, msg = evaluate_table_column_assert(
-                matching,
-                col_idx,
-                target_col,
-                expected,
-                match_all=match_all,
-                row_key=row_key,
+        ops_hint: Optional[str] = None
+        if not use_first_row:
+            resolved_key, ops_hint = resolve_table_row_key(
+                row_key, self.api_context, self._session_ops_cfg,
             )
-            if ok:
-                if ops_hint:
-                    msg = f"{msg} ({ops_hint})"
-                return True, msg
-            if matching:
-                return False, msg
-        hint = _ops_resolve_hint(
-            (action.value or "").strip(), self.api_context, self._session_ops_cfg,
+            if ops_hint and resolved_key != row_key:
+                row_key = resolved_key
+
+        display_key = "第一行" if use_first_row else row_key
+        ok, msg = perform_table_column_assert(
+            self.page,
+            target_col=target_col,
+            expected=expected,
+            row_key=row_key,
+            key_col=key_col,
+            use_first_row=use_first_row,
+            row_position=row_position or 0,
+            match_all=match_all,
+            display_key=display_key,
         )
-        return False, (
-            f"表格断言: 未找到行标识 {row_key!r} (列 {key_col!r}) "
-            f"或列 {target_col!r}; {hint}"
-        )
+        if ok:
+            if ops_hint:
+                msg = f"{msg} ({ops_hint})"
+            return True, msg
+        if not use_first_row and "未找到行标识" in msg:
+            hint = _ops_resolve_hint(
+                (action.value or "").strip(), self.api_context, self._session_ops_cfg,
+            )
+            return False, f"{msg}; {hint}"
+        return False, msg
 
     def _ensure_api_runner(self) -> bool:
         """首次 api_call 时按业务 profile 懒加载 ApiRunner (与前置是否含 API 无关)."""

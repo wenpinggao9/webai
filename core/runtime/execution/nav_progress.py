@@ -11,7 +11,7 @@ from .entity_discover import (
 )
 
 _NAV_SUCCESS = frozenset({
-    "resource_id_changed", "returned_to_list", "route_changed",
+    "resource_id_changed", "returned_to_list", "route_changed", "list_empty",
 })
 
 # 路由/列表上下文切换后, 下一步须做就绪检查 (与 intent 文案无关)

@@ -1,16 +1,16 @@
 {
   "version": 1,
   "route": "/video/taskindex",
-  "saved_at": 1782528956.001751,
+  "saved_at": 1782609336.764148,
   "entries": {
     "click|在筛选区点击学科下拉框": {
       "nth": 0,
       "in_dialog": false,
       "selector": "xpath=(//input[contains(@placeholder, '学科')])[1]",
       "method": "css",
-      "success_count": 1,
+      "success_count": 3,
       "created_at": 1782468911.0657148,
-      "updated_at": 1782468911.0657148,
+      "updated_at": 1782608986.2118342,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -28,9 +28,9 @@
       "role": "option",
       "name": "大学化学",
       "exact": false,
-      "success_count": 1,
+      "success_count": 3,
       "created_at": 1782468920.615156,
-      "updated_at": 1782468920.615156,
+      "updated_at": 1782608994.8187609,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -48,9 +48,9 @@
       "role": "button",
       "name": "领取题目",
       "exact": false,
-      "success_count": 1,
+      "success_count": 3,
       "created_at": 1782468955.364544,
-      "updated_at": 1782468955.364544,
+      "updated_at": 1782609026.4628081,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -76,6 +76,46 @@
         "tag": "",
         "text": "",
         "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏菜单待上传进入待上传页面": {
+      "method": "role",
+      "role": "link",
+      "name": "待上传",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=link[name=\"待上传\"]",
+      "success_count": 1,
+      "created_at": 1782561711.3094249,
+      "updated_at": 1782561711.3094249,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "link",
+        "class_pattern": ""
+      }
+    },
+    "click|点击待上传页面标签或菜单进入待上传页面": {
+      "method": "role",
+      "role": "link",
+      "name": "待上传",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=link[name=\"待上传\"]",
+      "success_count": 1,
+      "created_at": 1782609069.103889,
+      "updated_at": 1782609069.103889,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "link",
         "class_pattern": ""
       }
     }

@@ -20,6 +20,7 @@ from ...pipeline.planning import PlannedAction
 from .script_helpers import _page_alive, _page_usable
 from .submit_post_verify import evaluate_submit_post_check, is_submit_intent
 from ...locating.intent_route import is_select_trigger
+from ...locating.intent_rule_engine import is_select_clear_intent, _extract_select_clear_field_label
 from .optional_step import should_skip_optional_step
 
 # 需要后校验的动作类型
@@ -164,6 +165,8 @@ def should_inject_next_action(
 
     if cur_type == "hover" and nxt_type == "click":
         if any(m in nxt_intent for m in ("菜单", "退出", "logout", "menuitem", "MenuItem")):
+            return True
+        if is_select_clear_intent(nxt_intent):
             return True
     if cur_type == "click" and nxt_type == "click":
         if "下拉选项" in nxt_intent or "选项中" in nxt_intent:
@@ -310,6 +313,11 @@ class PostStepChecker:
             code_result = _check_select_trigger_expand(action.intent, dispatch_ok, dom)
             if code_result is not None:
                 return code_result
+            code_result = _check_select_clear_click(
+                action.intent, dispatch_ok, dispatch_msg, dom,
+            )
+            if code_result is not None:
+                return code_result
 
         try:
             page_url = page.url or ""
@@ -386,11 +394,17 @@ class PostStepChecker:
             else "(无)"
         )
 
+        submit_facts_block = ""
+        if is_submit_intent(action.intent or ""):
+            from .submit_outcome import build_outcome_facts
+            facts = build_outcome_facts(dispatch_meta or {}, dom_summary=base_dom)
+            submit_facts_block = "\n\n" + facts.format_for_prompt()
+
         system = self.prompts.system("post_check", _DEFAULT_SYSTEM)
         user = self.prompts.user(
             "post_check", _DEFAULT_USER,
             action_type=action.type, intent=action.intent, value=action.value,
-            ok=str(dispatch_ok).lower(), message=dispatch_msg, dom=dom,
+            ok=str(dispatch_ok).lower(), message=dispatch_msg, dom=dom + submit_facts_block,
             page_url=page_url, dispatch_meta=meta_text,
         )
         try:
@@ -578,6 +592,71 @@ def _dom_has_visible_select_panel(dom: str) -> bool:
         ):
             return True
     return False
+
+
+def _select_clear_resolve_hint(field: Optional[str]) -> str:
+    """按字段 label 构造 clear 图标 selector; 无 label 时用全页 clear 兜底."""
+    if field:
+        fe = field.replace("\\", "\\\\").replace('"', '\\"')
+        return (
+            f'xpath=(//label[contains(normalize-space(.), "{fe}")]'
+            f"/following::*[contains(@class,'ant-select') or contains(@class,'el-select')][1]"
+            f"//*[contains(@class,'ant-select-clear') or contains(@class,'close-circle') "
+            f"or contains(@class,'circle-close') or @aria-label='close-circle'])[1]"
+        )
+    return (
+        "xpath=(//*[contains(@class,'ant-select-clear') or contains(@class,'close-circle') "
+        "or contains(@class,'circle-close') or @aria-label='close-circle'])[1]"
+    )
+
+
+def _dom_select_clear_still_effective_blocker(dom: str) -> bool:
+    """清除后 DOM 仍同时存在 clear 图标与已选 tag → 清除未生效 (与业务文案无关)."""
+    text = dom or ""
+    low = text.lower()
+    has_clear = any(
+        m in low
+        for m in ("close-circle", "ant-select-clear", "circle-close", "aria-label=close")
+    )
+    has_selection = any(
+        m in low
+        for m in (
+            "ant-select-selection-item",
+            "el-select__tags",
+            "selection-item",
+            "ant-select-selection-search",
+        )
+    )
+    return has_clear and has_selection
+
+
+def _check_select_clear_click(
+    intent: str,
+    dispatch_ok: bool,
+    dispatch_msg: str,
+    dom: str,
+) -> Optional[PostCheckResult]:
+    """清除 × 类 click: 点到 label/非 clear 图标时本地判失败并给 selector hint."""
+    if not dispatch_ok or not is_select_clear_intent(intent):
+        return None
+    field = _extract_select_clear_field_label(intent)
+    field_label = field or "筛选"
+    msg = (dispatch_msg or "").lower()
+    if "<label" in msg and "clear" not in msg and "close-circle" not in msg:
+        return PostCheckResult(
+            step_ok=False,
+            reason=f"点击落到了 label 而非「{field_label}」筛选框的清除 ×",
+            retry_focus="选择器",
+            resolve_hint=_select_clear_resolve_hint(field),
+        )
+    if _dom_select_clear_still_effective_blocker(dom):
+        return PostCheckResult(
+            step_ok=False,
+            reason="清除 × 未生效: DOM 中 clear 图标与已选 tag 仍存在",
+            retry_focus="选择器",
+            resolve_hint=_select_clear_resolve_hint(field),
+        )
+    return None
 
 
 def _check_select_trigger_expand(

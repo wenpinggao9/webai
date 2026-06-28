@@ -336,6 +336,62 @@ def resolve_expected_radio_label(
     return None
 
 
+def radio_label_checked(page: Any, label: str) -> bool:
+    if not label:
+        return False
+    try:
+        state = page.evaluate(_RADIO_CHECK_JS, label) or {}
+        return bool(state.get("checked"))
+    except Exception:
+        return False
+
+
+def _is_radio_recovery_click(action: PlannedAction) -> bool:
+    if action.type != "click":
+        return False
+    intent = action.intent or ""
+    if _OPTION_INTENT_RE.search(intent):
+        return True
+    return any(h in intent for h in ("审核原因", "单选", "radio", "选项"))
+
+
+def filter_redundant_radio_recovery(
+    recovery: list[PlannedAction],
+    page: Any,
+    *,
+    prior_actions: Optional[list[PlannedAction]] = None,
+    next_action: Optional[PlannedAction] = None,
+    case_steps: Optional[list[str]] = None,
+    case_notes: Optional[list[str]] = None,
+) -> list[PlannedAction]:
+    """去掉 DOM 已选中或与 prior 已执行等价的 radio recovery."""
+    expected = None
+    if next_action and _is_submit_action(next_action):
+        expected = resolve_expected_radio_label(
+            last_click_label=None,
+            api_context={},
+            prior_actions=prior_actions or [],
+            case_steps=case_steps or [],
+            case_notes=case_notes or [],
+        )
+    kept: list[PlannedAction] = []
+    for rec in recovery:
+        if not _is_radio_recovery_click(rec):
+            kept.append(rec)
+            continue
+        label = extract_label_from_intent(rec.intent or "") or str(rec.value or "").strip()
+        if not label:
+            kept.append(rec)
+            continue
+        if expected and (label in expected or expected in label):
+            if radio_label_checked(page, expected) or radio_label_checked(page, label):
+                continue
+        elif radio_label_checked(page, label):
+            continue
+        kept.append(rec)
+    return kept
+
+
 def recover_expected_radio(page: Any, label: str, console: Any = None) -> bool:
     if not label:
         return False
@@ -418,7 +474,10 @@ def run_deterministic_pre_readiness(
             case_notes=case_notes or [],
         )
         if expected:
-            if recover_expected_radio(page, expected, console):
+            if radio_label_checked(page, expected):
+                if console:
+                    console.print(f"  [dim]↺ radio已选中[/dim] {expected[:40]}")
+            elif recover_expected_radio(page, expected, console):
                 result.radio_recovered = True
                 result.messages.append(f"补选 radio: {expected[:40]}")
 
@@ -462,4 +521,6 @@ __all__ = [
     "remember_option_click",
     "resolve_expected_radio_label",
     "is_option_selection_click",
+    "radio_label_checked",
+    "filter_redundant_radio_recovery",
 ]

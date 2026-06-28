@@ -1,15 +1,15 @@
 {
   "version": 1,
-  "saved_at": 1782528956.001751,
+  "saved_at": 1782609336.764148,
   "generic_entries": {
     "ant-design|dropdown_option": {
       "selector_template": "text=\"{text}\"",
       "selector_type": "css",
       "component_library": "ant-design",
       "component_type": "dropdown_option",
-      "success_count": 1,
+      "success_count": 4,
       "created_at": 1782528815.3165371,
-      "updated_at": 1782528815.3165371
+      "updated_at": 1782608785.414468
     },
     "ant-design|select_trigger": {
       "selector_template": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '{text}')]]//div[contains(@class,'ant-select')])[1]",

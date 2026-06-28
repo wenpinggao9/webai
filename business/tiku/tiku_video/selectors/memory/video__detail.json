@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/detail",
-  "saved_at": 1782528956.001751,
+  "saved_at": 1782609336.764148,
   "entries": {
     "click|点击提交按钮": {
       "method": "role",
@@ -11,9 +11,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=button[name=\"提 交\"]",
-      "success_count": 15,
+      "success_count": 17,
       "created_at": 1782121581.957115,
-      "updated_at": 1782528880.907028,
+      "updated_at": 1782608855.6135628,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -48,9 +48,9 @@
       "method": "text",
       "name": "水印题且可做",
       "exact": true,
-      "success_count": 2,
+      "success_count": 5,
       "created_at": 1782463464.0850182,
-      "updated_at": 1782528815.316455,
+      "updated_at": 1782608785.414402,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -65,9 +65,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"物理\")])[1]",
       "method": "css",
-      "success_count": 2,
+      "success_count": 4,
       "created_at": 1782463487.739725,
-      "updated_at": 1782528831.3338869,
+      "updated_at": 1782608806.8396301,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -82,9 +82,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学化学\")])[1]",
       "method": "css",
-      "success_count": 2,
+      "success_count": 4,
       "created_at": 1782463519.7950652,
-      "updated_at": 1782528848.84606,
+      "updated_at": 1782608825.181789,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -101,9 +101,9 @@
       "method": "text",
       "name": "已审核",
       "exact": true,
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782463577.566804,
-      "updated_at": 1782528900.911027,
+      "updated_at": 1782559803.290713,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -120,9 +120,9 @@
       "method": "text",
       "name": "题目无任何问题",
       "exact": true,
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782528867.390326,
-      "updated_at": 1782528867.390326,
+      "updated_at": 1782559774.8625011,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {

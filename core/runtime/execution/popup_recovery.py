@@ -13,6 +13,24 @@ _POPUP_BLOCK_MARKERS = (
     "弹窗", "对话框", "dialog", "modal", "红线", "checkbox", "复选框",
     "已知悉", "遮挡", "阻挡", "先处理", "先勾选", "关闭弹窗", "intercept",
 )
+_NEGATED_POPUP_RE = re.compile(
+    r"(?:未|没有|无|不存在|不含|不见|未出现|没有出现|没有出现任何|未见)",
+    re.I,
+)
+
+
+def _popup_block_evidence(text: str) -> bool:
+    """reason 中是否存在「肯定语气的弹窗阻挡」证据 (排除否定从句)."""
+    for seg in re.split(r"[,，;；\n]", text or ""):
+        seg = seg.strip()
+        if not seg:
+            continue
+        if _NEGATED_POPUP_RE.search(seg[:20]):
+            continue
+        if any(m in seg for m in _POPUP_BLOCK_MARKERS):
+            return True
+    return False
+_EMPTY_STATE_RECOVERY_RE = re.compile(r"暂无题目|请去任务中心领题")
 _DISABLED_MARKERS = re.compile(r"disabled|not enabled|已禁用|不可点|不可用", re.I)
 _POPUP_EVIDENCE = re.compile(r"弹窗|modal|dialog|遮挡|阻挡|intercept|pointer events", re.I)
 _CONFIRM_BTN_NAMES = ("已知悉并确认", "已知悉", "我已知悉", "同意并继续", "确认")
@@ -26,7 +44,7 @@ def needs_popup_recovery(post: PostCheckResult, dispatch_ok: bool) -> bool:
     # 仅按钮 disabled / not enabled、无弹窗证据 → 不是弹窗问题 (常见: 已领取导致按钮灰掉)
     if _DISABLED_MARKERS.search(text) and not _POPUP_EVIDENCE.search(text):
         return False
-    if not any(m in text for m in _POPUP_BLOCK_MARKERS):
+    if not _popup_block_evidence(text):
         return False
     if dispatch_ok:
         return True
@@ -166,6 +184,13 @@ def execute_readiness_recovery(
         )
     if rdy.ready or not rdy.recovery:
         return False
+    filtered = [
+        r for r in rdy.recovery
+        if not _EMPTY_STATE_RECOVERY_RE.search(r.intent or "")
+    ]
+    if not filtered:
+        return False
+    rdy.recovery = filtered
     if console:
         console.print(
             f"  [cyan]弹窗阻挡, 先执行 {len(rdy.recovery)} 条恢复动作再重试[/cyan]"

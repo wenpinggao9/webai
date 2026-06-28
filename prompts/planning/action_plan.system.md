@@ -199,7 +199,8 @@ upload 上传 / assert_text 断言文本 / assert_count 断言计数 / assert_ta
   - 示例: "所有待完成任务学段都是大学，不能出现小学" →
     {"type":"assert_text","intent":"验证待完成列表各行均包含大学学段","value":"大学"}
     {"type":"assert_text","intent":"验证待完成列表各行不含小学学段","value":"小学","negate":true}
-  - 仅当预期明确到 **某一条** 记录 (工单ID/任务ID/${变量}) 的某列值时, 才用 assert_table.
+  - 仅当预期明确到 **某一条** 记录 (工单ID/任务ID/${变量}) 的某列值时, 才用 assert_table 的主键行模式.
+  - **首行/第一行/列表第一行/最近一条** 的列值校验: 仍用 assert_table, 但 value 写 `"__first_row__"`, extras 写 `"row_position":"first"`, **禁止** value="1" 或 row_key_column="序号".
 
 表格行内按钮 (查看/编辑/删除等):
 - 步骤含 `${行主键}` 或需点某行按钮时, 在 extras 写 **row_key**、**button**; 可选 **status_filter**、**row_key_column**、**status_column**.
@@ -251,7 +252,10 @@ upload 上传 / assert_text 断言文本 / assert_count 断言计数 / assert_ta
 - assert_count: 用于验证列表、表格、搜索结果、数据行等数量.
   - 示例: {"type":"assert_count","intent":"验证列表中有10条数据","value":"10"}
 - assert_table: 用于验证表格某行某列的值、排序、筛选结果等; 行+列值校验必须带 extras.column 与 extras.expected.
-  - 单条记录: {"type":"assert_table","intent":"验证标识符为id1的状态为进行中","value":"${id1}","extras":{"column":"状态","expected":"进行中"}}
+  - 单条记录 (有工单ID/任务ID/${变量}): {"type":"assert_table","intent":"验证标识符为id1的状态为进行中","value":"${id1}","extras":{"column":"状态","expected":"进行中"}}
+  - **首行/第一行/最近一条** (无具体 ID): 禁止把行序写成 value="1" 或序号列; 必须使用首行语义:
+    {"type":"assert_table","intent":"验证列表第一行数据的状态为待自审","value":"__first_row__","extras":{"column":"状态","expected":"待自审","row_position":"first"}}
+    同一预期拆多条 assert_table 时, 每条都保持 value="__first_row__" + row_position:"first", 只改 column/expected.
   - 多条记录含多个 ${变量}: 拆成多条, 每条只校验一条记录, 参见上方"表格/列表行断言"拆分示例.
   - 排序等暂无法结构化时, 可保留 intent 语义并在 extras 中补充说明, 例如 {"extras":{"ordering":"desc"}}
 - asset: 仅用于工程明确支持的复杂资源/画布/节点类校验; 普通页面文本、成功提示、失败提示不要使用 asset.

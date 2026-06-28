@@ -1,7 +1,7 @@
 """提交类步骤: tab 恢复 + 本地后校验.
 
 - 详情页提交: tab 恢复 + navigation_outcome 推断 (可升级 dispatch_ok).
-- 列表/筛选页提交: 不升级 dispatch_ok, 保持 Playwright 分发原结果 (对齐 V3 双门).
+- 列表内嵌详情: URL 不变, 以 DOM 实体/空态判定 (submit_outcome 模块).
 - 本地短路: dispatch 失败 → 不进 LLM 判「页面已满足意图」.
 """
 from __future__ import annotations
@@ -23,11 +23,16 @@ from .script_helpers import (
     submit_left_detail_context,
     _context_from_any,
 )
+from .submit_outcome import (
+    SUCCESS_OUTCOMES,
+    AMBIGUOUS_OUTCOMES,
+    SubmitContextKind,
+    build_outcome_facts,
+    evaluate_submit_outcome,
+)
 
-_SUCCESS_OUTCOMES = frozenset({
-    "returned_to_list", "resource_id_changed", "route_changed",
-})
-_AMBIGUOUS_OUTCOMES = frozenset({"timeout", "settled"})
+_AMBIGUOUS_OUTCOMES = AMBIGUOUS_OUTCOMES
+_SUCCESS_OUTCOMES = SUCCESS_OUTCOMES
 
 
 def is_submit_intent(intent: str) -> bool:
@@ -55,6 +60,14 @@ def submit_dispatch_should_succeed(meta: dict[str, Any]) -> bool:
         if meta.get("submit_click_ok") and is_detail_submission_url(url_before):
             if meta.get("recovered") or meta.get("detail_tab_closed"):
                 return True
+        # LIST_EMBED: entity 已切换也算成功
+        id_b = str(meta.get("entity_id_before") or "")
+        id_a = str(meta.get("entity_id_after") or "")
+        if id_b and id_a and id_b != id_a:
+            return True
+        ctx = str(meta.get("submit_context") or "")
+        if ctx == SubmitContextKind.LIST_EMBED.value and outcome == "settled":
+            return False
     return True
 
 
@@ -176,20 +189,18 @@ def evaluate_submit_post_check(
     dom_summary: Optional[str],
     *,
     list_anchor: Any = None,
+    api_context: Optional[dict[str, Any]] = None,
 ) -> SubmitPostVerdict:
-    """提交类步骤后校验.
-
-    V3 式: 本地只做 tab 恢复和明显失败检测, 判断交给 LLM.
-    """
+    """提交类步骤后校验 — 通用三阶段: 恢复 tab → 结构化事实 → 本地 verdict."""
     if not is_submit_intent(intent):
         return SubmitPostVerdict(step_ok=None)
 
-    # tab 恢复: 确保 page 指向存活 tab
     meta = dict(dispatch_meta or {})
     url_before = str(meta.get("url_before") or "")
     outcome = str(meta.get("navigation_outcome") or "")
+
     if is_detail_submission_url(url_before) and outcome not in (
-        "resource_id_changed", "route_changed",
+        "resource_id_changed", "route_changed", "list_empty",
     ):
         fin = pick_surviving_tab_after_detail_close(
             page, url_before=url_before, list_anchor=list_anchor,
@@ -203,21 +214,14 @@ def evaluate_submit_post_check(
         if not _page_alive(page) and is_detail_submission_url(url_before):
             meta["detail_tab_closed"] = True
 
-    # 分发失败 → 直接判失败
-    if not dispatch_ok:
-        return SubmitPostVerdict(
-            step_ok=False,
-            reason="提交按钮未成功点击, 无法判断提交结果",
-            page=page, meta=meta,
-        )
+    facts = build_outcome_facts(meta, dom_summary=dom_summary, api_context=api_context)
+    meta["submit_context"] = facts.context.value
 
-    # 页面有明显提交失败文案 → 判失败
-    if _page_has_submit_error(page, dom_summary):
-        return SubmitPostVerdict(
-            step_ok=False,
-            reason="提交后页面提示提交失败或未生效",
-            page=page, meta=meta,
-        )
+    local = evaluate_submit_outcome(
+        facts, dom_summary=dom_summary, dispatch_ok=dispatch_ok,
+    )
+    if local is not None:
+        ok, reason = local
+        return SubmitPostVerdict(step_ok=ok, reason=reason, page=page, meta=meta)
 
-    # 其余交 LLM 判断
     return SubmitPostVerdict(step_ok=None, page=page, meta=meta)

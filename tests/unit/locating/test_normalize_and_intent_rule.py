@@ -30,3 +30,19 @@ def test_intent_rule_engine_resolve_when_selector_valid(monkeypatch):
     sel = engine.resolve(None, "选择'广东省'", "click", items)
     assert sel is not None
     assert engine.last_matched_rule() == "dropdown_option"
+
+
+def test_select_clear_rule_matches_and_builds_selector(monkeypatch):
+    engine = IntentRuleEngine()
+    monkeypatch.setattr(engine, "_validate_selector", lambda _p, _s: True)
+    intent = "点击'状态'筛选框中的清除'×'按钮"
+    sel = engine.resolve(None, intent, "click", [{"tag": "label", "text": "状态"}])
+    assert sel is not None
+    assert engine.last_matched_rule() == "select_clear"
+    assert "ant-select-clear" in sel or "close-circle" in sel
+
+
+def test_is_select_clear_intent():
+    from core.locating.intent_rule_engine import is_select_clear_intent
+    assert is_select_clear_intent("点击'状态'筛选框中的清除'×'")
+    assert not is_select_clear_intent("点击'提交'按钮")

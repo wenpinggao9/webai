@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "route": "/video/already-upload",
+  "saved_at": 1782609336.764148,
+  "entries": {
+    "hover|悬停状态筛选框": {
+      "method": "css",
+      "selector": "text=\"待申诉\"",
+      "nth": 0,
+      "in_dialog": false,
+      "success_count": 5,
+      "created_at": 1782561970.5221708,
+      "updated_at": 1782607955.935049,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击状态筛选框中的清除×按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//label[contains(normalize-space(.), '状态')]/following::*[contains(@class,'ant-select')][1]//*[contains(@class,'ant-select-clear') or contains(@class,'close-circle') or @aria-label='close-circle' or contains(@class,'circle-close')])[1]",
+      "method": "css",
+      "success_count": 4,
+      "created_at": 1782564333.568626,
+      "updated_at": 1782607959.535993,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交按钮进行查询": {
+      "method": "role",
+      "role": "button",
+      "name": "提 交",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
+      "success_count": 4,
+      "created_at": 1782564371.113376,
+      "updated_at": 1782607989.613987,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    }
+  }
+}

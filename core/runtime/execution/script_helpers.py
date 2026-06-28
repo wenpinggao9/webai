@@ -724,7 +724,7 @@ def classify_navigation_outcome(
 
 
 _NAV_SUCCESS_OUTCOMES = frozenset({
-    "resource_id_changed", "returned_to_list", "route_changed",
+    "resource_id_changed", "returned_to_list", "route_changed", "list_empty",
 })
 
 
@@ -1021,6 +1021,351 @@ def _table_key_col_index(headers: list[str], configured: str) -> int:
         if name and name in headers:
             return headers.index(name)
     return -1
+
+
+def _is_empty_table_row_cells(cells: list[str]) -> bool:
+    if not cells:
+        return True
+    joined = "".join(cells)
+    if any(m in joined for m in _EMPTY_ROW_MARKERS):
+        return True
+    # Ant Design 首行常为 ant-table-measure-row (列宽测量), 单元格全空或仅 &nbsp;
+    return not any((c or "").replace("\xa0", " ").strip() for c in cells)
+
+
+def collect_merged_ant_table_headers(scope: Any) -> list[str]:
+    """合并同一 ant-table 内各 thead 区域的 th (固定列 + 滚动列按 DOM 顺序拼接)."""
+    headers: list[str] = []
+    theads = scope.locator(".ant-table-thead")
+    for ti in range(theads.count()):
+        ths = theads.nth(ti).locator("th")
+        for i in range(ths.count()):
+            try:
+                headers.append(ths.nth(i).inner_text(timeout=500).strip())
+            except Exception:
+                headers.append("")
+    if headers:
+        return headers
+    ths = scope.locator(".ant-table-thead th, thead.ant-table-thead th")
+    for i in range(ths.count()):
+        try:
+            headers.append(ths.nth(i).inner_text(timeout=500).strip())
+        except Exception:
+            headers.append("")
+    return headers
+
+
+def collect_ant_table_headers(container: Any) -> list[str]:
+    return collect_merged_ant_table_headers(container)
+
+
+def collect_merged_ant_page_headers(page: Any) -> list[str]:
+    """按 DOM 顺序合并页面所有 ant-table thead 的 th (固定列 + 滚动列)."""
+    headers: list[str] = []
+    theads = page.locator(".ant-table-thead")
+    for ti in range(theads.count()):
+        ths = theads.nth(ti).locator("th")
+        for i in range(ths.count()):
+            try:
+                h = ths.nth(i).inner_text(timeout=500).strip()
+            except Exception:
+                h = ""
+            if h:
+                headers.append(h)
+    if headers:
+        return headers
+    return collect_merged_ant_table_headers(page)
+
+
+def collect_best_ant_page_headers(page: Any) -> list[str]:
+    """取页面数据列表合并表头 (固定列 + 滚动列, 按 DOM 顺序)."""
+    return collect_merged_ant_page_headers(page)
+
+
+def _is_data_list_table_headers(headers: list[str]) -> bool:
+    """数据列表表头应含主键列; 筛选项伪表通常只有 状态/学段/学科 等."""
+    return any(h in headers for h in ("题目ID", "工单ID", "任务ID"))
+
+
+def _extract_row_cell_texts(row: Any) -> list[str]:
+    """逐 td 读 inner_text, 避免 all_inner_texts 在 Ant 单元格上返回空."""
+    tds = row.locator("td")
+    n = tds.count()
+    if n <= 0:
+        return []
+    cells: list[str] = []
+    for i in range(n):
+        try:
+            cells.append(tds.nth(i).inner_text(timeout=500).strip())
+        except Exception:
+            cells.append("")
+    return cells
+
+
+def _data_list_header_score(headers: list[str]) -> int:
+    score = 0
+    joined = "|".join(headers)
+    for name in ("题目ID", "工单ID", "任务ID"):
+        if name in headers:
+            score += 100
+    for name in ("学段", "学科", "年级", "来源", "状态"):
+        if name in headers:
+            score += 8
+    if "重置" in joined or "导出" in joined:
+        score -= 80
+    if len(headers) >= 8:
+        score += 20
+    return score
+
+
+def _first_data_row_cells(get_row_cells, row_count: int) -> list[str]:
+    for ri in range(row_count):
+        cells = get_row_cells(ri)
+        if not _is_empty_table_row_cells(cells):
+            return cells
+    return []
+
+
+def _score_table_candidate(
+    headers: list[str],
+    get_row_cells,
+    row_count: int,
+    target_col: str,
+    *,
+    use_first_row: bool,
+) -> int:
+    if target_col not in headers:
+        return -1
+    if not _is_data_list_table_headers(headers):
+        return -1
+    col_idx = headers.index(target_col)
+    score = _data_list_header_score(headers) + min(row_count, 30)
+    if not use_first_row:
+        return score
+    cells = _first_data_row_cells(get_row_cells, row_count)
+    if not cells:
+        return score - 50
+    if col_idx < len(cells) and cells[col_idx].strip():
+        score += 150
+    elif any(c.strip() for c in cells):
+        score -= 60
+    else:
+        score -= 80
+    return score
+
+
+def _enumerate_table_matrix_candidates(page: Any):
+    """产出 (headers, get_row_cells, row_count, kind) 供 assert_table 选最佳表."""
+    seen: set[tuple[str, int]] = set()
+
+    def _yield(headers, get_row_cells, row_count, kind):
+        if not headers or row_count <= 0:
+            return
+        key = ("|".join(headers[:12]), row_count)
+        if key in seen:
+            return
+        seen.add(key)
+        yield headers, get_row_cells, row_count, kind
+
+    page_headers = collect_merged_ant_page_headers(page)
+    containers = page.locator(".ant-table")
+    for ci in range(containers.count()):
+        container = containers.nth(ci)
+        headers = collect_merged_ant_table_headers(container)
+        tbodies = container.locator(".ant-table-tbody")
+        if not headers or tbodies.count() == 0:
+            continue
+        row_count = tbodies.nth(0).locator("tr").count()
+        if row_count <= 0:
+            continue
+
+        def _container_cells(ri: int, _tb=tbodies) -> list[str]:
+            return collect_ant_merged_row_cells(_tb, ri)
+
+        yield from _yield(headers, _container_cells, row_count, f"ant_container_{ci}")
+
+    if page_headers:
+        page_tbodies = page.locator(".ant-table-tbody")
+        if page_tbodies.count():
+            row_count = page_tbodies.nth(0).locator("tr").count()
+            if row_count > 0:
+                def _page_cells(ri: int) -> list[str]:
+                    return collect_ant_merged_row_cells(page_tbodies, ri)
+
+                yield from _yield(page_headers, _page_cells, row_count, "ant_page")
+
+    tables = page.locator("table")
+    for ti in range(tables.count()):
+        table = tables.nth(ti)
+        headers = [h.strip() for h in table.locator("thead th, thead td").all_inner_texts()]
+        if not _is_data_list_table_headers(headers):
+            continue
+        body_rows = table.locator("tbody tr")
+        row_count = body_rows.count()
+        if not headers or row_count <= 0:
+            continue
+
+        def _html_cells(ri: int, _rows=body_rows) -> list[str]:
+            return _extract_row_cell_texts(_rows.nth(ri))
+
+        yield from _yield(headers, _html_cells, row_count, f"html_table_{ti}")
+
+
+def _pick_best_table_candidate(
+    page: Any,
+    target_col: str,
+    *,
+    use_first_row: bool,
+) -> Optional[tuple[list[str], Any, int, str, int]]:
+    best = None
+    best_score = -1
+    for headers, get_row_cells, row_count, kind in _enumerate_table_matrix_candidates(page):
+        score = _score_table_candidate(
+            headers, get_row_cells, row_count, target_col, use_first_row=use_first_row,
+        )
+        if score > best_score:
+            best_score = score
+            col_idx = headers.index(target_col)
+            best = (headers, get_row_cells, row_count, kind, col_idx)
+    return best
+
+
+def collect_ant_merged_row_cells(tbodies: Any, row_index: int) -> list[str]:
+    """Ant Design 拆表: 按行索引合并各 .ant-table-tbody 中的 td."""
+    cells: list[str] = []
+    n = tbodies.count()
+    if n == 0:
+        return cells
+    for bi in range(n):
+        rows = tbodies.nth(bi).locator("tr")
+        if row_index >= rows.count():
+            continue
+        row = rows.nth(row_index)
+        cells.extend(_extract_row_cell_texts(row))
+    return cells
+
+
+def _matching_rows_from_get_cells(
+    headers: list[str],
+    get_row_cells,
+    row_count: int,
+    *,
+    use_first_row: bool,
+    row_position: int,
+    key_col: str,
+    row_key: str,
+) -> list[tuple[list[str], str]]:
+    if use_first_row:
+        found = 0
+        for ri in range(row_count):
+            cells = get_row_cells(ri)
+            if _is_empty_table_row_cells(cells):
+                continue
+            if found == row_position:
+                label = cells[0] if cells else str(ri)
+                return [(cells, label)]
+            found += 1
+        return []
+
+    key_idx = _table_key_col_index(headers, key_col)
+    rows: list[tuple[list[str], str]] = []
+    for ri in range(row_count):
+        cells = get_row_cells(ri)
+        if _is_empty_table_row_cells(cells):
+            continue
+        if not _row_matches_key(cells, row_key, key_idx):
+            continue
+        hit = cells[key_idx] if 0 <= key_idx < len(cells) else row_key
+        rows.append((cells, hit))
+    return rows
+
+
+def collect_ant_table_row_at_index(tbodies: Any, row_count: int, index: int = 0) -> list[tuple[list[str], str]]:
+    if index < 0:
+        return []
+    found = 0
+    for ri in range(row_count):
+        cells = collect_ant_merged_row_cells(tbodies, ri)
+        if _is_empty_table_row_cells(cells):
+            continue
+        if found == index:
+            label = cells[0] if cells else str(ri)
+            return [(cells, label)]
+        found += 1
+    return []
+
+
+def collect_ant_table_rows_for_key(
+    tbodies: Any,
+    row_count: int,
+    headers: list[str],
+    key_col: str,
+    row_key: str,
+) -> list[tuple[list[str], str]]:
+    def _get(ri: int) -> list[str]:
+        return collect_ant_merged_row_cells(tbodies, ri)
+
+    return _matching_rows_from_get_cells(
+        headers, _get, row_count,
+        use_first_row=False, row_position=0, key_col=key_col, row_key=row_key,
+    )
+
+
+def perform_table_column_assert(
+    page: Any,
+    *,
+    target_col: str,
+    expected: str,
+    row_key: str = "",
+    key_col: str = "工单ID",
+    use_first_row: bool = False,
+    row_position: int = 0,
+    match_all: bool = False,
+    display_key: str = "",
+) -> tuple[bool, str]:
+    """表格列断言: 在候选数据表中选最佳表头/行, 兼容 Ant Design 拆表."""
+    from .session_ops import evaluate_table_column_assert
+
+    label = display_key or (row_key if not use_first_row else "第一行")
+    picked = _pick_best_table_candidate(page, target_col, use_first_row=use_first_row)
+    if picked is not None:
+        headers, get_row_cells, row_count, _kind, col_idx = picked
+        matching = _matching_rows_from_get_cells(
+            headers,
+            get_row_cells,
+            row_count,
+            use_first_row=use_first_row,
+            row_position=row_position,
+            key_col=key_col,
+            row_key=row_key,
+        )
+        ok, msg = evaluate_table_column_assert(
+            matching,
+            col_idx,
+            target_col,
+            expected,
+            match_all=match_all,
+            row_key=label,
+        )
+        if ok:
+            return True, msg
+        if matching:
+            return False, msg
+
+    list_headers = collect_best_ant_page_headers(page)
+    if list_headers and target_col not in list_headers:
+        cols = ", ".join(h for h in list_headers if h)
+        return False, (
+            f"表格断言: 数据列表表头中不存在列 {target_col!r} "
+            f"(现有: {cols})"
+        )
+    if use_first_row:
+        return False, (
+            f"表格断言: 未找到数据行或列 {target_col!r} (首行期望 {expected!r})"
+        )
+    return False, (
+        f"表格断言: 未找到行标识 {row_key!r} (列 {key_col!r}) 或列 {target_col!r}"
+    )
 
 
 def _row_matches_key(cells: list[str], row_key: str, key_idx: int) -> bool:
@@ -1418,36 +1763,21 @@ def assert_table_cell(
     match_all: bool = False,
 ) -> None:
     """断言表格中某行某列的值 (与 dispatcher._assert_table 行匹配规则一致)."""
-    from .session_ops import (
-        collect_table_rows_for_key,
-        evaluate_table_column_assert,
+    use_first_row = row_key == FIRST_TABLE_ROW_KEY
+    display_key = "第一行" if use_first_row else row_key
+    ok, msg = perform_table_column_assert(
+        page,
+        target_col=target_col,
+        expected=expected,
+        row_key=row_key,
+        key_col=key_col,
+        use_first_row=use_first_row,
+        match_all=match_all,
+        display_key=display_key,
     )
-
-    tables = page.locator("table")
-    for ti in range(tables.count()):
-        table = tables.nth(ti)
-        headers = [h.strip() for h in table.locator("thead th, thead td").all_inner_texts()]
-        if not headers or key_col not in headers or target_col not in headers:
-            continue
-        key_idx = headers.index(key_col)
-        col_idx = headers.index(target_col)
-        body_rows = table.locator("tbody tr")
-        matching = collect_table_rows_for_key(body_rows, key_idx, row_key)
-        ok, msg = evaluate_table_column_assert(
-            matching,
-            col_idx,
-            target_col,
-            expected,
-            match_all=match_all,
-            row_key=row_key,
-        )
-        if ok:
-            return
-        if matching:
-            raise AssertionError(msg)
-    raise AssertionError(
-        f"表格断言失败: 未找到行 {row_key!r} (列 {key_col!r}) 或列 {target_col!r}"
-    )
+    if ok:
+        return
+    raise AssertionError(msg)
 
 
 from .tab_follow import (  # noqa: E402  — 统一 tab 跟随, 避免与上方循环 import

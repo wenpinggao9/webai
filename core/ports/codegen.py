@@ -1015,16 +1015,24 @@ def _gen_assert_table_lines(
     indent: str = "    ",
     runtime_api: bool = False,
 ) -> list[str]:
+    from ..runtime.execution.script_helpers import FIRST_TABLE_ROW_KEY
+
     extras = action.extras or {}
-    row_key = _value_expr((action.value or extras.get("row_key") or "").strip(), api_context, runtime_api)
-    key_col = str(extras.get("row_key_column") or "工单ID")
+    raw_key = (action.value or extras.get("row_key") or "").strip()
+    use_first_row = (
+        raw_key == FIRST_TABLE_ROW_KEY
+        or str(extras.get("row_position") or "").strip().lower() in {"first", "1"}
+        or str(extras.get("row_index") or "").strip() == "1"
+    )
+    row_key = repr(FIRST_TABLE_ROW_KEY) if use_first_row else _value_expr(raw_key, api_context, runtime_api)
+    key_col = '""' if use_first_row else _py_str(str(extras.get("row_key_column") or "工单ID"))
     target_col = str(extras.get("column") or "")
     expected = _value_expr(str(extras.get("expected") or extras.get("cell_value") or ""), api_context, runtime_api)
-    if not row_key or not target_col or not expected:
+    if (not use_first_row and not raw_key) or not target_col or not expected:
         return [f"{indent}# TODO: assert_table 参数不完整 - {action.intent}"]
     line = (
         f"{indent}_assert_table_cell(page, "
-        f"{row_key}, {_py_str(key_col)}, {_py_str(target_col)}, {expected}"
+        f"{row_key}, {key_col}, {_py_str(target_col)}, {expected}"
     )
     if extras.get("match_all"):
         line += ", match_all=True"

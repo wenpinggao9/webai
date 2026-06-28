@@ -23,6 +23,12 @@ from .script_helpers import (
     submit_left_detail_context,
     url_matches_anchor,
 )
+from .submit_outcome import (
+    SubmitContextKind,
+    classify_submit_context,
+    detect_list_embed_progress,
+    capture_submit_snapshot,
+)
 from .nav_progress import capture_submit_entity_before, try_wait_url_entity_change
 
 # 提交后 tab/URL 变化探测上限 (与 click default_timeout 解耦)
@@ -211,8 +217,9 @@ def wait_after_detail_submit(
     budget_ms: int = DEFAULT_SUBMIT_WAIT_MS,
     poll_ms: int = _SUBMIT_POLL_MS,
     max_polls: int = 0,  # 兼容旧签名; 由 budget_ms 驱动
+    dom_entity_before: str = "",
 ) -> tuple[Any, str, bool]:
-    """提交后事件驱动等待: 跟 tab + 扫 URL, 预算内结束, 不返回 timeout."""
+    """提交后事件驱动等待: 跟 tab + 扫 URL/DOM, 预算内结束, 不返回 timeout."""
     del max_polls  # budget 驱动
     recovered = False
     cur = page
@@ -220,6 +227,17 @@ def wait_after_detail_submit(
     ctx = _context_from_any(page, list_anchor)
     count_before = len(ctx.pages) if ctx else 1
     deadline = time.monotonic() + budget_ms / 1000.0
+
+    list_embed = classify_submit_context(
+        url_before,
+        flat_text=_read_body_safe(cur) if _page_usable(cur, timeout_ms=300) else "",
+    ) == SubmitContextKind.LIST_EMBED
+    if list_embed and not dom_entity_before and _page_usable(cur, timeout_ms=400):
+        snap = capture_submit_snapshot(
+            url=url_before,
+            flat_text=_read_body_safe(cur),
+        )
+        dom_entity_before = snap.entity_id
 
     def _finish(outcome: str, target: Any) -> tuple[Any, str, bool]:
         if outcome == "returned_to_list" and _page_usable(target, timeout_ms=500):
@@ -229,6 +247,11 @@ def wait_after_detail_submit(
         except Exception:
             pass
         return target, outcome, recovered
+
+    def _list_embed_outcome(body: str) -> Optional[str]:
+        if not list_embed:
+            return None
+        return detect_list_embed_progress(body, entity_before=dom_entity_before)
 
     out, hit = _scan_tabs_for_outcome(
         url_before, list_url=list_url, hints=(cur, list_anchor),
@@ -315,6 +338,9 @@ def wait_after_detail_submit(
             body = _read_body_safe(cur)
             if _body_has_submit_error(body):
                 return cur, "submit_error", recovered
+            embed_out = _list_embed_outcome(body)
+            if embed_out:
+                return _finish(embed_out, cur)
 
         for p in ordered_usable_tabs(cur, list_anchor):
             try:
@@ -368,6 +394,9 @@ def wait_after_detail_submit(
         body = _read_body_safe(cur)
         if _body_has_submit_error(body):
             return cur, "submit_error", recovered
+        embed_out = _list_embed_outcome(body)
+        if embed_out:
+            return _finish(embed_out, cur)
         return cur, "settled", recovered
 
     if list_anchor is not None and _page_usable(list_anchor, timeout_ms=400):

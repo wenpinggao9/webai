@@ -42,6 +42,7 @@ class SubmitLiveFacts:
     entity_field: str = ""
     entity_id_before: str = ""
     entity_id_after: str = ""
+    submit_context: str = ""
 
     @property
     def entity_changed(self) -> bool:
@@ -55,6 +56,7 @@ class SubmitLiveFacts:
         field_name = self.entity_field or "entity"
         lines = [
             "【提交后结构化事实】(断言时刻实时提取, 优先据此判断)",
+            f"- submit_context: {self.submit_context or '(未识别)'}",
             f"- 提交前{field_name}: {self.entity_id_before or '(未记录)'}",
             f"- 提交后{field_name}: {self.entity_id_after or '(未解析)'}",
             f"- 实体是否切换: {'是' if self.entity_changed else '否'}",
@@ -134,6 +136,7 @@ def build_live_submit_facts(
         entity_field=field_after or str(meta.get("entity_field") or "entity"),
         entity_id_before=id_before,
         entity_id_after=id_after,
+        submit_context=str(meta.get("submit_context") or ""),
     )
 
 

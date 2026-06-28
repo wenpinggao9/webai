@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "saved_at": 1782528956.010828,
+  "saved_at": 1782609336.7661598,
   "pages": {
     "/video/welcome": {
       "route": "/video/welcome",
       "component_library": "ant-design",
-      "dom_signature": "d71b6a8ed95a0b2f",
+      "dom_signature": "f7d3860c632dd771",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -13,13 +13,13 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 8,
+          "success_count": 10,
           "failure_count": 3
         }
       },
       "learned_at": 1782142954.8372102,
-      "updated_at": 1782478567.259179,
-      "hit_count": 4
+      "updated_at": 1782608723.888763,
+      "hit_count": 6
     },
     "/video/all-question": {
       "route": "/video/all-question",
@@ -61,7 +61,7 @@
     "/video/wait-preview": {
       "route": "/video/wait-preview",
       "component_library": "ant-design",
-      "dom_signature": "6521539b1af8abe1",
+      "dom_signature": "3c2b02433c09b159",
       "rules": {
         "click|button": {
           "action_type": "click",
@@ -78,18 +78,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 14,
+          "success_count": 16,
           "failure_count": 9
         }
       },
       "learned_at": 1782146590.337551,
-      "updated_at": 1782463452.197966,
-      "hit_count": 4
+      "updated_at": 1782608901.02704,
+      "hit_count": 6
     },
     "/video/detail": {
       "route": "/video/detail",
       "component_library": "ant-design",
-      "dom_signature": "7dd10d5eea12e998",
+      "dom_signature": "400e4082dbbacdd1",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -97,7 +97,7 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 11,
+          "success_count": 14,
           "failure_count": 0
         },
         "click|dropdown_trigger": {
@@ -111,13 +111,13 @@
         }
       },
       "learned_at": 1782172644.151975,
-      "updated_at": 1782528867.390713,
-      "hit_count": 8
+      "updated_at": 1782608785.41466,
+      "hit_count": 11
     },
     "/video/already-self": {
       "route": "/video/already-self",
       "component_library": "ant-design",
-      "dom_signature": "e750686f86233baa",
+      "dom_signature": "1e1d25ddf3cf130b",
       "rules": {
         "click|button": {
           "action_type": "click",
@@ -127,10 +127,19 @@
           "anchor_type": "text",
           "success_count": 1,
           "failure_count": 0
+        },
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "text=\"{text}\"",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 1
         }
       },
       "learned_at": 1782172752.178855,
-      "updated_at": 1782172752.178855,
+      "updated_at": 1782561374.261486,
       "hit_count": 0
     },
     "/video/check-history": {
@@ -173,7 +182,7 @@
     "/video/taskindex": {
       "route": "/video/taskindex",
       "component_library": "ant-design",
-      "dom_signature": "4348a764c86d9b23",
+      "dom_signature": "63ace3f8f5fcf228",
       "rules": {
         "click|input": {
           "action_type": "click",
@@ -181,7 +190,7 @@
           "selector_template": "xpath=(//input[contains(@placeholder, '学科')])[1]",
           "selector_type": "xpath",
           "anchor_type": "placeholder",
-          "success_count": 1,
+          "success_count": 3,
           "failure_count": 0
         },
         "click|dropdown_trigger": {
@@ -205,16 +214,81 @@
         "click|generic": {
           "action_type": "click",
           "component_type": "generic",
-          "selector_template": "label.ant-radio-wrapper:has-text(\"{text}\")",
-          "selector_type": "css",
+          "selector_template": "role=link[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 3,
+          "failure_count": 2
+        }
+      },
+      "learned_at": 1782468911.066154,
+      "updated_at": 1782609069.104407,
+      "hit_count": 2
+    },
+    "/video/tasklist": {
+      "route": "/video/tasklist",
+      "component_library": "ant-design",
+      "dom_signature": "238e97ec4ea2c7f3",
+      "rules": {
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "button:has-text(\"{text}\")",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 4,
+          "failure_count": 0
+        },
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "role=link[name=\"{text}\"]",
+          "selector_type": "role",
           "anchor_type": "text",
           "success_count": 1,
           "failure_count": 0
         }
       },
-      "learned_at": 1782468911.066154,
-      "updated_at": 1782468976.227916,
-      "hit_count": 0
+      "learned_at": 1782561744.491434,
+      "updated_at": 1782609194.077856,
+      "hit_count": 1
+    },
+    "/video/already-upload": {
+      "route": "/video/already-upload",
+      "component_library": "ant-design",
+      "dom_signature": "b99ed2bad1fa0b3b",
+      "rules": {
+        "hover|generic": {
+          "action_type": "hover",
+          "component_type": "generic",
+          "selector_template": "text=\"{text}\"",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 2,
+          "failure_count": 1
+        },
+        "click|generic": {
+          "action_type": "click",
+          "component_type": "generic",
+          "selector_template": "[role=\"{text}\"][aria-label=\"{text}\"]",
+          "selector_type": "css",
+          "anchor_type": "text",
+          "success_count": 6,
+          "failure_count": 5
+        },
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "role=button[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782561918.516429,
+      "updated_at": 1782564371.113856,
+      "hit_count": 1
     }
   }
 }

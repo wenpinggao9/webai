@@ -7,6 +7,7 @@ run_tests(测试文件):
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Optional
 
@@ -585,7 +586,7 @@ class UITestAgent:
                     f"  [dim]交错编排: {len(exec_blocks)} 个执行块 "
                     f"(原 {len(case.execution_blocks)} 段)[/dim]"
                 )
-                actions, raw, passed, primary_role, dispatcher, runner = self._plan_and_run_by_blocks(
+                actions, raw, passed, primary_role, dispatcher, runner, results = self._plan_and_run_by_blocks(
                     case=case,
                     exec_blocks=exec_blocks,
                     page=page,
@@ -911,6 +912,7 @@ class UITestAgent:
             watermark_cfg=self.watermark_cfg,
             feature_titles=list(case.module_path or []) if case else [],
         )
+        runner.reset_case_prior_actions()
         return dispatcher, runner
 
     def _plan_and_run_by_blocks(
@@ -931,11 +933,12 @@ class UITestAgent:
         first_role: str | None,
         session_vars: dict[str, Any] | None,
         _get_page_for_role,
-    ) -> tuple[list, list[Any], bool, Optional[str], ActionDispatcher | None, PlaywrightRunner | None]:
+    ) -> tuple[list, list[Any], bool, Optional[str], ActionDispatcher | None, PlaywrightRunner | None, list]:
         from .planning.role_infer import infer_primary_role
 
         all_actions: list = []
         all_raws: list[Any] = []
+        all_results: list = []
         primary_role: Optional[str] = None
         dispatcher: ActionDispatcher | None = None
         runner: PlaywrightRunner | None = None
@@ -1014,11 +1017,15 @@ class UITestAgent:
             if not block_actions:
                 continue
 
-            results = runner.run_actions(block_actions, case.case_id)
+            block_results = runner.run_actions(block_actions, case.case_id)
+            offset = len(all_results)
+            all_results.extend(
+                replace(r, step_no=offset + r.step_no) for r in block_results
+            )
             page = dispatcher.page
             if primary_role:
                 runner._last_active_role = primary_role
-            if not results or not all(r.status == "PASS" for r in results):
+            if not block_results or not all(r.status == "PASS" for r in block_results):
                 passed = False
                 self.console.print(f"  [red]块 {block_no} 执行失败, 停止后续块[/red]")
                 break
@@ -1029,12 +1036,14 @@ class UITestAgent:
         )
         fm.save_prompt(case.case_id, self._dump_prompt(case, exec_blocks))
         fm.save_planned_actions(case.case_id, all_actions)
+        if runner is not None and all_results:
+            runner._save_exec_log(all_results)
 
         if not all_actions:
             self.console.print("[yellow]规划结果为空, 跳过执行[/yellow]")
-            return [], all_raws, False, primary_role, dispatcher, runner
+            return [], all_raws, False, primary_role, dispatcher, runner, all_results
 
-        return all_actions, all_raws, passed, primary_role, dispatcher, runner
+        return all_actions, all_raws, passed, primary_role, dispatcher, runner, all_results
 
     def _dump_prompt(self, case, exec_blocks=None) -> str:
         blocks = exec_blocks or build_execution_blocks(case)

@@ -144,6 +144,36 @@ def _extract_dropdown_trigger_label(intent: str, match: Optional[re.Match] = Non
     return None
 
 
+def is_select_clear_intent(intent: str) -> bool:
+    """意图是否为筛选/下拉框的清除 × 操作."""
+    text = intent or ""
+    if not re.search(r"清除|清空|close|×|✕", text, re.I):
+        return False
+    return bool(re.search(r"筛选|下拉|select|框", text, re.I))
+
+
+def _extract_select_clear_field_label(
+    intent: str, match: Optional[re.Match] = None,
+) -> Optional[str]:
+    """从「点击状态筛选框中的清除×」类 intent 提取字段名."""
+    for pattern in [
+        r"[「\"'](.+?)[「\"']?\s*筛选框",
+        r"[「\"'](.+?)[「\"']?\s*下拉框",
+        r"筛选框.*?[「\"'](.+?)[「\"']",
+        r"[「\"'](.+?)[「\"'].*?中的\s*清除",
+    ]:
+        m = re.search(pattern, intent)
+        if m:
+            label = (m.group(1) or "").strip().strip("\"'")
+            if label and label.lower() not in ("×", "x", "清除", "清空"):
+                return label
+    for q in re.findall(r'["\'\u201c\u201d\u300c\u300d](.+?)["\'\u201c\u201d\u300c\u300d]', intent):
+        t = q.strip()
+        if t and t.lower() not in ("×", "x", "清除", "清空") and len(t) <= 30:
+            return t
+    return _extract_dropdown_trigger_label(intent) or _extract_fill_label(intent)
+
+
 def _extract_fill_label(intent: str, match: Optional[re.Match] = None) -> Optional[str]:
     """从「在XXX输入框中输入/填写YYY」类 intent 提取字段标签 XXX"""
     for pattern in [
@@ -455,10 +485,39 @@ def _build_hover_candidates(
     intent: str,
 ) -> List[str]:
     """构建悬浮 selector 候选列表"""
+    if re.search(r"筛选框|下拉框|下拉栏|筛选区", intent or ""):
+        wrappers = _build_dropdown_trigger_candidates(target_text, semantic_dom, intent)
+        if wrappers:
+            return wrappers
     name_escaped = target_text.replace("\\", "\\\\").replace('"', '\\"')
+    text_escaped = _escape_xpath_string(target_text.strip())
     candidates = [
+        f"(//label[contains(normalize-space(.), {text_escaped})]/following::*[contains(@class,'ant-select')][1])[1]",
+        f"(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), {text_escaped})]]//div[contains(@class,'ant-select')])[1]",
         f'role=button >> text="{name_escaped}"',
         f'text="{name_escaped}"',
+    ]
+    return list(dict.fromkeys(c for c in candidates if c))
+
+
+def _build_select_clear_candidates(
+    target_text: str,
+    semantic_dom: List[Dict[str, Any]],
+    intent: str,
+) -> List[str]:
+    """构建 Ant/Element 下拉框清除 × selector 候选 (悬停后才可见)."""
+    label = target_text.strip()
+    text_escaped = _escape_xpath_string(label)
+    clear_icon = (
+        "*[contains(@class,'ant-select-clear') or contains(@class,'close-circle') "
+        "or @aria-label='close-circle' or contains(@class,'circle-close')]"
+    )
+    candidates = [
+        f"(//label[contains(normalize-space(.), {text_escaped})]/following::*[contains(@class,'ant-select')][1]//{clear_icon})[1]",
+        f"(//label[@title={text_escaped}]/following::*[contains(@class,'ant-select')][1]//{clear_icon})[1]",
+        f"(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), {text_escaped})]]//{clear_icon})[1]",
+        f"(//div[contains(@class,'el-form-item')][.//*[contains(normalize-space(.), {text_escaped})]]//i[contains(@class,'circle-close')])[1]",
+        f"(//div[contains(@class,'el-form-item')][.//*[contains(normalize-space(.), {text_escaped})]]//span[contains(@class,'el-select__caret')])[1]",
     ]
     return list(dict.fromkeys(c for c in candidates if c))
 
@@ -608,6 +667,18 @@ class IntentRuleEngine:
                 extract_fn=_extract_dropdown_trigger_label,
                 build_fn=_build_dropdown_trigger_candidates,
                 priority=10,
+            ),
+            # ── 筛选框清除 ×（priority 12, 高于 generic click）──
+            IntentRule(
+                name="select_clear",
+                action_types={"click"},
+                intent_pattern=re.compile(
+                    r"(?:筛选|下拉).*(?:清除|清空|×|✕)"
+                    r"|(?:清除|清空|×|✕).*(?:筛选框|下拉框|筛选)",
+                ),
+                extract_fn=_extract_select_clear_field_label,
+                build_fn=_build_select_clear_candidates,
+                priority=12,
             ),
             # ── 可筛选下拉输入（priority 20）──
             IntentRule(

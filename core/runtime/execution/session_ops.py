@@ -139,6 +139,71 @@ def collect_table_rows_for_key(body_rows: Any, key_idx: int, row_key: str) -> li
     return rows
 
 
+_FIRST_ROW_INTENT = re.compile(
+    r"第一行|第一条|首行|首条|最近一条|列表第一|表格第一",
+)
+
+
+def _is_empty_table_row(cells: list[str]) -> bool:
+    from .script_helpers import _is_empty_table_row_cells
+
+    return _is_empty_table_row_cells(cells)
+
+
+def collect_table_row_at_index(
+    body_rows: Any,
+    index: int = 0,
+) -> list[tuple[list[str], str]]:
+    """按数据行序 (跳过空态行) 取第 index 行, 供首行 assert_table 使用."""
+    if index < 0:
+        return []
+    found = 0
+    for ri in range(body_rows.count()):
+        cells = [c.strip() for c in body_rows.nth(ri).locator("td").all_inner_texts()]
+        if _is_empty_table_row(cells):
+            continue
+        if found == index:
+            label = cells[0] if cells else str(ri)
+            return [(cells, label)]
+        found += 1
+    return []
+
+
+def assert_table_row_position(action: Any) -> Optional[int]:
+    """assert_table 是否按行序定位; 返回 0-based 行序, None 表示按主键列."""
+    if getattr(action, "type", None) != "assert_table":
+        return None
+    ex = dict(getattr(action, "extras", None) or {})
+    intent = str(getattr(action, "intent", "") or "")
+    row_key = str(getattr(action, "value", None) or ex.get("row_key") or "").strip()
+
+    if row_key == FIRST_TABLE_ROW_KEY:
+        return 0
+    pos = ex.get("row_position")
+    if str(pos).strip().lower() in {"first", "1"}:
+        return 0
+    idx_raw = ex.get("row_index")
+    if idx_raw is not None and str(idx_raw).strip() == "1":
+        return 0
+    if _FIRST_ROW_INTENT.search(intent):
+        return 0
+    if row_key == "1" and (ex.get("row_index") is not None or _FIRST_ROW_INTENT.search(intent)):
+        return 0
+    return None
+
+
+def normalize_assert_table_first_row(action: Any) -> bool:
+    """规划后归一化: 首行/第一行语义 → FIRST_TABLE_ROW_KEY."""
+    pos = assert_table_row_position(action)
+    if pos is None:
+        return False
+    action.value = FIRST_TABLE_ROW_KEY
+    ex = dict(getattr(action, "extras", None) or {})
+    ex["row_position"] = "first"
+    action.extras = ex
+    return True
+
+
 def evaluate_table_column_assert(
     rows: list[tuple[list[str], str]],
     col_idx: int,
@@ -490,11 +555,13 @@ def enrich_session_assertions(
     ctx: dict[str, Any] | None,
     session_ops_cfg: Optional[dict[str, Any]] = None,
 ) -> list[Any]:
-    """规划后补全 assert_table 行标识 (索引字段 → 表格行主键)."""
-    if not actions or not ctx:
+    """规划后补全 assert_table 行标识 (首行语义 / 索引字段 → 表格行主键)."""
+    if not actions:
         return actions
     for action in actions:
-        resolve_assert_table_row_key(action, ctx, session_ops_cfg)
+        normalize_assert_table_first_row(action)
+        if ctx:
+            resolve_assert_table_row_key(action, ctx, session_ops_cfg)
     return actions
 
 

@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "route": "/video/tasklist",
+  "saved_at": 1782609336.764148,
+  "entries": {
+    "click|点击提交视频按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"提交视频\")",
+      "method": "role",
+      "role": "button",
+      "name": "提交视频",
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782561744.4909272,
+      "updated_at": 1782609094.79223,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击确认按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"确认\")",
+      "method": "role",
+      "role": "button",
+      "name": "确认",
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782561824.283398,
+      "updated_at": 1782609172.171459,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交任务": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"提交任务\")",
+      "method": "role",
+      "role": "button",
+      "name": "提交任务",
+      "exact": false,
+      "success_count": 1,
+      "created_at": 1782561844.8828878,
+      "updated_at": 1782561844.8828878,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击左侧导航已上传进入已上传列表页": {
+      "method": "role",
+      "role": "link",
+      "name": "已上传",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=link[name=\"已上传\"]",
+      "success_count": 2,
+      "created_at": 1782561889.067225,
+      "updated_at": 1782609238.171647,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "link",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交任务按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"提交任务\")",
+      "method": "role",
+      "role": "button",
+      "name": "提交任务",
+      "exact": false,
+      "success_count": 1,
+      "created_at": 1782609194.077024,
+      "updated_at": 1782609194.077024,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    }
+  }
+}

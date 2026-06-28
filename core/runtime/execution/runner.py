@@ -101,6 +101,22 @@ class PlaywrightRunner:
         self.screens_dir = self.out_dir / SCREENSHOTS_SUBDIR
         self.screens_dir.mkdir(parents=True, exist_ok=True)
         self._last_active_role: Optional[str] = None
+        self._case_prior_actions: list[PlannedAction] = []
+
+    def reset_case_prior_actions(self) -> None:
+        """新用例开始时清空; 块式执行时跨块累积已执行动作供 readiness 使用."""
+        self._case_prior_actions = []
+
+    def _effective_prior_actions(
+        self, actions: list[PlannedAction], idx: int,
+    ) -> list[PlannedAction]:
+        """当前块内前序 + 本用例更早块/步骤已执行动作."""
+        return list(self._case_prior_actions) + list(actions[:idx])
+
+    def _record_case_prior_action(self, action: PlannedAction) -> None:
+        if action.is_assert():
+            return
+        self._case_prior_actions.append(action)
 
     def run_actions(self, actions: list[PlannedAction], case_id: str) -> list[ExecResult]:
         from ..readiness import should_run_readiness
@@ -111,7 +127,9 @@ class PlaywrightRunner:
         self.dispatcher.feature_titles = list(self.feature_titles)
         if self.retry_controller and hasattr(self.retry_controller, "set_readiness_context_fn"):
             self.retry_controller.set_readiness_context_fn(
-                lambda act, prior=None: self._readiness_context(actions, act, prior),
+                lambda act, prior=None, _acts=actions: self._readiness_context(
+                    _acts, act, prior,
+                ),
             )
 
         results: list[ExecResult] = []
@@ -369,6 +387,8 @@ class PlaywrightRunner:
                 self.observability.end_step(seq, r)
             self._log_result(r)
             results.append(r)
+            if status == "PASS":
+                self._record_case_prior_action(action)
             if should_post_check(action):
                 prev_post_verify_ok = post_ok
                 if post_ok:
@@ -393,9 +413,11 @@ class PlaywrightRunner:
         if prior is None:
             try:
                 idx = actions.index(current)
-                prior = actions[:idx]
+                prior = self._effective_prior_actions(actions, idx)
             except ValueError:
-                prior = []
+                prior = list(self._case_prior_actions)
+        else:
+            prior = list(self._case_prior_actions) + list(prior)
         api_ctx = getattr(self.dispatcher, "api_context", {}) or {}
         case_ctx = self.readiness_case_context or ReadinessCaseContext()
         return ReadinessContext(
@@ -422,8 +444,9 @@ class PlaywrightRunner:
 
     def _run_readiness(self, action: PlannedAction, case_id: str, results: list[ExecResult], seq: int) -> int:
         """执行就绪检查; 未就绪则跑恢复动作并记录."""
-        rctx = self._readiness_context([], action, [])
-        self._run_deterministic_pre_readiness(action, [])
+        prior = list(self._case_prior_actions)
+        rctx = self._readiness_context([], action, prior)
+        self._run_deterministic_pre_readiness(action, prior)
         rdy = self.readiness_checker.check(self.dispatcher.page, action, context=rctx)
         if self.trace:
             self.trace.emit(
@@ -464,7 +487,7 @@ class PlaywrightRunner:
         if new_pg is not None:
             self.dispatcher.set_page(new_pg)
 
-        prior = actions[:idx]
+        prior = self._effective_prior_actions(actions, idx)
         self._run_deterministic_pre_readiness(action, prior)
         rctx = self._readiness_context(actions, action, prior)
         rdy = self.readiness_checker.check(self.dispatcher.page, action, context=rctx)
@@ -485,6 +508,20 @@ class PlaywrightRunner:
         if not rdy.recovery:
             return seq, idx, False
 
+        from .deterministic_recovery import filter_redundant_radio_recovery
+
+        case = self.readiness_case_context
+        rdy.recovery = filter_redundant_radio_recovery(
+            rdy.recovery,
+            self.dispatcher.page,
+            prior_actions=prior,
+            next_action=action,
+            case_steps=list(case.steps) if case else [],
+            case_notes=list(case.notes) if case else [],
+        )
+        if not rdy.recovery:
+            return seq, idx, False
+
         rdy.recovery = filter_redundant_login_goto(rdy.recovery, self.dispatcher.page)
         if not rdy.recovery:
             return seq, idx, False
@@ -497,6 +534,14 @@ class PlaywrightRunner:
             rdy = self.readiness_checker.check(self.dispatcher.page, action, context=rctx)
             if rdy.ready:
                 return seq, idx, False
+            rdy.recovery = filter_redundant_radio_recovery(
+                rdy.recovery,
+                self.dispatcher.page,
+                prior_actions=prior,
+                next_action=action,
+                case_steps=list(case.steps) if case else [],
+                case_notes=list(case.notes) if case else [],
+            )
             if not rdy.recovery:
                 return seq, idx, False
 
@@ -584,6 +629,7 @@ class PlaywrightRunner:
             outcomes.append(RecoveryStepOutcome(rec, ok, post_ok, row_msg))
             if ok and (post_ok is None or post_ok):
                 executed_recovery.append(rec)
+                self._record_case_prior_action(rec)
             results.append(ExecResult(
                 step_no=seq,
                 raw_text=f"[恢复] {rec.intent}",
@@ -630,7 +676,7 @@ class PlaywrightRunner:
         if not should_run_readiness(action):
             return None
 
-        prior = actions[:action_idx] if actions else []
+        prior = self._effective_prior_actions(actions or [], action_idx)
         self._run_deterministic_pre_readiness(action, prior)
         rctx = self._readiness_context(actions or [], action, prior)
         rdy = self.readiness_checker.check(self.dispatcher.page, action, context=rctx)
@@ -646,7 +692,7 @@ class PlaywrightRunner:
             )
         if rdy.ready or not rdy.recovery:
             if _is_submit_action(action):
-                prior = actions[:action_idx] if actions else []
+                prior = self._effective_prior_actions(actions or [], action_idx)
                 if attempt_submit_prerecovery(
                     self.dispatcher, action, self.console, prior_actions=prior,
                 ):
@@ -668,6 +714,19 @@ class PlaywrightRunner:
                         if outcome.ok and outcome.post_ok:
                             action.selector = retry_action.selector
                             return True, outcome.message, True, seq
+            return None
+        from .deterministic_recovery import filter_redundant_radio_recovery
+
+        case = self.readiness_case_context
+        rdy.recovery = filter_redundant_radio_recovery(
+            rdy.recovery,
+            self.dispatcher.page,
+            prior_actions=prior,
+            next_action=action,
+            case_steps=list(case.steps) if case else [],
+            case_notes=list(case.notes) if case else [],
+        )
+        if not rdy.recovery:
             return None
         self.console.print(
             f"  [yellow]步骤失败, 执行恢复后重试原动作: {action.intent}[/yellow]"
