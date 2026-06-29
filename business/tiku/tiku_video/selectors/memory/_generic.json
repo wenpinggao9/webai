@@ -1,24 +1,24 @@
 {
   "version": 1,
-  "saved_at": 1782609336.764148,
+  "saved_at": 1782724494.569015,
   "generic_entries": {
     "ant-design|dropdown_option": {
-      "selector_template": "text=\"{text}\"",
-      "selector_type": "css",
+      "selector_template": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"{text}\")])[1]",
+      "selector_type": "xpath",
       "component_library": "ant-design",
       "component_type": "dropdown_option",
-      "success_count": 4,
-      "created_at": 1782528815.3165371,
-      "updated_at": 1782608785.414468
+      "success_count": 1,
+      "created_at": 1782724433.055216,
+      "updated_at": 1782724433.055216
     },
     "ant-design|select_trigger": {
-      "selector_template": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '{text}')]]//div[contains(@class,'ant-select')])[1]",
+      "selector_template": "xpath=(//input[contains(@placeholder, '{text}')])[1]",
       "selector_type": "xpath",
       "component_library": "ant-design",
       "component_type": "select_trigger",
       "success_count": 1,
-      "created_at": 1782208481.7831628,
-      "updated_at": 1782208481.7831628
+      "created_at": 1782714537.721053,
+      "updated_at": 1782714537.721053
     },
     "ant-design|radio": {
       "selector_template": "label.ant-radio-wrapper:has-text(\"{text}\")",

@@ -1,0 +1,249 @@
+{
+    "cases": [
+      {
+        "case_id": "大学前审_数据看板_018",
+        "module": "大学前审",
+        "priority": "P2",
+        "origin_case": {
+          "preconditions": [],
+          "format": "interleaved",
+          "blocks": [
+            {
+              "steps": [
+                "前审老师A（teacherA）点击左侧导航「大学数据看板」下的二级菜单「大学数据看板明细」"
+              ],
+              "expectations": [
+                "前审明细表包含「题目内容涉及不良导向/敏感信息」、「非大学题」、「非目标学科」、「题目不完整或题干残缺」、「多题」字段，不包含「放弃」字段",
+                "「多题举报量」字段的数量大于1",
+                "「题目内容涉及不良导向/敏感信息」字段的数量大于1"
+              ]
+            },
+            {
+              "steps": [
+                "筛选「学段」为「大学」，「学科」为「大学化学」"
+              ],
+              "expectations": []
+            },
+            {
+              "steps": [
+                "点击「查询」"
+              ],
+              "expectations": [
+                "列表中「多题举报量」不为0"
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "click",
+            "intent": "点击侧栏一级菜单'大学数据看板'展开子菜单"
+          },
+          {
+            "type": "click",
+            "intent": "点击二级菜单'大学数据看板明细'"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证前审明细表包含'题目内容涉及不良导向/敏感信息'字段",
+            "value": "题目内容涉及不良导向/敏感信息"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证前审明细表包含'非大学题'字段",
+            "value": "非大学题"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证前审明细表包含'非目标学科'字段",
+            "value": "非目标学科"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证前审明细表包含'题目不完整或题干残缺'字段",
+            "value": "题目不完整或题干残缺"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证前审明细表包含'多题'字段",
+            "value": "多题"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证前审明细表不包含'放弃'字段",
+            "value": "放弃",
+            "negate": true
+          },
+          {
+            "type": "assert_count",
+            "intent": "验证'多题举报量'字段的数量大于1",
+            "value": ">1",
+            "extras": {
+              "field": "多题举报量"
+            }
+          },
+          {
+            "type": "assert_count",
+            "intent": "验证'题目内容涉及不良导向/敏感信息'字段的数量大于1",
+            "value": ">1",
+            "extras": {
+              "field": "题目内容涉及不良导向/敏感信息"
+            }
+          },
+          {
+            "type": "click",
+            "intent": "在筛选区点击'学段'下拉框"
+          },
+          {
+            "type": "click",
+            "intent": "在下拉选项中点击'大学'"
+          },
+          {
+            "type": "click",
+            "intent": "在筛选区点击'学科'下拉框"
+          },
+          {
+            "type": "click",
+            "intent": "在下拉选项中点击'大学化学'"
+          },
+          {
+            "type": "click",
+            "intent": "点击'查询'按钮"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证列表中'多题举报量'不为0",
+            "value": "0",
+            "extras": {
+              "semantic": true
+            },
+            "negate": true
+          }
+        ],
+        "action_count": 16
+      },
+      {
+        "case_id": "大学前审_结算信息_019",
+        "module": "大学前审",
+        "priority": "P1",
+        "origin_case": {
+          "preconditions": [],
+          "format": "interleaved",
+          "blocks": [
+            {
+              "steps": [
+                "前审老师A点击「个人中心」"
+              ],
+              "expectations": [
+                "个人中心下展开二级菜单中包含「结算信息（新）」"
+              ]
+            },
+            {
+              "steps": [
+                "点击「结算信息（新）」"
+              ],
+              "expectations": [
+                "结算信息页面中包含主要字段「姓名」、「手机号」、「身份证号」、「银行卡号」、「身份证人像面」、「身份证国徽面」"
+              ]
+            },
+            {
+              "steps": [
+                "点击「编辑信息」"
+              ],
+              "expectations": [
+                "页面包含\"税务资料完善确认\""
+              ]
+            }
+          ]
+        },
+        "actions": [
+          {
+            "type": "click",
+            "intent": "点击'个人中心'"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证个人中心下展开二级菜单中包含'结算信息（新）'",
+            "value": "结算信息（新）"
+          },
+          {
+            "type": "click",
+            "intent": "点击'结算信息（新）'"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证结算信息页面包含'姓名'字段",
+            "value": "姓名"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证结算信息页面包含'手机号'字段",
+            "value": "手机号"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证结算信息页面包含'身份证号'字段",
+            "value": "身份证号"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证结算信息页面包含'银行卡号'字段",
+            "value": "银行卡号"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证结算信息页面包含'身份证人像面'字段",
+            "value": "身份证人像面"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证结算信息页面包含'身份证国徽面'字段",
+            "value": "身份证国徽面"
+          },
+          {
+            "type": "click",
+            "intent": "点击'编辑信息'按钮"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证页面包含'税务资料完善确认'",
+            "value": "税务资料完善确认"
+          }
+        ],
+        "action_count": 11
+      },
+      {
+        "case_id": "大学前审_数据看板_020",
+        "module": "大学前审",
+        "priority": "P2",
+        "origin_case": {
+          "preconditions": [
+            "管理员登录"
+          ],
+          "steps": [
+            "选择「大学数据看板」的二级菜单「大学数据看板明细」"
+          ],
+          "expectations": [
+            "除自审明细表外增加前审明细表"
+          ]
+        },
+        "actions": [
+          {
+            "type": "click",
+            "intent": "点击侧栏一级菜单'大学数据看板'展开子菜单"
+          },
+          {
+            "type": "click",
+            "intent": "点击二级菜单'大学数据看板明细'"
+          },
+          {
+            "type": "assert_text",
+            "intent": "验证页面包含前审明细表",
+            "value": "前审明细"
+          }
+        ],
+        "action_count": 3
+      }
+    ],
+    "total_cases": 3
+  }

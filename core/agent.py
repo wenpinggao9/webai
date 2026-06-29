@@ -17,7 +17,12 @@ from playwright.sync_api import sync_playwright
 from . import codegen
 from .business_loader import BusinessLoader
 from .ports.business.accel_store import resolve_accel_dir, seed_business_accel_from_global
-from .ports.business.plan_store import build_plan_entry, save_case_file_actions
+from .ports.business.plan_store import (
+    build_plan_entry,
+    case_file_actions_path,
+    save_case_file_actions,
+    snapshot_actions_for_plan,
+)
 from .execution import ActionDispatcher, PlaywrightRunner
 from .execution.cross_case_session import refresh_page_on_role_reentry
 from .execution.script_helpers import (
@@ -246,12 +251,19 @@ class UITestAgent:
             plan_entries = [r["plan_entry"] for r in case_results if r.get("plan_entry")]
             if plan_entries:
                 stem = Path(test_file).stem
-                out_path = save_case_file_actions(biz.project_dir, stem, plan_entries)
+                actions_path = case_file_actions_path(biz.project_dir, stem)
                 try:
-                    rel = out_path.relative_to(self.root)
+                    rel = actions_path.relative_to(self.root)
                 except ValueError:
-                    rel = out_path
-                self.console.print(f"[cyan]动作规划已写入: {rel}[/cyan]")
+                    rel = actions_path
+                overwrite = self.runner_cfg.get("overwrite_actions", False)
+                out_path = save_case_file_actions(
+                    biz.project_dir, stem, plan_entries, overwrite=overwrite,
+                )
+                if out_path is None:
+                    self.console.print(f"[dim]动作规划文件已存在, 跳过覆盖: {rel}[/dim]")
+                else:
+                    self.console.print(f"[cyan]动作规划已写入: {rel}[/cyan]")
 
         # 持久化智能加速层 (L1 短期缓存 + L2 记忆 + L4 学习)
         self.cache.save()
@@ -484,6 +496,7 @@ class UITestAgent:
 
         passed = False
         actions: list = []
+        plan_actions_for_save: list = []
         dispatcher = None
         runner = None
         primary_role: Optional[str] = None
@@ -576,6 +589,7 @@ class UITestAgent:
                     _get_page_for_role=_get_page_for_role if session.roles else None,
                     case=case,
                 )
+                plan_actions_for_save = snapshot_actions_for_plan(actions)
                 results = runner.run_actions(actions, case.case_id)
                 passed = bool(results) and all(r.status == "PASS" for r in results)
                 page = dispatcher.page
@@ -586,7 +600,7 @@ class UITestAgent:
                     f"  [dim]交错编排: {len(exec_blocks)} 个执行块 "
                     f"(原 {len(case.execution_blocks)} 段)[/dim]"
                 )
-                actions, raw, passed, primary_role, dispatcher, runner, results = self._plan_and_run_by_blocks(
+                actions, raw, passed, primary_role, dispatcher, runner, results, plan_actions_for_save = self._plan_and_run_by_blocks(
                     case=case,
                     exec_blocks=exec_blocks,
                     page=page,
@@ -656,6 +670,7 @@ class UITestAgent:
                     _get_page_for_role=_get_page_for_role if session.roles else None,
                     case=case,
                 )
+                plan_actions_for_save = snapshot_actions_for_plan(actions)
                 results = runner.run_actions(actions, case.case_id)
                 passed = bool(results) and all(r.status == "PASS" for r in results)
                 page = dispatcher.page
@@ -766,7 +781,9 @@ class UITestAgent:
             )
 
         return self._finish_case_result(
-            case, results, passed, case_start, origin_snapshot, actions, fm=fm,
+            case, results, passed, case_start, origin_snapshot, actions,
+            plan_actions=plan_actions_for_save or None,
+            fm=fm,
         )
 
     def _finish_case_result(
@@ -777,14 +794,16 @@ class UITestAgent:
         case_start: float,
         origin_snapshot: dict[str, Any],
         actions: list,
+        plan_actions: list | None = None,
         fm: FileManager | None = None,
     ) -> dict[str, Any]:
         case_out_dir = fm.case_dir(case.case_id) if fm else None
         summary = self._case_result_summary(
             case, results, passed, case_start, case_out_dir=case_out_dir,
         )
-        if actions and not getattr(self, "_from_actions_mode", False):
-            summary["plan_entry"] = build_plan_entry(case, origin_snapshot, actions)
+        to_persist = plan_actions if plan_actions else actions
+        if to_persist and not getattr(self, "_from_actions_mode", False):
+            summary["plan_entry"] = build_plan_entry(case, origin_snapshot, to_persist)
         else:
             summary["plan_entry"] = None
         return summary
@@ -933,10 +952,11 @@ class UITestAgent:
         first_role: str | None,
         session_vars: dict[str, Any] | None,
         _get_page_for_role,
-    ) -> tuple[list, list[Any], bool, Optional[str], ActionDispatcher | None, PlaywrightRunner | None, list]:
+    ) -> tuple[list, list[Any], bool, Optional[str], ActionDispatcher | None, PlaywrightRunner | None, list, list]:
         from .planning.role_infer import infer_primary_role
 
         all_actions: list = []
+        all_plan_actions: list = []
         all_raws: list[Any] = []
         all_results: list = []
         primary_role: Optional[str] = None
@@ -1017,6 +1037,7 @@ class UITestAgent:
             if not block_actions:
                 continue
 
+            all_plan_actions.extend(snapshot_actions_for_plan(block_actions))
             block_results = runner.run_actions(block_actions, case.case_id)
             offset = len(all_results)
             all_results.extend(
@@ -1041,9 +1062,9 @@ class UITestAgent:
 
         if not all_actions:
             self.console.print("[yellow]规划结果为空, 跳过执行[/yellow]")
-            return [], all_raws, False, primary_role, dispatcher, runner, all_results
+            return [], all_raws, False, primary_role, dispatcher, runner, all_results, all_plan_actions
 
-        return all_actions, all_raws, passed, primary_role, dispatcher, runner, all_results
+        return all_actions, all_raws, passed, primary_role, dispatcher, runner, all_results, all_plan_actions
 
     def _dump_prompt(self, case, exec_blocks=None) -> str:
         blocks = exec_blocks or build_execution_blocks(case)

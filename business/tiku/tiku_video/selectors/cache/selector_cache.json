@@ -1,235 +1,19 @@
 {
   "version": 1,
-  "saved_at": 1782609336.7633631,
+  "saved_at": 1782724494.568595,
   "entries": {
-    "/video/welcome|click|点击左侧导航'已上传'进入已上传列表页": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "text=\"已上传\"",
-      "method": "text",
-      "name": "已上传",
-      "exact": true,
-      "success_count": 4,
-      "created_at": 1782564153.1160269,
-      "updated_at": 1782607930.570954,
-      "component_library": "ant-design",
-      "selector_type": "css",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/welcome",
-      "ts": 1782607930.572465,
-      "hit_count": 1
-    },
-    "/video/already-upload|hover|悬停'状态'筛选框": {
-      "method": "css",
-      "selector": "text=\"待申诉\"",
-      "nth": 0,
-      "in_dialog": false,
-      "success_count": 5,
-      "created_at": 1782561970.5221708,
-      "updated_at": 1782607955.935049,
-      "component_library": "ant-design",
-      "selector_type": "css",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/already-upload",
-      "ts": 1782609260.829329,
-      "hit_count": 2
-    },
-    "/video/already-upload|click|点击'状态'筛选框中的清除'×'按钮": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//label[contains(normalize-space(.), '状态')]/following::*[contains(@class,'ant-select')][1]//*[contains(@class,'ant-select-clear') or contains(@class,'close-circle') or @aria-label='close-circle' or contains(@class,'circle-close')])[1]",
-      "method": "css",
-      "success_count": 4,
-      "created_at": 1782564333.568626,
-      "updated_at": 1782607959.535993,
-      "component_library": "ant-design",
-      "selector_type": "xpath",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/already-upload",
-      "ts": 1782609264.31584,
-      "hit_count": 2
-    },
-    "/video/already-upload|click|点击'提交'按钮进行查询": {
-      "method": "role",
-      "role": "button",
-      "name": "提 交",
-      "exact": false,
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "role=button[name=\"提 交\"]",
-      "success_count": 4,
-      "created_at": 1782564371.113376,
-      "updated_at": 1782607989.613987,
-      "component_library": "ant-design",
-      "selector_type": "role",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "button",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/already-upload",
-      "ts": 1782609294.101042,
-      "hit_count": 2
-    },
-    "/video/welcome|click|点击侧栏菜单'全部题目'进入全部题目页面": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "text=\"全部题目\"",
-      "method": "text",
-      "name": "全部题目",
-      "exact": true,
-      "success_count": 19,
-      "created_at": 1782142954.8364859,
-      "updated_at": 1782608593.7477078,
-      "component_library": "ant-design",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/welcome",
-      "ts": 1782608593.74794,
-      "hit_count": 1
-    },
-    "/video/all-question|click|在筛选区点击'来源'下拉框": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"来源\")]]//*[@role='combobox'])[1]",
-      "method": "css",
-      "success_count": 24,
-      "created_at": 1782121380.9641411,
-      "updated_at": 1782608612.423148,
-      "component_library": "ant-design",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
-      "ts": 1782608612.423266,
-      "hit_count": 1
-    },
-    "/video/all-question|click|在下拉选项中点击'策略'": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"策略\")])[1]",
-      "method": "css",
-      "success_count": 24,
-      "created_at": 1782121397.6158369,
-      "updated_at": 1782608628.440958,
-      "component_library": "ant-design",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
-      "ts": 1782608628.441046,
-      "hit_count": 1
-    },
-    "/video/all-question|click|在筛选区点击'学段'下拉框": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学段\")]]//*[@role='combobox'])[1]",
-      "method": "css",
-      "success_count": 24,
-      "created_at": 1782121410.135294,
-      "updated_at": 1782608646.207244,
-      "component_library": "ant-design",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
-      "ts": 1782608646.2073119,
-      "hit_count": 1
-    },
-    "/video/all-question|click|在下拉选项中点击'大学'": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学\")])[1]",
-      "method": "css",
-      "success_count": 23,
-      "created_at": 1782121426.30214,
-      "updated_at": 1782608657.0594912,
-      "component_library": "ant-design",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
-      "ts": 1782608657.059548,
-      "hit_count": 1
-    },
-    "/video/all-question|click|在筛选区点击'学科'下拉框": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学科\")]]//*[@role='combobox'])[1]",
-      "method": "css",
-      "success_count": 29,
-      "created_at": 1782121437.823912,
-      "updated_at": 1782608672.514006,
-      "component_library": "ant-design",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
-      "ts": 1782608917.075653,
-      "hit_count": 2
-    },
-    "/video/all-question|click|在下拉选项中点击'大学化学'": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学化学\")])[1]",
-      "method": "css",
-      "success_count": 6,
-      "created_at": 1782457782.152359,
-      "updated_at": 1782608685.72496,
-      "component_library": "ant-design",
-      "selector_type": "xpath",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
-      "ts": 1782608922.801449,
-      "hit_count": 2
-    },
-    "/video/welcome|click|点击'待前审'列表页": {
+    "/video/welcome|click|点击侧栏菜单'待前审'进入待前审页面": {
       "nth": 0,
       "in_dialog": false,
       "selector": "text=\"待前审\"",
       "method": "text",
       "name": "待前审",
       "exact": true,
+      "success_count": 15,
+      "created_at": 1782146813.4398952,
+      "updated_at": 1782718766.029418,
+      "component_library": "ant-design",
+      "selector_type": "css",
       "node_signature": {
         "tag": "",
         "text": "",
@@ -237,10 +21,10 @@
         "class_pattern": ""
       },
       "page_url": "https://www-gwp11-bc.suanshubang.com/video/welcome",
-      "ts": 1782608723.888381,
-      "hit_count": 0
+      "ts": 1782724229.9496331,
+      "hit_count": 8
     },
-    "/video/wait-preview|click|在'待前审'列表页点击'领取题目'": {
+    "/video/wait-preview|click|点击'领取题目'按钮": {
       "nth": 0,
       "in_dialog": false,
       "selector": "button:has-text(\"领取题目\")",
@@ -248,9 +32,9 @@
       "role": "button",
       "name": "领取题目",
       "exact": false,
-      "success_count": 4,
-      "created_at": 1782463425.358619,
-      "updated_at": 1782608748.651135,
+      "success_count": 5,
+      "created_at": 1782437588.58713,
+      "updated_at": 1782722532.669634,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -260,92 +44,49 @@
         "class_pattern": ""
       },
       "page_url": "https://www-gwp11-bc.suanshubang.com/video/wait-preview",
-      "ts": 1782608748.65122,
-      "hit_count": 1
+      "ts": 1782724249.076307,
+      "hit_count": 3
     },
-    "/video/wait-preview|click|点击学科为'化学'一行的'查看'按钮": {
-      "method": "role",
-      "role": "button",
-      "name": "查 看",
-      "exact": false,
+    "/video/detail|click|在详情页选择'题目无任何问题'": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "role=button[name=\"查 看\"]",
-      "success_count": 4,
-      "created_at": 1782463452.197133,
-      "updated_at": 1782608767.675091,
-      "component_library": "ant-design",
-      "selector_type": "role",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "button",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/wait-preview",
-      "ts": 1782608767.6751518,
-      "hit_count": 1
-    },
-    "/video/detail|click|点击'水印题且可做'选项": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "text=\"水印题且可做\"",
+      "selector": "label.ant-radio-wrapper:has-text(\"题目无任何问题\")",
       "method": "text",
-      "name": "水印题且可做",
-      "exact": true,
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608785.41435,
-      "hit_count": 1
-    },
-    "/video/detail|click|点击'学科'下拉框": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '学科')]]//div[contains(@class,'ant-select')])[1]",
-      "method": "css",
+      "name": "题目无任何问题",
+      "exact": false,
       "component_library": "ant-design",
-      "component_type": "select_trigger",
+      "component_type": "radio",
       "node_signature": {
         "tag": "",
         "text": "",
         "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608821.208065,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146947746",
+      "ts": 1782724274.3769238,
       "hit_count": 2
     },
-    "/video/detail|click|在下拉选项中点击'物理'": {
+    "/video/detail|click|点击学科下拉框展开选项列表": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"物理\")])[1]",
+      "selector": "#targetSubject",
       "method": "css",
-      "success_count": 4,
-      "created_at": 1782463487.739725,
-      "updated_at": 1782608806.8396301,
-      "component_library": "ant-design",
-      "selector_type": "xpath",
       "node_signature": {
         "tag": "",
         "text": "",
         "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608806.83973,
-      "hit_count": 1
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146947746",
+      "ts": 1782723209.428062,
+      "hit_count": 0
     },
-    "/video/detail|click|选择'题目无任何问题'": {
+    "/video/detail|click|点击'物理'学科选项": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "label.ant-radio-wrapper:has-text(\"题目无任何问题\")",
+      "selector": "label.ant-radio-wrapper:has-text(\"物理\")",
       "method": "text",
-      "name": "题目无任何问题",
+      "name": "物理",
       "exact": false,
       "component_library": "ant-design",
       "component_type": "radio",
@@ -355,47 +96,8 @@
         "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608810.996716,
-      "hit_count": 1
-    },
-    "/video/detail|click|在下拉选项中点击'大学化学'": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学化学\")])[1]",
-      "method": "css",
-      "success_count": 4,
-      "created_at": 1782463519.7950652,
-      "updated_at": 1782608825.181789,
-      "component_library": "ant-design",
-      "selector_type": "xpath",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608825.1818728,
-      "hit_count": 1
-    },
-    "/video/detail|click|选择审核原因'题目无任何问题'单选项": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "label.ant-radio-wrapper:has-text(\"题目无任何问题\")",
-      "method": "text",
-      "name": "题目无任何问题",
-      "exact": false,
-      "component_library": "ant-design",
-      "component_type": "radio",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608847.655988,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146947746",
+      "ts": 1782723220.515255,
       "hit_count": 1
     },
     "/video/detail|click|点击'提交'按钮": {
@@ -406,9 +108,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=button[name=\"提 交\"]",
-      "success_count": 17,
+      "success_count": 20,
       "created_at": 1782121581.957115,
-      "updated_at": 1782608855.6135628,
+      "updated_at": 1782723228.634869,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -416,11 +118,90 @@
         "role": "button",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146853290",
-      "ts": 1782608855.613666,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146947746",
+      "ts": 1782724315.000252,
+      "hit_count": 2
+    },
+    "/video/wait-preview|click|点击'已审核'": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"已审核\"",
+      "method": "text",
+      "name": "已审核",
+      "exact": true,
+      "success_count": 3,
+      "created_at": 1782561348.002916,
+      "updated_at": 1782723271.538388,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      },
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/wait-preview",
+      "ts": 1782723271.538527,
       "hit_count": 1
     },
-    "/video/wait-preview|click|点击'已审核'标签切换到已审核列表": {
+    "/video/welcome|click|点击'全部题目'": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"全部题目\"",
+      "method": "text",
+      "name": "全部题目",
+      "exact": true,
+      "success_count": 13,
+      "created_at": 1782144885.995884,
+      "updated_at": 1782723292.073921,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      },
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/welcome",
+      "ts": 1782724380.7469041,
+      "hit_count": 2
+    },
+    "/video/detail|click|点击'学科'下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "#targetSubject",
+      "method": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      },
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146947805",
+      "ts": 1782724289.504716,
+      "hit_count": 0
+    },
+    "/video/detail|click|在下拉选项中点击'物理'": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"物理\")])[1]",
+      "method": "css",
+      "success_count": 6,
+      "created_at": 1782463487.739725,
+      "updated_at": 1782724308.3574588,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      },
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/detail/?uniqId=146947805",
+      "ts": 1782724308.357555,
+      "hit_count": 1
+    },
+    "/video/wait-preview|click|点击侧栏菜单'已审核'进入已审核页面": {
       "nth": 0,
       "in_dialog": false,
       "selector": "text=\"已审核\"",
@@ -434,201 +215,98 @@
         "class_pattern": ""
       },
       "page_url": "https://www-gwp11-bc.suanshubang.com/video/wait-preview",
-      "ts": 1782608901.026765,
+      "ts": 1782724358.140439,
       "hit_count": 0
     },
-    "/video/welcome|click|点击侧栏菜单'任务中心'进入任务中心页面": {
+    "/video/all-question|click|在筛选区点击'学段'下拉框": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "text=\"任务中心\"",
-      "method": "text",
-      "name": "任务中心",
-      "exact": true,
-      "success_count": 3,
-      "created_at": 1782468845.2002492,
-      "updated_at": 1782608948.40095,
-      "component_library": "generic",
-      "selector_type": "css",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/welcome",
-      "ts": 1782608948.401027,
-      "hit_count": 1
-    },
-    "/video/taskindex|click|在筛选区点击'学科'下拉框": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//input[contains(@placeholder, '学科')])[1]",
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"学段\")]]//*[@role='combobox'])[1]",
       "method": "css",
-      "success_count": 3,
-      "created_at": 1782468911.0657148,
-      "updated_at": 1782608986.2118342,
+      "success_count": 26,
+      "created_at": 1782121410.135294,
+      "updated_at": 1782724400.3889458,
       "component_library": "ant-design",
-      "selector_type": "xpath",
       "node_signature": {
         "tag": "",
         "text": "",
         "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/taskindex?vvp=%2Fvvp%2Fv3%2Ftaskindex",
-      "ts": 1782608986.211908,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
+      "ts": 1782724400.389049,
       "hit_count": 1
     },
-    "/video/taskindex|click|在下拉选项中点击'大学化学'": {
+    "/video/all-question|click|在下拉选项中点击'大学'": {
       "nth": 0,
       "in_dialog": false,
-      "selector": ".ant-select-dropdown:visible .ant-select-item-option-content:has-text(\"大学化学\")",
-      "method": "role",
-      "role": "option",
-      "name": "大学化学",
-      "exact": false,
-      "success_count": 3,
-      "created_at": 1782468920.615156,
-      "updated_at": 1782608994.8187609,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学\")])[1]",
+      "method": "css",
+      "success_count": 25,
+      "created_at": 1782121426.30214,
+      "updated_at": 1782724410.4784,
       "component_library": "ant-design",
-      "selector_type": "role",
       "node_signature": {
         "tag": "",
         "text": "",
-        "role": "option",
+        "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/taskindex?vvp=%2Fvvp%2Fv3%2Ftaskindex",
-      "ts": 1782608994.818824,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
+      "ts": 1782724410.478494,
       "hit_count": 1
     },
-    "/video/taskindex|click|点击'领取题目'按钮": {
+    "/video/all-question|click|在筛选区点击'来源'下拉框": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "button:has-text(\"领取题目\")",
-      "method": "role",
-      "role": "button",
-      "name": "领取题目",
-      "exact": false,
-      "success_count": 3,
-      "created_at": 1782468955.364544,
-      "updated_at": 1782609026.4628081,
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), \"来源\")]]//*[@role='combobox'])[1]",
+      "method": "css",
+      "success_count": 26,
+      "created_at": 1782121380.9641411,
+      "updated_at": 1782724424.041056,
       "component_library": "ant-design",
-      "selector_type": "role",
       "node_signature": {
         "tag": "",
         "text": "",
-        "role": "button",
+        "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/taskindex?vvp=%2Fvvp%2Fv3%2Ftaskindex",
-      "ts": 1782609026.462914,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
+      "ts": 1782724424.04117,
       "hit_count": 1
     },
-    "/video/taskindex|click|点击'待上传'页面标签或菜单进入待上传页面": {
-      "method": "role",
-      "role": "link",
-      "name": "待上传",
-      "exact": false,
+    "/video/all-question|click|在下拉选项中点击'策略投放'": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "role=link[name=\"待上传\"]",
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"策略投放\")])[1]",
+      "method": "css",
       "node_signature": {
         "tag": "",
         "text": "",
-        "role": "link",
+        "role": "",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/taskindex?vvp=%2Fvvp%2Fv3%2Ftaskindex",
-      "ts": 1782609069.103824,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
+      "ts": 1782724433.054819,
       "hit_count": 0
     },
-    "/video/tasklist|click|点击'提交视频'按钮": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "button:has-text(\"提交视频\")",
+    "/video/all-question|click|点击'提交'按钮进行查询": {
       "method": "role",
       "role": "button",
-      "name": "提交视频",
+      "name": "提 交",
       "exact": false,
-      "success_count": 2,
-      "created_at": 1782561744.4909272,
-      "updated_at": 1782609094.79223,
-      "component_library": "ant-design",
-      "selector_type": "role",
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
       "node_signature": {
         "tag": "",
         "text": "",
         "role": "button",
         "class_pattern": ""
       },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/tasklist?vvp=%2Fvvp%2Fv3%2Ftasklist",
-      "ts": 1782609094.792661,
-      "hit_count": 1
-    },
-    "/video/tasklist|click|点击'确认'按钮": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "button:has-text(\"确认\")",
-      "method": "role",
-      "role": "button",
-      "name": "确认",
-      "exact": false,
-      "success_count": 2,
-      "created_at": 1782561824.283398,
-      "updated_at": 1782609172.171459,
-      "component_library": "ant-design",
-      "selector_type": "role",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "button",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/tasklist?vvp=%2Fvvp%2Fv3%2Ftasklist",
-      "ts": 1782609172.171621,
-      "hit_count": 1
-    },
-    "/video/tasklist|click|点击'提交任务'按钮": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "button:has-text(\"提交任务\")",
-      "method": "role",
-      "role": "button",
-      "name": "提交任务",
-      "exact": false,
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "button",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/tasklist?vvp=%2Fvvp%2Fv3%2Ftasklist",
-      "ts": 1782609194.0769548,
+      "page_url": "https://www-gwp11-bc.suanshubang.com/video/all-question",
+      "ts": 1782724452.5313768,
       "hit_count": 0
-    },
-    "/video/tasklist|click|点击左侧导航'已上传'进入已上传列表页": {
-      "method": "role",
-      "role": "link",
-      "name": "已上传",
-      "exact": false,
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "role=link[name=\"已上传\"]",
-      "success_count": 2,
-      "created_at": 1782561889.067225,
-      "updated_at": 1782609238.171647,
-      "component_library": "ant-design",
-      "selector_type": "role",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "link",
-        "class_pattern": ""
-      },
-      "page_url": "https://www-gwp11-bc.suanshubang.com/video/tasklist?vvp=%2Fvvp%2Fv3%2Ftasklist",
-      "ts": 1782609238.171804,
-      "hit_count": 1
     }
   }
 }

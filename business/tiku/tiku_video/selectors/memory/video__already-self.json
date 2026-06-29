@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/already-self",
-  "saved_at": 1782609336.764148,
+  "saved_at": 1782724494.569015,
   "entries": {
     "click|点击最近一条数据的查看": {
       "method": "role",
@@ -20,6 +20,25 @@
         "tag": "",
         "text": "",
         "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏菜单待前审进入待前审页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"待前审\"",
+      "method": "text",
+      "name": "待前审",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782722565.622047,
+      "updated_at": 1782722565.622047,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
         "class_pattern": ""
       }
     }

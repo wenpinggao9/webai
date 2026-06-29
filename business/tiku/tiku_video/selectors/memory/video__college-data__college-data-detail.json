@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "route": "/video/college-data/college-data-detail",
+  "saved_at": 1782724494.569015,
+  "entries": {
+    "click|在筛选区点击学段下拉框": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//input[contains(@placeholder, '学段')])[1]",
+      "method": "css",
+      "success_count": 2,
+      "created_at": 1782714537.720713,
+      "updated_at": 1782717981.136832,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击大学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": ".ant-select-dropdown:visible .ant-select-item-option-content:has-text(\"大学\")",
+      "method": "role",
+      "role": "option",
+      "name": "大学",
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782714545.704449,
+      "updated_at": 1782717989.1109362,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "option",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击大学化学": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": ".ant-select-dropdown:visible .ant-select-item-option-content:has-text(\"大学化学\")",
+      "method": "role",
+      "role": "option",
+      "name": "大学化学",
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782714566.0048928,
+      "updated_at": 1782718010.3653178,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "option",
+        "class_pattern": ""
+      }
+    },
+    "click|点击查询按钮": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "button:has-text(\"查询\")",
+      "method": "role",
+      "role": "button",
+      "name": "查询",
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782714579.442359,
+      "updated_at": 1782718024.820569,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "click|点击个人中心": {
+      "method": "role",
+      "role": "menuitem",
+      "name": "个人中心",
+      "exact": true,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=menuitem[name=\"个人中心\"]",
+      "success_count": 1,
+      "created_at": 1782718468.4818392,
+      "updated_at": 1782718468.4818392,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "menuitem",
+        "class_pattern": ""
+      }
+    },
+    "click|点击结算信息（新）": {
+      "method": "role",
+      "role": "menuitem",
+      "name": "结算信息（新）",
+      "exact": true,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=menuitem[name=\"结算信息（新）\"]",
+      "success_count": 1,
+      "created_at": 1782718487.985065,
+      "updated_at": 1782718487.985065,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "menuitem",
+        "class_pattern": ""
+      }
+    }
+  }
+}

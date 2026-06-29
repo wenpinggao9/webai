@@ -22,21 +22,15 @@
       "actions": [
         {
           "type": "api_call",
-          "intent": "投放策略来源、大学学段、数学学科的题目第1题，获取orderId1"
+          "intent": "投放策略来源、大学学段、数学学科的题目（第1题），获取orderId1"
         },
         {
           "type": "api_call",
-          "intent": "投放策略来源、大学学段、数学学科的题目第2题，获取orderId2"
+          "intent": "投放策略来源、大学学段、数学学科的题目（第2题），获取orderId2"
         },
         {
           "type": "click",
-          "intent": "点击侧栏菜单'全部题目'进入全部题目页面",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/all-question"
-            }
-          }
+          "intent": "点击'全部题目'"
         },
         {
           "type": "click",
@@ -44,8 +38,7 @@
         },
         {
           "type": "click",
-          "intent": "在下拉选项中点击'策略'",
-          "value": "策略投放"
+          "intent": "在下拉选项中点击'策略'"
         },
         {
           "type": "click",
@@ -69,30 +62,18 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证列表中存在工单ID为146720881的记录",
-          "value": "146720881",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "${orderId1}"
-            }
-          }
+          "intent": "验证列表中存在工单ID为${orderId1}的记录",
+          "value": "${orderId1}"
         },
         {
           "type": "assert_text",
-          "intent": "验证列表中存在工单ID为146720893的记录",
-          "value": "146720893",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "${orderId2}"
-            }
-          }
+          "intent": "验证列表中存在工单ID为${orderId2}的记录",
+          "value": "${orderId2}"
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881的生产状态为待前审",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1}的生产状态为待前审",
+          "value": "${orderId1}",
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
@@ -101,15 +82,16 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720893的生产状态为待前审",
-          "value": "146720893",
+          "intent": "验证工单ID为${orderId2}的生产状态为待前审",
+          "value": "${orderId2}",
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
             "row_key_column": "工单ID"
           }
         }
-      ]
+      ],
+      "action_count": 14
     },
     {
       "case_id": "K12前审_投放_002",
@@ -138,12 +120,15 @@
         },
         {
           "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "click",
           "intent": "在筛选区点击'来源'下拉框"
         },
         {
           "type": "click",
-          "intent": "在下拉选项中点击'策略'",
-          "value": "策略投放"
+          "intent": "在下拉选项中点击'策略'"
         },
         {
           "type": "click",
@@ -159,8 +144,8 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证146720918的生产状态为待前审",
-          "value": "146720918",
+          "intent": "验证orderId3的生产状态为待前审",
+          "value": "${orderId3}",
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
@@ -169,15 +154,16 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证146720931的生产状态为待前审",
-          "value": "146720931",
+          "intent": "验证orderId4的生产状态为待前审",
+          "value": "${orderId4}",
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
             "row_key_column": "工单ID"
           }
         }
-      ]
+      ],
+      "action_count": 10
     },
     {
       "case_id": "大学前审_流程_003",
@@ -188,7 +174,7 @@
           "大学前审老师A权限且学段是大学，前审角色领取按钮高亮"
         ],
         "steps": [
-          "前审在待前审页面点击领取"
+          "前审在待前审页面点击领取题目"
         ],
         "expectations": [
           "领取成功后展现在待前审列表中",
@@ -199,66 +185,35 @@
       "actions": [
         {
           "type": "click",
-          "intent": "点击侧栏菜单'待前审'进入待前审页面",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/wait-preview"
-            }
-          }
+          "intent": "点击侧栏菜单'待前审'进入待前审页面"
         },
         {
           "type": "click",
-          "intent": "点击'领取'按钮",
-          "value": "领取题目"
+          "intent": "点击'领取题目'按钮"
         },
         {
           "type": "assert_text",
-          "intent": "验证领取成功后待前审列表中存在任务",
-          "value": "待前审",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "待前审"
-            }
-          }
+          "intent": "验证领取成功后记录展现在待前审列表中",
+          "value": "待前审"
         },
         {
           "type": "assert_count",
-          "intent": "验证待完成任务数量大于1",
-          "value": ">1",
-          "extras": {
-            "codegen_assert": {
-              "kind": "list_count",
-              "op": ">",
-              "threshold": 1
-            }
-          }
+          "intent": "验证待完成任务数量大于1个",
+          "value": ">1"
         },
         {
           "type": "assert_text",
           "intent": "验证待完成列表各行均包含大学学段",
-          "value": "大学",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "大学"
-            }
-          }
+          "value": "大学"
         },
         {
           "type": "assert_text",
           "intent": "验证待完成列表各行不含小学学段",
           "value": "小学",
-          "extras": {
-            "codegen_assert": {
-              "kind": "negate_literal",
-              "text": "小学"
-            }
-          },
           "negate": true
         }
-      ]
+      ],
+      "action_count": 6
     },
     {
       "case_id": "大学前审_流程_004",
@@ -283,153 +238,71 @@
       "actions": [
         {
           "type": "click",
-          "intent": "点击待前审列表中任务的'查看'",
-          "extras": {
-            "button": "查看",
-            "row_key": "__first_row__",
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/detail/"
-            }
-          }
+          "intent": "点击待前审列表中任务的'查看'"
         },
         {
           "type": "assert_text",
           "intent": "验证进入任务详情页",
-          "value": "详情",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "详情"
-            }
-          }
+          "value": "详情"
         },
         {
           "type": "assert_text",
           "intent": "验证最上方标题包含大学数学",
-          "value": "大学数学",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "大学数学"
-            }
-          }
+          "value": "大学数学"
         },
         {
           "type": "assert_text",
           "intent": "验证详情页左侧展示题目详情",
-          "value": "题目详情",
-          "extras": {
-            "codegen_assert": {
-              "kind": "semantic_only",
-              "intent": "验证详情页左侧展示题目详情"
-            }
-          }
+          "value": "题目详情"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'题目内容涉及不良导向/敏感信息'",
-          "value": "题目内容涉及不良导向/敏感信息",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "题目内容涉及不良导向/敏感信息"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'题目内容涉及不良导向/敏感信息'",
+          "value": "题目内容涉及不良导向/敏感信息"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'非大学题'",
-          "value": "非大学题",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "非大学题"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'非大学题'",
+          "value": "非大学题"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'非目标学科'",
-          "value": "非目标学科",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "非目标学科"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'非目标学科'",
+          "value": "非目标学科"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'题目不完整或题干残缺'",
-          "value": "题目不完整或题干残缺",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "题目不完整或题干残缺"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'题目不完整或题干残缺'",
+          "value": "题目不完整或题干残缺"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'多题'",
-          "value": "多题",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "多题"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'多题'",
+          "value": "多题"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'水印题且可做'",
-          "value": "水印题且可做",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "水印题且可做"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'水印题且可做'",
+          "value": "水印题且可做"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项包含'题目无任何问题'",
-          "value": "题目无任何问题",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "题目无任何问题"
-            }
-          }
+          "intent": "验证右侧展示审核原因选项包含'题目无任何问题'",
+          "value": "题目无任何问题"
         },
         {
           "type": "assert_text",
           "intent": "验证审核原因选项只能单选",
-          "value": "单选",
-          "extras": {
-            "codegen_assert": {
-              "kind": "control_single",
-              "radio_min": 2,
-              "checkbox_max": 0,
-              "radio": 7,
-              "checkbox": 0
-            }
-          }
+          "value": "单选"
         },
         {
           "type": "assert_text",
           "intent": "验证详情页不存在放弃选项",
           "value": "放弃",
-          "extras": {
-            "codegen_assert": {
-              "kind": "negate_literal",
-              "text": "放弃"
-            }
-          },
           "negate": true
         }
-      ]
+      ],
+      "action_count": 13
     },
     {
       "case_id": "大学前审_流程_005",
@@ -459,26 +332,15 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/detail/"
-            }
-          }
+          "intent": "点击'提交'按钮"
         },
         {
           "type": "assert_text",
           "intent": "验证页面自动加载下一个任务的详情页",
-          "value": "详情",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "详情"
-            }
-          }
+          "value": "详情"
         }
-      ]
+      ],
+      "action_count": 4
     },
     {
       "case_id": "大学前审_流程_006",
@@ -508,37 +370,27 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/wait-preview"
-            }
-          }
+          "intent": "点击'提交'按钮"
         },
         {
           "type": "assert_text",
-          "intent": "验证提交后页面自动加载下一个任务详情或详情页关闭",
+          "intent": "验证提交后页面自动加载下一个待完成任务详情或详情页关闭",
           "extras": {
             "any_of": true,
             "branches": [
               {
                 "intent": "验证页面自动加载下一个待完成任务详情页",
-                "value": "待完成"
+                "value": "任务详情"
               },
               {
                 "intent": "验证详情页关闭回到列表页",
                 "value": "待完成"
               }
-            ],
-            "codegen_assert": {
-              "kind": "list_count",
-              "op": ">",
-              "threshold": 0
-            }
+            ]
           }
         }
-      ]
+      ],
+      "action_count": 4
     },
     {
       "case_id": "大学前审_工单状态_007",
@@ -560,12 +412,15 @@
       "actions": [
         {
           "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "click",
           "intent": "在筛选区点击'来源'下拉框"
         },
         {
           "type": "click",
-          "intent": "在下拉选项中点击'策略'",
-          "value": "策略投放"
+          "intent": "在下拉选项中点击'策略'"
         },
         {
           "type": "click",
@@ -581,8 +436,8 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720893的工单生产状态为已退场",
-          "value": "146720893",
+          "intent": "验证工单ID为${orderId1001}的工单生产状态为已退场",
+          "value": "${orderId1001}",
           "extras": {
             "column": "生产状态",
             "expected": "已退场",
@@ -591,15 +446,16 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881的工单生产状态为待前审",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1002}的工单生产状态为待前审",
+          "value": "${orderId1002}",
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
             "row_key_column": "工单ID"
           }
         }
-      ]
+      ],
+      "action_count": 8
     },
     {
       "case_id": "大学前审_日志_008",
@@ -629,7 +485,7 @@
         {
           "type": "fill",
           "intent": "在筛选区搜索框输入工单ID",
-          "value": "146720893"
+          "value": "${orderId1001}"
         },
         {
           "type": "click",
@@ -637,37 +493,25 @@
         },
         {
           "type": "click",
-          "intent": "点击146720893的'日志'",
+          "intent": "点击${orderId1001}的'日志'",
           "extras": {
-            "row_key": "146720893",
+            "row_key": "${orderId1001}",
             "button": "日志",
-            "row_key_column": "工单ID",
-            "row_key_source": "extras.row_key"
+            "row_key_column": "工单ID"
           }
         },
         {
           "type": "assert_text",
           "intent": "验证日志末尾包含行为'前审领取'",
-          "value": "前审领取",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "前审领取"
-            }
-          }
+          "value": "前审领取"
         },
         {
           "type": "assert_text",
           "intent": "验证日志末尾包含行为'前审举报'",
-          "value": "前审举报",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "前审举报"
-            }
-          }
+          "value": "前审举报"
         }
-      ]
+      ],
+      "action_count": 7
     },
     {
       "case_id": "大学前审_领取限制_009",
@@ -692,14 +536,11 @@
           "intent": "验证'领取题目'按钮置灰",
           "value": "领取题目",
           "extras": {
-            "state": "disabled",
-            "codegen_assert": {
-              "kind": "button_enabled",
-              "text": "领取题目"
-            }
+            "state": "disabled"
           }
         }
-      ]
+      ],
+      "action_count": 2
     },
     {
       "case_id": "大学前审_流程_010",
@@ -748,62 +589,31 @@
       "actions": [
         {
           "type": "click",
-          "intent": "点击侧栏菜单'待前审'进入待前审页面",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/wait-preview"
-            }
-          }
+          "intent": "点击侧栏菜单'待前审'进入待前审页面"
         },
         {
           "type": "click",
-          "intent": "点击'领取题目'按钮"
+          "intent": "在'待前审'页面点击'领取题目'按钮"
         },
         {
           "type": "assert_text",
           "intent": "验证页面不存在领取失败提示",
           "value": "领取失败",
-          "extras": {
-            "codegen_assert": {
-              "kind": "negate_literal",
-              "text": "领取失败"
-            }
-          },
           "negate": true
         },
         {
           "type": "assert_count",
           "intent": "验证待完成任务列表不为空",
-          "value": ">0",
-          "extras": {
-            "codegen_assert": {
-              "kind": "list_count",
-              "op": ">",
-              "threshold": 0
-            }
-          }
+          "value": ">0"
         },
         {
           "type": "click",
-          "intent": "点击'查看'",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/detail/"
-            }
-          }
+          "intent": "点击'查看'按钮"
         },
         {
           "type": "assert_text",
           "intent": "验证页面进入任务详情页",
-          "value": "任务详情",
-          "extras": {
-            "codegen_assert": {
-              "kind": "semantic_only",
-              "intent": "验证页面进入任务详情页"
-            }
-          }
+          "value": "任务详情"
         },
         {
           "type": "click",
@@ -811,13 +621,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/wait-preview"
-            }
-          }
+          "intent": "点击'提交'按钮"
         },
         {
           "type": "assert_text",
@@ -832,70 +636,34 @@
               {
                 "intent": "验证页面自动加载下一个任务详情"
               }
-            ],
-            "codegen_assert": {
-              "kind": "list_count",
-              "op": ">",
-              "threshold": 0
-            }
+            ]
           }
         },
         {
           "type": "click",
-          "intent": "点击'已审核'页面切换到已审核列表",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/already-self"
-            }
-          }
+          "intent": "点击'已审核'页面"
         },
         {
           "type": "click",
-          "intent": "点击列表中最近一条数据的'查看'按钮",
-          "extras": {
-            "button": "查看",
-            "row_key": "__first_row__",
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/detail/"
-            }
-          }
+          "intent": "点击列表中第一行的'查看'按钮"
         },
         {
           "type": "assert_text",
           "intent": "验证审核行为显示为举报",
-          "value": "举报",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "举报"
-            }
-          }
+          "value": "举报"
         },
         {
           "type": "assert_text",
           "intent": "验证学科显示为数学",
-          "value": "数学",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "数学"
-            }
-          }
+          "value": "数学"
         },
         {
           "type": "assert_text",
           "intent": "验证学段显示为大学",
-          "value": "大学",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "大学"
-            }
-          }
+          "value": "大学"
         }
-      ]
+      ],
+      "action_count": 14
     },
     {
       "case_id": "大学前审_流程_011",
@@ -917,8 +685,7 @@
         },
         {
           "type": "click",
-          "intent": "在下拉选项中点击'策略'",
-          "value": "策略投放"
+          "intent": "在下拉选项中点击'策略'"
         },
         {
           "type": "click",
@@ -930,8 +697,8 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720893的生产状态为已退场",
-          "value": "146720893",
+          "intent": "验证工单ID为${orderId1001}的生产状态为已退场",
+          "value": "${orderId1001}",
           "extras": {
             "column": "生产状态",
             "expected": "已退场",
@@ -940,15 +707,16 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881的生产状态为已退场",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1002}的生产状态为已退场",
+          "value": "${orderId1002}",
           "extras": {
             "column": "生产状态",
             "expected": "已退场",
             "row_key_column": "工单ID"
           }
         }
-      ]
+      ],
+      "action_count": 6
     },
     {
       "case_id": "大学前审_审核历史_012",
@@ -972,13 +740,7 @@
       "actions": [
         {
           "type": "click",
-          "intent": "点击'审核历史'",
-          "extras": {
-            "codegen_post_wait": {
-              "kind": "url_contains",
-              "fragment": "/video/check-history"
-            }
-          }
+          "intent": "点击'审核历史'"
         },
         {
           "type": "click",
@@ -1010,111 +772,94 @@
         },
         {
           "type": "click",
-          "intent": "在'审核时间'日期面板中选择开始日期2026-06-25"
+          "intent": "在'审核时间'日期面板中选择开始日期2026-06-28"
         },
         {
           "type": "click",
-          "intent": "在'审核时间'日期面板中选择结束日期2026-06-26"
+          "intent": "在'审核时间'日期面板中选择结束日期2026-06-29"
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮进行查询"
+          "intent": "点击'提交'进行查询"
         },
         {
           "type": "assert_count",
           "intent": "验证当前总数大于0",
-          "value": ">0",
-          "extras": {
-            "codegen_assert": {
-              "kind": "list_count",
-              "op": ">",
-              "threshold": 0
-            }
-          }
+          "value": ">0"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核历史列表中存在工单ID 146720893",
-          "value": "146720893",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "${orderId}"
-            }
-          }
+          "intent": "验证审核历史列表中存在${orderId1001}",
+          "value": "${orderId1001}"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核历史列表中存在工单ID 146720881",
-          "value": "146720881",
-          "extras": {
-            "codegen_assert": {
-              "kind": "literal",
-              "text": "${orderId1}"
-            }
-          }
+          "intent": "验证审核历史列表中存在${orderId1002}",
+          "value": "${orderId1002}"
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720893的审核老师UID为1001636",
-          "value": "146720893",
+          "intent": "验证工单ID为${orderId1001}的审核老师UID为1001636",
+          "value": "${orderId1001}",
           "extras": {
             "column": "审核老师UID",
-            "expected": "1001636"
+            "expected": "1001636",
+            "row_key_column": "工单ID"
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720893的举报原因为「题目内容涉及不良导向/敏感信息」",
-          "value": "146720893",
+          "intent": "验证工单ID为${orderId1001}的举报原因为题目内容涉及不良导向/敏感信息",
+          "value": "${orderId1001}",
           "extras": {
             "column": "举报原因",
-            "expected": "题目内容涉及不良导向/敏感信息"
+            "expected": "题目内容涉及不良导向/敏感信息",
+            "row_key_column": "工单ID"
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881的其中一行审核老师UID为1001635",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1002}的其中一行审核老师UID为1001635",
+          "value": "${orderId1002}",
           "extras": {
             "column": "审核老师UID",
-            "expected": "1001635"
+            "expected": "1001635",
+            "row_key_column": "工单ID"
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881的其中一行审核老师UID为1001636",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1002}的另一行审核老师UID为1001636",
+          "value": "${orderId1002}",
           "extras": {
             "column": "审核老师UID",
-            "expected": "1001636"
+            "expected": "1001636",
+            "row_key_column": "工单ID"
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881且审核老师UID为1001635的举报原因为多题",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1002}且审核老师UID为1001635的举报原因为多题",
+          "value": "${orderId1002}",
           "extras": {
             "column": "举报原因",
             "expected": "多题",
-            "row_filter": {
-              "审核老师UID": "1001635"
-            }
+            "row_key_column": "工单ID"
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为146720881且审核老师UID为1001636的举报原因为多题",
-          "value": "146720881",
+          "intent": "验证工单ID为${orderId1002}且审核老师UID为1001636的举报原因为多题",
+          "value": "${orderId1002}",
           "extras": {
             "column": "举报原因",
             "expected": "多题",
-            "row_filter": {
-              "审核老师UID": "1001636"
-            }
+            "row_key_column": "工单ID"
           }
         }
-      ]
+      ],
+      "action_count": 20
     }
-  ]
+  ],
+  "total_cases": 12
 }

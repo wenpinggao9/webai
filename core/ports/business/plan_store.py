@@ -1,6 +1,7 @@
 """动作规划：business/<project>/actions/<用例文件名>_actions.json."""
 from __future__ import annotations
 
+import copy
 import json
 import logging
 from pathlib import Path
@@ -35,6 +36,19 @@ def planned_actions_path(project_dir: Path, case_id: str) -> Path:
     return action_plans_dir(project_dir) / f"{case_id}.json"
 
 
+def snapshot_actions_for_plan(actions: list[Any]) -> list[Any]:
+    """执行前深拷贝动作列表，避免变量替换污染写入 actions 文件的内容."""
+    out: list[Any] = []
+    for a in actions:
+        if hasattr(a, "model_copy"):
+            out.append(a.model_copy(deep=True))
+        elif isinstance(a, dict):
+            out.append(copy.deepcopy(a))
+        else:
+            out.append(a)
+    return out
+
+
 def dump_action_for_file(action: Any) -> dict[str, Any]:
     if hasattr(action, "model_dump"):
         raw = action.model_dump()
@@ -65,11 +79,22 @@ def build_plan_entry(case: Any, origin_case: dict[str, Any], actions: list[Any])
     }
 
 
-def save_case_file_actions(project_dir: Path, case_file_stem: str, entries: list[dict[str, Any]]) -> Path:
-    """将一次 run 的规划结果写入 actions/<stem>_actions.json（覆盖整文件）."""
+def save_case_file_actions(
+    project_dir: Path,
+    case_file_stem: str,
+    entries: list[dict[str, Any]],
+    *,
+    overwrite: bool = True,
+) -> Optional[Path]:
+    """将一次 run 的规划结果写入 actions/<stem>_actions.json.
+
+    overwrite=False 且文件已存在时跳过写入，返回 None.
+    """
     out_dir = action_plans_dir(project_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     path = case_file_actions_path(project_dir, case_file_stem)
+    if path.is_file() and not overwrite:
+        return None
     payload = {"cases": entries}
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return path

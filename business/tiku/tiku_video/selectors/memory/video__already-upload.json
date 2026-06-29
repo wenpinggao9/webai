@@ -1,16 +1,16 @@
 {
   "version": 1,
   "route": "/video/already-upload",
-  "saved_at": 1782609336.764148,
+  "saved_at": 1782724494.569015,
   "entries": {
     "hover|悬停状态筛选框": {
       "method": "css",
       "selector": "text=\"待申诉\"",
       "nth": 0,
       "in_dialog": false,
-      "success_count": 5,
+      "success_count": 6,
       "created_at": 1782561970.5221708,
-      "updated_at": 1782607955.935049,
+      "updated_at": 1782708926.158697,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -25,9 +25,9 @@
       "in_dialog": false,
       "selector": "xpath=(//label[contains(normalize-space(.), '状态')]/following::*[contains(@class,'ant-select')][1]//*[contains(@class,'ant-select-clear') or contains(@class,'close-circle') or @aria-label='close-circle' or contains(@class,'circle-close')])[1]",
       "method": "css",
-      "success_count": 4,
+      "success_count": 5,
       "created_at": 1782564333.568626,
-      "updated_at": 1782607959.535993,
+      "updated_at": 1782708934.175649,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -45,15 +45,32 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=button[name=\"提 交\"]",
-      "success_count": 4,
+      "success_count": 5,
       "created_at": 1782564371.113376,
-      "updated_at": 1782607989.613987,
+      "updated_at": 1782708961.816894,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
         "tag": "",
         "text": "",
         "role": "button",
+        "class_pattern": ""
+      }
+    },
+    "hover|悬停状态筛选框，使清除×按钮显示出来": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '状态')]]//div[contains(@class,'ant-select')])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782708934.028745,
+      "updated_at": 1782708934.028745,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
         "class_pattern": ""
       }
     }

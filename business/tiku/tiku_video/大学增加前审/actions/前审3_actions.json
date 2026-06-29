@@ -1,0 +1,43 @@
+{
+  "cases": [
+    {
+      "case_id": "K12前审_领取_017",
+      "module": "K12前审",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [
+          "前审老师C（teacherC_k）学段是非大学"
+        ],
+        "steps": [
+          "点击「待前审」",
+          "前审老师点击「领取题目」"
+        ],
+        "expectations": [
+          "预期：待完成任务数量大于1个",
+          "预期：待完成列表所有任务学段均不含「大学」（可为小学、初中、高中）"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'待前审'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'领取题目'"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证待完成任务数量大于1个",
+          "value": ">1"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证待完成列表所有任务学段均不含大学",
+          "value": "大学",
+          "negate": true
+        }
+      ]
+    }
+  ]
+}

@@ -83,6 +83,7 @@ runner:
   pre_readiness_check: true  # 步骤⑩ 步骤前就绪检查 (弹窗/表单优先 + 必填检测 + 恢复动作)
   post_step_check: true      # 步骤⑫ 步骤后校验 (防假操作) + 步骤⑬ 带重试
   post_step_max_retries: 5   # 步骤⑬ 带后校验重试上限
+  overwrite_actions: false    # 是否覆盖写入 actions/ 文件
 
 # 步骤⑨ 智能加速层 TTL
 acceleration:

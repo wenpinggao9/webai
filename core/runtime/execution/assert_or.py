@@ -4,16 +4,27 @@ from __future__ import annotations
 import re
 from typing import Any, Optional
 
+from .page_morphology import (
+    MainContentMorphology,
+    detect_main_content_morphology,
+    main_content_contains,
+    token_only_in_nav,
+)
 from .post_submit_eval import (
-    build_live_submit_facts,
     eval_submit_expect,
     infer_expect_from_text,
 )
-from .script_helpers import is_detail_submission_url
 
 _OR_INTENT_RE = re.compile(r"否则|有的话|没有.{0,24}则|任一|任意一种")
-_DETAIL_BRANCH_RE = re.compile(r"详情|任务详情")
-_LIST_BRANCH_RE = re.compile(r"待领取|待前审|领取页|列表页")
+# 分支 intent 语义 (来自用例描述, 非 DOM 业务字段)
+_LIST_BRANCH_RE = re.compile(
+    r"列表|list|回到|返回|回.*页|领.*页|索引页|一览",
+    re.I,
+)
+_DETAIL_BRANCH_RE = re.compile(
+    r"详情|detail|下一条|另一条|下一个|单条|记录页|明细",
+    re.I,
+)
 
 
 def is_or_assert(action: Any) -> bool:
@@ -57,13 +68,70 @@ def _resolve_or_page_url(
     return ""
 
 
-def _resolve_or_body_text(page: Any, body_text: str = "") -> str:
-    if body_text:
-        return body_text[:4000]
-    try:
-        return (page.inner_text("body") or "")[:4000]
-    except Exception:
-        return ""
+def _branch_wants_list(intent: str, branch_value: str) -> bool:
+    if _LIST_BRANCH_RE.search(intent):
+        return True
+    if branch_value and not _DETAIL_BRANCH_RE.search(intent):
+        return bool(_LIST_BRANCH_RE.search(branch_value))
+    return False
+
+
+def _branch_wants_form_detail(intent: str) -> bool:
+    return bool(_DETAIL_BRANCH_RE.search(intent))
+
+
+def _layout_hit_for_branch(
+    intent: str,
+    branch_value: str,
+    morph: MainContentMorphology,
+) -> Optional[tuple[bool, str]]:
+    """结构层: table_dominant / form_dominant (无业务词). mixed 返回 None 交语义层."""
+    want_list = _branch_wants_list(intent, branch_value)
+    want_form = _branch_wants_form_detail(intent)
+
+    if want_list and morph.is_table_dominant:
+        return True, "主内容区为数据表主导布局 (table_dominant)"
+    if want_list and morph.is_form_dominant:
+        return False, "主内容区仍为表单主导布局 (form_dominant)"
+    if want_form and morph.is_form_dominant:
+        return True, "主内容区为表单/单记录主导布局 (form_dominant)"
+    if want_form and morph.is_table_dominant:
+        return False, "主内容区仍为数据表主导布局 (table_dominant)"
+    return None
+
+
+def _eval_branch_with_facts(
+    branch_intent: str,
+    morph: MainContentMorphology,
+    facts: Any,
+    url: str,
+) -> Optional[tuple[bool, str]]:
+    exp = infer_expect_from_text(branch_intent)
+    if not exp:
+        return None
+    if exp == "navigated_away":
+        if morph.is_table_dominant:
+            return True, "主内容区已切换为数据表主导布局"
+        if morph.is_form_dominant:
+            return False, "主内容区仍为表单主导布局"
+        return None
+    if exp == "entity_changed":
+        if morph.is_form_dominant:
+            if facts and getattr(facts, "entity_changed", False):
+                return True, (
+                    f"主内容区表单布局且实体已切换 "
+                    f"({facts.entity_id_before} → {facts.entity_id_after})"
+                )
+            return True, "主内容区为表单/单记录主导布局"
+        if morph.is_table_dominant:
+            return False, "主内容区为数据表布局, 非单记录表单"
+        return None
+    ok, msg = eval_submit_expect(exp, facts, url)
+    if ok and exp in ("navigated_away", "entity_changed"):
+        return None
+    if ok:
+        return True, msg
+    return False, msg
 
 
 def try_or_branches(
@@ -75,9 +143,10 @@ def try_or_branches(
     page_url: str = "",
     live_facts: Any = None,
 ) -> Optional[tuple[bool, str]]:
-    """按 extras.branches 逐支尝试: 优先实时 DOM 字面量, 再用实时 URL/实体判定."""
+    """逐支尝试: 主区结构布局 → 主区字面量 → 提交事实; 均未决则返回 None 交语义断言."""
     url = _resolve_or_page_url(page, page_url, dispatch_meta)
     facts = live_facts
+    morph = detect_main_content_morphology(page)
 
     for i, raw in enumerate(branches):
         if not isinstance(raw, dict):
@@ -85,26 +154,45 @@ def try_or_branches(
         branch_intent = str(raw.get("intent") or raw.get("desc") or "").strip()
         branch_value = str(raw.get("value") or "").strip()
         label = branch_intent or branch_value or f"分支{i + 1}"
-        if branch_value and branch_value in body_text:
-            return True, f"或断言(分支{i + 1}): 页面包含 {branch_value!r} ({label})"
+
+        layout_hit = _layout_hit_for_branch(branch_intent, branch_value, morph)
+        if layout_hit is not None:
+            ok, detail = layout_hit
+            if ok:
+                return True, f"或断言(分支{i + 1}): {detail} ({label})"
+            if _branch_wants_list(branch_intent, branch_value) or _branch_wants_form_detail(branch_intent):
+                continue
+
+        if branch_value and not token_only_in_nav(morph, branch_value):
+            if main_content_contains(page, branch_value, morphology=morph):
+                return True, (
+                    f"或断言(分支{i + 1}): 主内容区含 {branch_value!r} ({label})"
+                )
+
         if facts is not None:
-            exp = infer_expect_from_text(branch_intent)
-            if exp:
-                ok, msg = eval_submit_expect(exp, facts, url)
+            fact_hit = _eval_branch_with_facts(branch_intent, morph, facts, url)
+            if fact_hit is not None:
+                ok, msg = fact_hit
                 if ok:
                     return True, f"或断言(分支{i + 1}): {msg} ({label})"
+                if exp := infer_expect_from_text(branch_intent):
+                    if exp in ("navigated_away", "entity_changed"):
+                        continue
+
         hit = try_or_heuristic(
             page, branch_intent,
             dispatch_meta=dispatch_meta,
             page_url=url,
             body_text=body_text,
             live_facts=facts,
+            morphology=morph,
+            branch_value=branch_value,
         )
-        if hit is not None:
+        if hit is not None and hit[0]:
             detail = hit[1]
             if not detail.startswith("或断言"):
                 detail = f"或断言(分支{i + 1}): {detail}"
-            return hit[0], detail
+            return True, detail
     return None
 
 
@@ -129,42 +217,23 @@ def try_or_heuristic(
     page_url: str = "",
     body_text: str = "",
     live_facts: Any = None,
+    morphology: MainContentMorphology | None = None,
+    branch_value: str = "",
 ) -> Optional[tuple[bool, str]]:
-    """用实时 URL/页面特征快速判定或断言分支 (无需 LLM)."""
+    """结构层快速判定; mixed/未决返回 None."""
     if not intent:
         return None
-    url = _resolve_or_page_url(page, page_url, dispatch_meta)
-    body = _resolve_or_body_text(page, body_text)
+    morph = morphology or detect_main_content_morphology(page)
     facts = live_facts
+    url = _resolve_or_page_url(page, page_url, dispatch_meta)
 
-    want_detail = bool(_DETAIL_BRANCH_RE.search(intent))
-    want_list = bool(_LIST_BRANCH_RE.search(intent))
-
-    on_detail = (
-        is_detail_submission_url(url)
-        or "请选择审核原因" in body
-        or ("任务id" in body.lower() and "审核原因" in body)
-    )
-    on_list = not on_detail and not is_detail_submission_url(url)
-
-    if want_detail and on_detail:
-        if body_text or "/detail" in url:
-            return True, "或断言(启发式): 当前在任务详情页"
-        try:
-            radios = page.locator("input[type=radio], .ant-radio-input").count()
-        except Exception:
-            radios = 0
-        if radios >= 1:
-            return True, "或断言(启发式): 当前在任务详情页"
-
-    if want_list and on_list:
-        return True, "或断言(启发式): 当前在待领取/待前审页面"
+    layout_hit = _layout_hit_for_branch(intent, branch_value, morph)
+    if layout_hit is not None and layout_hit[0]:
+        return True, f"或断言(启发式): {layout_hit[1]}"
 
     if facts is not None:
-        exp = infer_expect_from_text(intent)
-        if exp:
-            ok, msg = eval_submit_expect(exp, facts, url)
-            if ok:
-                return True, f"或断言(启发式): {msg}"
+        fact_hit = _eval_branch_with_facts(intent, morph, facts, url)
+        if fact_hit is not None and fact_hit[0]:
+            return True, f"或断言(启发式): {fact_hit[1]}"
 
     return None

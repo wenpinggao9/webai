@@ -291,8 +291,9 @@ async def run_preplanned(
             cfg.setdefault("playwright", {})["headless"] = True
             # 用 UITestAgent 执行, 但传入预规划的动作
             agent = UITestAgent(cfg, project_root=PROJECT_ROOT)
-            # 替换 agent 的 planner 为预规划动作注入器
+            # 用 UITestAgent 执行, 但传入预规划的动作
             agent._preplanned_actions = actions
+            agent._from_actions_mode = True
             result = agent.run_tests(temp_path)
             return result
         finally:

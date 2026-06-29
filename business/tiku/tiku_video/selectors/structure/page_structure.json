@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "saved_at": 1782609336.7661598,
+  "saved_at": 1782724494.571999,
   "pages": {
     "/video/welcome": {
       "route": "/video/welcome",
@@ -13,18 +13,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 10,
+          "success_count": 14,
           "failure_count": 3
         }
       },
       "learned_at": 1782142954.8372102,
-      "updated_at": 1782608723.888763,
-      "hit_count": 6
+      "updated_at": 1782718338.4884999,
+      "hit_count": 10
     },
     "/video/all-question": {
       "route": "/video/all-question",
       "component_library": "ant-design",
-      "dom_signature": "724031ab9d9086ab",
+      "dom_signature": "67a1e4c606d6fe39",
       "rules": {
         "click|button": {
           "action_type": "click",
@@ -32,7 +32,7 @@
           "selector_template": "role=button[name=\"{text}\"]",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 1,
+          "success_count": 2,
           "failure_count": 0
         },
         "click|generic": {
@@ -50,18 +50,18 @@
           "selector_template": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"{text}\")])[1]",
           "selector_type": "xpath",
           "anchor_type": "class",
-          "success_count": 1,
+          "success_count": 2,
           "failure_count": 0
         }
       },
       "learned_at": 1782143045.140954,
-      "updated_at": 1782457782.154432,
-      "hit_count": 0
+      "updated_at": 1782724452.5328782,
+      "hit_count": 1
     },
     "/video/wait-preview": {
       "route": "/video/wait-preview",
       "component_library": "ant-design",
-      "dom_signature": "3c2b02433c09b159",
+      "dom_signature": "8848262f93e9d5c1",
       "rules": {
         "click|button": {
           "action_type": "click",
@@ -69,7 +69,7 @@
           "selector_template": "role=button[name=\"{text}\"]",
           "selector_type": "role",
           "anchor_type": "text",
-          "success_count": 8,
+          "success_count": 10,
           "failure_count": 0
         },
         "click|generic": {
@@ -78,18 +78,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 16,
-          "failure_count": 9
+          "success_count": 24,
+          "failure_count": 12
         }
       },
       "learned_at": 1782146590.337551,
-      "updated_at": 1782608901.02704,
-      "hit_count": 6
+      "updated_at": 1782724358.140713,
+      "hit_count": 14
     },
     "/video/detail": {
       "route": "/video/detail",
       "component_library": "ant-design",
-      "dom_signature": "400e4082dbbacdd1",
+      "dom_signature": "fc0e0c022de754aa",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -97,7 +97,7 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 14,
+          "success_count": 19,
           "failure_count": 0
         },
         "click|dropdown_trigger": {
@@ -108,11 +108,20 @@
           "anchor_type": "class",
           "success_count": 2,
           "failure_count": 0
+        },
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "role=button[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
         }
       },
       "learned_at": 1782172644.151975,
-      "updated_at": 1782608785.41466,
-      "hit_count": 11
+      "updated_at": 1782724289.50579,
+      "hit_count": 15
     },
     "/video/already-self": {
       "route": "/video/already-self",
@@ -134,18 +143,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 1,
+          "success_count": 2,
           "failure_count": 1
         }
       },
       "learned_at": 1782172752.178855,
-      "updated_at": 1782561374.261486,
-      "hit_count": 0
+      "updated_at": 1782722565.622684,
+      "hit_count": 1
     },
     "/video/check-history": {
       "route": "/video/check-history",
       "component_library": "ant-design",
-      "dom_signature": "ee9d24215c12b009",
+      "dom_signature": "5f41eb741416b21d",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -153,8 +162,8 @@
           "selector_template": "xpath=(//td[contains(@title, \"{text}\")])[1]",
           "selector_type": "xpath",
           "anchor_type": "text",
-          "success_count": 10,
-          "failure_count": 2
+          "success_count": 16,
+          "failure_count": 7
         },
         "click|dropdown_trigger": {
           "action_type": "click",
@@ -162,7 +171,7 @@
           "selector_template": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"{text}\")])[1]",
           "selector_type": "xpath",
           "anchor_type": "class",
-          "success_count": 3,
+          "success_count": 4,
           "failure_count": 0
         },
         "click|button": {
@@ -173,11 +182,20 @@
           "anchor_type": "text",
           "success_count": 3,
           "failure_count": 0
+        },
+        "click|dropdown_option": {
+          "action_type": "click",
+          "component_type": "dropdown_option",
+          "selector_template": "role=option[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
         }
       },
       "learned_at": 1782208481.7840261,
-      "updated_at": 1782448089.8266501,
-      "hit_count": 7
+      "updated_at": 1782707578.4987829,
+      "hit_count": 8
     },
     "/video/taskindex": {
       "route": "/video/taskindex",
@@ -190,7 +208,7 @@
           "selector_template": "xpath=(//input[contains(@placeholder, '学科')])[1]",
           "selector_type": "xpath",
           "anchor_type": "placeholder",
-          "success_count": 3,
+          "success_count": 4,
           "failure_count": 0
         },
         "click|dropdown_trigger": {
@@ -217,13 +235,13 @@
           "selector_template": "role=link[name=\"{text}\"]",
           "selector_type": "role",
           "anchor_type": "text",
-          "success_count": 3,
-          "failure_count": 2
+          "success_count": 4,
+          "failure_count": 3
         }
       },
       "learned_at": 1782468911.066154,
-      "updated_at": 1782609069.104407,
-      "hit_count": 2
+      "updated_at": 1782708769.65571,
+      "hit_count": 3
     },
     "/video/tasklist": {
       "route": "/video/tasklist",
@@ -256,7 +274,7 @@
     "/video/already-upload": {
       "route": "/video/already-upload",
       "component_library": "ant-design",
-      "dom_signature": "b99ed2bad1fa0b3b",
+      "dom_signature": "07b3bd0a5bde0bf2",
       "rules": {
         "hover|generic": {
           "action_type": "hover",
@@ -264,7 +282,7 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 2,
+          "success_count": 3,
           "failure_count": 1
         },
         "click|generic": {
@@ -287,8 +305,73 @@
         }
       },
       "learned_at": 1782561918.516429,
-      "updated_at": 1782564371.113856,
+      "updated_at": 1782708934.029354,
       "hit_count": 1
+    },
+    "/video/college-data/college-data-detail": {
+      "route": "/video/college-data/college-data-detail",
+      "component_library": "ant-design",
+      "dom_signature": "3254c9cbd56f3a3f",
+      "rules": {
+        "click|input": {
+          "action_type": "click",
+          "component_type": "input",
+          "selector_template": "xpath=(//input[contains(@placeholder, '学段')])[1]",
+          "selector_type": "xpath",
+          "anchor_type": "placeholder",
+          "success_count": 1,
+          "failure_count": 0
+        },
+        "click|dropdown_trigger": {
+          "action_type": "click",
+          "component_type": "dropdown_trigger",
+          "selector_template": ".ant-select-dropdown:visible .ant-select-item-option-content:has-text(\"{text}\")",
+          "selector_type": "role",
+          "anchor_type": "class",
+          "success_count": 2,
+          "failure_count": 0
+        },
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "button:has-text(\"{text}\")",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        },
+        "click|menu_item": {
+          "action_type": "click",
+          "component_type": "menu_item",
+          "selector_template": "role=menuitem[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 2,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782714537.721944,
+      "updated_at": 1782718487.987067,
+      "hit_count": 2
+    },
+    "/video/userInfo/settlement": {
+      "route": "/video/userInfo/settlement",
+      "component_library": "ant-design",
+      "dom_signature": "9267a2e79903cefa",
+      "rules": {
+        "click|button": {
+          "action_type": "click",
+          "component_type": "button",
+          "selector_template": "role=button[name=\"{text}\"]",
+          "selector_type": "role",
+          "anchor_type": "text",
+          "success_count": 1,
+          "failure_count": 0
+        }
+      },
+      "learned_at": 1782718541.48981,
+      "updated_at": 1782718541.48981,
+      "hit_count": 0
     }
   }
 }

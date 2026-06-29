@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "route": "/video/userInfo/settlement",
+  "saved_at": 1782724494.569015,
+  "entries": {
+    "click|点击编辑信息按钮": {
+      "method": "role",
+      "role": "button",
+      "name": "编辑信息",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"编辑信息\"]",
+      "_frame_locator": "iframe[src*=\"settlement-info\"]",
+      "success_count": 1,
+      "created_at": 1782718541.489315,
+      "updated_at": 1782718541.489315,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
+        "class_pattern": ""
+      }
+    }
+  }
+}

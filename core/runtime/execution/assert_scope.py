@@ -441,3 +441,19 @@ def format_scope_note_for_semantic(scope: AssertScope) -> str:
 def should_disable_semantic_fallback(scope: AssertScope) -> bool:
     """列表「所有行」类断言由结构化行扫描负责, 不走语义兜底."""
     return scope.all_table_rows or scope.negate_table_rows
+
+
+def action_prefers_semantic_assert(action: Any) -> bool:
+    """规划阶段标记的语义断言: 跳过字面量匹配, 直接 semantic_assert.
+
+    约定 (动作规划 LLM 输出):
+      extras.semantic=true
+      或 extras.assert_mode=\"semantic\"
+    """
+    extras = getattr(action, "extras", None) or {}
+    if not isinstance(extras, dict):
+        return False
+    if extras.get("semantic") is True:
+        return True
+    mode = str(extras.get("assert_mode") or "").strip().lower()
+    return mode == "semantic"

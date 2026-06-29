@@ -72,22 +72,34 @@ def record_or_branch(
     api_context: dict[str, Any] | None = None,
 ) -> None:
     """与 try_or_branches 判定顺序一致, 记录获胜分支当时页面状态."""
-    from .assert_or import try_or_heuristic
+    from .assert_or import try_or_branches, try_or_heuristic
+    from .page_morphology import (
+        detect_main_content_morphology,
+        main_content_contains,
+        token_only_in_nav,
+    )
 
+    morph = detect_main_content_morphology(page)
     for raw in branches:
         if not isinstance(raw, dict):
             continue
         branch_intent = str(raw.get("intent") or raw.get("desc") or "").strip()
         branch_value = str(raw.get("value") or "").strip()
-        if branch_value and branch_value in body_text:
-            record_literal(action, branch_value, api_context=api_context)
-            return
-        hit = try_or_heuristic(page, branch_intent)
-        if hit is not None:
+        if branch_value and not token_only_in_nav(morph, branch_value):
+            if main_content_contains(page, branch_value, morphology=morph):
+                record_literal(action, branch_value, api_context=api_context)
+                return
+        hit = try_or_heuristic(
+            page, branch_intent, morphology=morph, branch_value=branch_value,
+        )
+        if hit is not None and hit[0]:
             record_pass_state(
                 action, page, body_text, branch_value or None, api_context=api_context,
             )
             return
+    hit = try_or_branches(page, branches, body_text)
+    if hit is not None and hit[0]:
+        record_pass_state(action, page, body_text, None, api_context=api_context)
 
 
 def record_or_heuristic(

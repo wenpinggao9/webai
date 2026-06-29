@@ -1,16 +1,16 @@
 {
   "version": 1,
   "route": "/video/check-history",
-  "saved_at": 1782609336.764148,
+  "saved_at": 1782724494.569015,
   "entries": {
     "click|在筛选区点击类型下拉框": {
       "nth": 0,
       "in_dialog": false,
       "selector": "xpath=(//div[contains(@class,'ant-form-item')][.//label[contains(normalize-space(.), '类型')]]//div[contains(@class,'ant-select')])[1]",
       "method": "css",
-      "success_count": 7,
+      "success_count": 9,
       "created_at": 1782208481.7828832,
-      "updated_at": 1782448032.079284,
+      "updated_at": 1782707462.260685,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -25,9 +25,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"前审\")])[1]",
       "method": "css",
-      "success_count": 7,
+      "success_count": 9,
       "created_at": 1782208496.7052958,
-      "updated_at": 1782448037.158429,
+      "updated_at": 1782707472.62894,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -42,26 +42,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学\")])[1]",
       "method": "css",
-      "success_count": 7,
+      "success_count": 9,
       "created_at": 1782208525.084556,
-      "updated_at": 1782448053.4471118,
-      "component_library": "ant-design",
-      "selector_type": "xpath",
-      "node_signature": {
-        "tag": "",
-        "text": "",
-        "role": "",
-        "class_pattern": ""
-      }
-    },
-    "click|在下拉选项中点击举报/放弃": {
-      "nth": 0,
-      "in_dialog": false,
-      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"举报/放弃\")])[1]",
-      "method": "css",
-      "success_count": 6,
-      "created_at": 1782208553.160309,
-      "updated_at": 1782448068.973739,
+      "updated_at": 1782707498.494355,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -76,9 +59,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "input#submitTimeRange",
-      "success_count": 6,
+      "success_count": 7,
       "created_at": 1782208585.214915,
-      "updated_at": 1782448079.659122,
+      "updated_at": 1782705755.5420392,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -170,9 +153,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=button[name=\"提 交\"]",
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782370196.6293309,
-      "updated_at": 1782445474.173755,
+      "updated_at": 1782705802.712194,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -224,9 +207,9 @@
       "in_dialog": false,
       "selector": "xpath=(//td[contains(@title, \"2026-06-26\")])[1]",
       "method": "css",
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782439981.066719,
-      "updated_at": 1782448100.566782,
+      "updated_at": 1782705787.65974,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -258,9 +241,60 @@
       "in_dialog": false,
       "selector": "xpath=(//td[contains(@title, \"2026-06-25\")])[1]",
       "method": "css",
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782448089.825258,
-      "updated_at": 1782448089.825258,
+      "updated_at": 1782705772.536926,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在下拉选项中点击举报/放弃": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"举报/放弃\")])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782705741.646053,
+      "updated_at": 1782705741.646053,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择开始日期2026-06-28": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-28\")])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782707560.6279721,
+      "updated_at": 1782707560.6279721,
+      "component_library": "ant-design",
+      "selector_type": "xpath",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|在审核时间日期面板中选择结束日期2026-06-29": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "xpath=(//td[contains(@title, \"2026-06-29\")])[1]",
+      "method": "css",
+      "success_count": 1,
+      "created_at": 1782707578.497451,
+      "updated_at": 1782707578.497451,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {

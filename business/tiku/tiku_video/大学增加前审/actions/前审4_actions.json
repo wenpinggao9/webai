@@ -1,0 +1,151 @@
+{
+  "cases": [
+    {
+      "case_id": "vip_前审_025",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [
+          "投放策略来源、大学学段、大学化学学科的题目（1题），获取工单ID为${orderId9}"
+        ],
+        "steps": [
+          "大学前审老师A从「待前审」页面「领取题目」",
+          "点击列表中的「查看」按钮",
+          "在详情页选择「题目无任何问题」",
+          "学科选择\"物理\"并「提交」",
+          "点击「已审核」"
+        ],
+        "expectations": [
+          "第一行数据的学科为\"大学化学\""
+        ]
+      },
+      "actions": [
+        {
+          "type": "api_call",
+          "intent": "投放策略来源、大学学段、大学化学学科的题目（1题），获取工单ID为${orderId9}"
+        },
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'待前审'进入待前审页面"
+        },
+        {
+          "type": "click",
+          "intent": "点击'领取题目'按钮"
+        },
+        {
+          "type": "click",
+          "intent": "点击列表中的'查看'按钮"
+        },
+        {
+          "type": "click",
+          "intent": "在详情页选择'题目无任何问题'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'学科'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'物理'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮"
+        },
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'已审核'进入已审核页面"
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证列表第一行数据的学科为大学化学",
+          "value": "__first_row__",
+          "extras": {
+            "column": "学科",
+            "expected": "大学化学",
+            "row_position": "first"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "vip_前审_026",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员点击「全部题目」",
+          "筛选学段：大学，来源：策略投放",
+          "点击「提交」进行查询"
+        ],
+        "expectations": [
+          "列表中存在工单ID=${orderId9}",
+          "工单ID=${orderId9}的生产状态为「已退回」",
+          "列表中最近一条数据学段为「大学」，学科为「物理」"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'学段'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'大学'"
+        },
+        {
+          "type": "click",
+          "intent": "在筛选区点击'来源'下拉框"
+        },
+        {
+          "type": "click",
+          "intent": "在下拉选项中点击'策略投放'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'提交'按钮进行查询"
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证列表中存在工单ID为${orderId9}的记录",
+          "value": "${orderId9}"
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证工单ID为${orderId9}的生产状态为已退回",
+          "value": "${orderId9}",
+          "extras": {
+            "column": "生产状态",
+            "expected": "已退回",
+            "row_key_column": "工单ID"
+          }
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证列表第一行数据的学段为大学",
+          "value": "__first_row__",
+          "extras": {
+            "column": "学段",
+            "expected": "大学",
+            "row_position": "first"
+          }
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证列表第一行数据的学科为物理",
+          "value": "__first_row__",
+          "extras": {
+            "column": "学科",
+            "expected": "物理",
+            "row_position": "first"
+          }
+        }
+      ]
+    }
+  ]
+}

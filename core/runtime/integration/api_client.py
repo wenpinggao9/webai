@@ -8,13 +8,13 @@
 """
 from __future__ import annotations
 
-import re
 from typing import Any, Optional
 from urllib.parse import urljoin
 
 import requests
 
 from ...foundation.profile import ApiTemplate, SystemProfile
+from ...foundation.variable_substitution import resolve_placeholder_alias
 
 
 class APIClient:
@@ -28,29 +28,20 @@ class APIClient:
         api_name: str,
         params: Optional[dict[str, Any]] = None,
         context: Optional[dict[str, Any]] = None,
+        *,
+        var_refs: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
-        """调用指定 API.
-
-        Args:
-            api_name: profile.apis 中的 key
-            params: 调用方传入的额外参数 (覆盖模板默认值)
-            context: 变量上下文, 用于 ${var} 替换
-
-        Returns:
-            从响应中提取的返回值 dict, 如 {"orderId": "118743302"}
-        """
+        """调用指定 API."""
         tpl = self.profile.apis.get(api_name)
         if not tpl:
             raise ValueError(f"API '{api_name}' 未在 profile 中定义. 可用: {list(self.profile.apis.keys())}")
 
-        # DB 查询型 (type=db)
         if getattr(tpl, "type", None) == "db":
             return self._query_db(tpl, params or {}, context or {})
 
-        # 1. 构建请求参数
-        data = self._build_params(tpl, params or {}, context or {})
+        data = self._build_params(tpl, params or {}, context or {}, var_refs=var_refs or {})
+        self._ensure_params_resolved(data)
 
-        # 2. 发请求 (单 API base_url > profile.api_base_url > profile.base_url)
         url = self._resolve_url(api_name, tpl, data)
         if tpl.method == "POST":
             resp = requests.post(url, json=data.get("body"), params=data.get("params"), timeout=30)
@@ -79,6 +70,8 @@ class APIClient:
         api_name: str,
         params: Optional[dict[str, Any]] = None,
         context: Optional[dict[str, Any]] = None,
+        *,
+        var_refs: Optional[dict[str, str]] = None,
     ) -> dict[str, Any]:
         """构建即将发出的请求 (不实际调用), 供日志打印."""
         tpl = self.profile.apis.get(api_name)
@@ -87,7 +80,7 @@ class APIClient:
         if getattr(tpl, "type", None) == "db":
             return {"api_name": api_name, "type": "db", "query": getattr(tpl, "query", "(profile.database.query)")}
 
-        data = self._build_params(tpl, params or {}, context or {})
+        data = self._build_params(tpl, params or {}, context or {}, var_refs=var_refs or {})
         url = self._resolve_url(api_name, tpl, data)
         return {
             "api_name": api_name,
@@ -152,17 +145,21 @@ class APIClient:
         enum_map = self.profile.enums.get(enum_name, {})
         if key in enum_map:
             return enum_map[key]
-        # 也支持数字字符串
         try:
             return int(key)
         except ValueError:
             return None
 
-    # ---------- 内部 ----------
-    def _build_params(self, tpl: ApiTemplate, extra: dict, context: dict) -> dict:
+    def _build_params(
+        self,
+        tpl: ApiTemplate,
+        extra: dict,
+        context: dict,
+        *,
+        var_refs: dict[str, str],
+    ) -> dict:
         """合并模板参数与调用参数, 并递归替换变量占位符."""
         data: dict[str, Any] = {}
-        # extra 可能是平铺的 {period: 80} 或嵌套的 {body: {...}, params: {...}}
         if "body" in extra or "params" in extra:
             body_extra = extra.get("body", {})
             params_extra = extra.get("params", {})
@@ -175,18 +172,23 @@ class APIClient:
             if not src:
                 continue
             merged = dict(src)
-            # 调用方参数优先级高于模板默认值.
             merged.update(extra_src)
-            # ${var} 替换 (extra 中的值也参与替换)
-            merged = _substitute(merged, {**context, **extra_src})
+            sub_ctx = {**(context or {}), **extra_src, **var_refs}
+            merged = substitute_with_refs(merged, sub_ctx, var_refs)
             data[part_name] = merged
         return data
+
+    @staticmethod
+    def _ensure_params_resolved(data: dict) -> None:
+        for part in ("params", "body"):
+            blob = data.get(part)
+            if blob is not None and has_unresolved_placeholder(blob):
+                raise ValueError(f"API 参数含未替换占位符: {part}={blob!r}")
 
     def _extract_returns(self, tpl: ApiTemplate, result: dict) -> dict[str, Any]:
         """按 returns 配置从响应 JSON 中提取变量."""
         extracted = {}
         for ret_name in tpl.returns:
-            # 支持点路径: "data.orderId" → result["data"]["orderId"]
             value = _get_nested(result, ret_name)
             if value is not None:
                 extracted[ret_name.split(".")[-1]] = str(value)
@@ -195,11 +197,57 @@ class APIClient:
         return extracted
 
 
+def has_unresolved_placeholder(obj: Any) -> bool:
+    if isinstance(obj, str):
+        return "${" in obj
+    if isinstance(obj, dict):
+        return any(has_unresolved_placeholder(v) for v in obj.values())
+    if isinstance(obj, list):
+        return any(has_unresolved_placeholder(v) for v in obj)
+    return False
+
+
+def substitute_with_refs(
+    obj: Any,
+    context: dict[str, Any],
+    var_refs: dict[str, str],
+) -> Any:
+    """先按 context 精确替换 ${name}, 再按步骤引用 var_refs 做基名别名解析."""
+    resolved = _substitute(obj, context)
+    return _apply_ref_aliases(resolved, var_refs)
+
+
+def _apply_ref_aliases(obj: Any, refs: dict[str, str]) -> Any:
+    if isinstance(obj, str):
+        out = obj
+        for token in list(_unresolved_placeholders(obj)):
+            val = resolve_placeholder_alias(token, refs)
+            if val is not None:
+                out = out.replace(f"${{{token}}}", val)
+        return out
+    if isinstance(obj, dict):
+        return {k: _apply_ref_aliases(v, refs) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_apply_ref_aliases(v, refs) for v in obj]
+    return obj
+
+
+def _unresolved_placeholders(text: str) -> list[str]:
+    import re
+    seen: set[str] = set()
+    names: list[str] = []
+    for m in re.finditer(r"\$\{(\w+)\}", text):
+        name = m.group(1)
+        if name not in seen:
+            seen.add(name)
+            names.append(name)
+    return names
+
+
 def _substitute(obj: Any, context: dict) -> Any:
     """递归替换 dict/list/str 中的 ${var}."""
     if isinstance(obj, str):
         for k, v in context.items():
-            # 变量来自前置 API 返回或运行上下文.
             obj = obj.replace(f"${{{k}}}", str(v))
         return obj
     if isinstance(obj, dict):

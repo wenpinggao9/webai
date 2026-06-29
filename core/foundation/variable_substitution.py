@@ -6,6 +6,88 @@ import re
 from typing import Any
 
 _API_CTX_SKIP_KEYS = frozenset({"ops", "_ops_index"})
+_PLACEHOLDER_RE = re.compile(r"\$\{(\w+)\}")
+# api_call 执行前写入 extras, 供 API 模板 ${var} 与步骤引用变量对齐 (如 orderId7 → orderId).
+API_PLACEHOLDER_REFS_KEY = "_placeholder_refs"
+
+
+def extract_placeholder_names(*texts: str | None) -> list[str]:
+    """从文本中提取 ${varName} 占位符名 (去重, 保持顺序)."""
+    seen: set[str] = set()
+    names: list[str] = []
+    for text in texts:
+        if not text:
+            continue
+        for m in _PLACEHOLDER_RE.finditer(text):
+            name = m.group(1)
+            if name not in seen:
+                seen.add(name)
+                names.append(name)
+    return names
+
+
+def collect_placeholder_bindings(
+    *texts: str | None,
+    context: dict[str, Any] | None = None,
+) -> dict[str, str]:
+    """收集文本中引用的 ${name} 在 context 中的已解析值."""
+    ctx = context or {}
+    out: dict[str, str] = {}
+    for name in extract_placeholder_names(*texts):
+        if name in ctx and ctx[name] is not None:
+            out[name] = str(ctx[name])
+    return out
+
+
+def resolve_placeholder_alias(
+    placeholder: str,
+    refs: dict[str, str],
+) -> str | None:
+    """模板占位符与步骤引用变量对齐: 精确名或「基名+数字后缀」唯一匹配.
+
+    例: 模板 ${orderId}, 步骤引用 orderId7 → 返回 orderId7 的值.
+    """
+    if not placeholder or not refs:
+        return None
+    if placeholder in refs:
+        return refs[placeholder]
+    matches = [
+        v
+        for k, v in refs.items()
+        if k.startswith(placeholder)
+        and (len(k) == len(placeholder) or k[len(placeholder) :].isdigit())
+    ]
+    if len(matches) == 1:
+        return matches[0]
+    return None
+
+
+def extract_explicit_api_params(line: str) -> dict[str, Any]:
+    """从步骤文本解析显式 API 参数: 「传参 orderId=1, op=7」或「params: orderId=1」.
+
+    返回平铺 dict, 由 ApiRunner 按模板归入 params/body.
+    """
+    if not line:
+        return {}
+    m = re.search(r"(?:传参|params[:：])\s*(.+)$", line.strip(), re.I)
+    if not m:
+        return {}
+    segment = m.group(1).strip()
+    out: dict[str, Any] = {}
+    for part in re.split(r"[,，]\s*", segment):
+        part = part.strip()
+        if not part or "=" not in part:
+            continue
+        key, val = part.split("=", 1)
+        key = key.strip()
+        val = val.strip().strip("'\"「」")
+        if not key:
+            continue
+        if val.isdigit():
+            out[key] = int(val)
+        else:
+            out[key] = val
+    return out
 
 
 def substitute_variables(text: str, context: dict[str, Any]) -> str:

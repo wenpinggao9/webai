@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/tasklist",
-  "saved_at": 1782609336.764148,
+  "saved_at": 1782724494.569015,
   "entries": {
     "click|点击提交视频按钮": {
       "nth": 0,
@@ -11,9 +11,9 @@
       "role": "button",
       "name": "提交视频",
       "exact": false,
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782561744.4909272,
-      "updated_at": 1782609094.79223,
+      "updated_at": 1782708787.707267,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -31,9 +31,9 @@
       "role": "button",
       "name": "确认",
       "exact": false,
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782561824.283398,
-      "updated_at": 1782609172.171459,
+      "updated_at": 1782708855.171114,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -71,9 +71,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=link[name=\"已上传\"]",
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782561889.067225,
-      "updated_at": 1782609238.171647,
+      "updated_at": 1782708907.694558,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -91,9 +91,9 @@
       "role": "button",
       "name": "提交任务",
       "exact": false,
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782609194.077024,
-      "updated_at": 1782609194.077024,
+      "updated_at": 1782708870.239887,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {

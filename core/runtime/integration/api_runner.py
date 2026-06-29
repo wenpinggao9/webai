@@ -16,6 +16,12 @@ from typing import Any, Optional
 
 from .api_client import APIClient
 from ...foundation.profile import ApiTemplate, SystemProfile
+from ...foundation.variable_substitution import (
+    API_PLACEHOLDER_REFS_KEY,
+    collect_placeholder_bindings,
+    extract_explicit_api_params,
+    substitute_variables,
+)
 
 
 def _print_api_preview(preview: dict[str, Any]) -> None:
@@ -50,9 +56,18 @@ class ApiRunner:
         self.client = client
         self.profile = profile
         self.context: dict[str, Any] = {}
+        self._last_api_execution: dict[str, Any] | None = None
+        self._last_raw_response: dict[str, Any] | None = None
 
-    def run_preconditions(self, preconditions: list[str]) -> dict[str, Any]:
+    def run_preconditions(
+        self,
+        preconditions: list[str],
+        *,
+        var_refs: Optional[dict[str, str]] = None,
+        action_extras: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """执行所有前置环节, 返回变量上下文."""
+        self._last_api_execution = None
         for line in preconditions:
             line = line.strip()
             if not line:
@@ -61,14 +76,27 @@ class ApiRunner:
             if not api_name:
                 continue
 
-            # 从描述中提取目标数量 (如"2题"→2, "获取 orderId1 和 orderId2"→2)
+            self._last_api_execution = {"api_name": api_name, "executed": False}
             target_count = self._extract_target_count(line)
-
-            # 从描述中提取参数 (对照配置中的 param_rules)
             params = self._extract_params(line, api_tpl)
+            if action_extras:
+                for part in ("params", "body"):
+                    block = action_extras.get(part)
+                    if isinstance(block, dict):
+                        params.update(block)
 
-            # 调用 API (智能重试: 查一批 TID 逐个试, 直到成功 target_count 个)
-            results = self._call_until_success(api_name, api_tpl, params, target_count)
+            line_refs = collect_placeholder_bindings(line, context=self.context)
+            call_refs = {**(var_refs or {}), **line_refs}
+
+            results = self._call_until_success(
+                api_name, api_tpl, params, target_count, var_refs=call_refs,
+            )
+            if self._last_api_execution is not None:
+                self._last_api_execution["executed"] = True
+                if self._last_raw_response is not None:
+                    self._last_api_execution["response"] = self._format_api_response(
+                        self._last_raw_response,
+                    )
 
             # 提取返回值存入上下文
             var_suffixes = re.findall(r'[a-zA-Z]+(\d+)', line)
@@ -144,7 +172,12 @@ class ApiRunner:
                     params[field] = enum_map[key]
                     break
 
-        # 从上下文中引用已存在的变量 (如 "orderId1")
+        params.update(extract_explicit_api_params(line))
+        for k, v in list(params.items()):
+            if isinstance(v, str) and "${" in v:
+                params[k] = substitute_variables(v, self.context)
+
+        # 从上下文中引用已存在的变量 (步骤/前置文本仍含 ${name} 时)
         for var_name, var_value in self.context.items():
             if var_name in line and var_value is not None:
                 params[var_name] = var_value
@@ -152,7 +185,13 @@ class ApiRunner:
         return params
 
     def _call_until_success(
-        self, api_name: str, api_tpl: ApiTemplate, params: dict, target_count: int
+        self,
+        api_name: str,
+        api_tpl: ApiTemplate,
+        params: dict,
+        target_count: int,
+        *,
+        var_refs: Optional[dict[str, str]] = None,
     ) -> list[dict[str, Any]]:
         """调用 API, 直到成功 target_count 个.
 
@@ -199,19 +238,54 @@ class ApiRunner:
             else:
                 new_params = params
 
+            call_extra = self._wrap_call_extra(api_tpl, new_params)
+
             if total_tried == 0:
-                preview = self.client.preview_request(api_name, new_params, self.context)
+                preview = self.client.preview_request(
+                    api_name, call_extra, self.context, var_refs=var_refs or {},
+                )
                 _print_api_preview(preview)
 
-            raw_result = self.client.call(api_name, new_params, self.context)
+            raw_result = self.client.call(
+                api_name, call_extra, self.context, var_refs=var_refs or {},
+            )
             err_no = self._get_err_no(raw_result)
 
             if err_no == 0:
+                self._last_raw_response = raw_result
                 extracted = self._extract_returns(api_tpl, raw_result)
                 success_list.append(extracted)
             total_tried += 1
 
+        if len(success_list) < target_count and on_error != "next_tid":
+            raise ValueError(
+                f"API {api_name} 调用未成功 (成功 {len(success_list)}/{target_count})",
+            )
         return success_list
+
+    @staticmethod
+    def _wrap_call_extra(api_tpl: ApiTemplate, flat: dict[str, Any]) -> dict[str, Any]:
+        """将平铺参数按模板字段归入 params/body, 供 APIClient 合并."""
+        if not flat:
+            return {}
+        tpl_params = set((api_tpl.params or {}).keys())
+        tpl_body = set((api_tpl.body or {}).keys())
+        params_part = {k: v for k, v in flat.items() if k in tpl_params}
+        body_part = {k: v for k, v in flat.items() if k in tpl_body}
+        orphan = {k: v for k, v in flat.items() if k not in params_part and k not in body_part}
+        if orphan:
+            if tpl_params and not tpl_body:
+                params_part.update(orphan)
+            elif tpl_body and not tpl_params:
+                body_part.update(orphan)
+            else:
+                params_part.update(orphan)
+        out: dict[str, Any] = {}
+        if params_part:
+            out["params"] = params_part
+        if body_part:
+            out["body"] = body_part
+        return out
 
     @staticmethod
     def _extract_returns(api_tpl: ApiTemplate, result: dict) -> dict[str, Any]:
@@ -228,6 +302,25 @@ class ApiRunner:
                     break
             extracted[var_name.split(".")[-1]] = cur
         return extracted
+
+    @staticmethod
+    def _format_api_response(result: dict[str, Any]) -> str:
+        """将 API 原始响应压缩为一行摘要, 供日志展示."""
+        err_no = ApiRunner._get_err_no(result)
+        parts: list[str] = []
+        if err_no is not None:
+            parts.append(f"errNo={err_no}")
+        for key in ("errMsg", "errmsg", "message"):
+            msg = result.get(key)
+            if msg:
+                parts.append(f"{key}={msg}")
+                break
+        data = result.get("data")
+        if isinstance(data, dict) and data.get("desc"):
+            parts.append(f"data.desc={data['desc']}")
+        elif data not in (None, {}, []):
+            parts.append(f"data={data}")
+        return ", ".join(parts) if parts else str(result)[:200]
 
     @staticmethod
     def _get_err_no(result: dict) -> Optional[int]:

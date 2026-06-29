@@ -20,7 +20,11 @@ from ...locating.page_guard import PageNotReadyError, PageReadyGuard
 from ...locating.intent_align import detect_feature_titles_menu_nav
 from ...locating.playwright_api import info_key, infer_from_selector, normalize_info, resolve_locator
 from ...pipeline.planning import PlannedAction
-from ...foundation.variable_substitution import substitute_variables
+from ...foundation.variable_substitution import (
+    API_PLACEHOLDER_REFS_KEY,
+    collect_placeholder_bindings,
+    substitute_variables,
+)
 from .session_ops import (
     explicit_row_keys_from_action,
     resolve_assert_table_row_key,
@@ -35,10 +39,10 @@ from .assert_scope import (
     build_semantic_text_summary_from_items,
     format_scope_note_for_semantic,
     items_flat_text,
+    action_prefers_semantic_assert,
     parse_assert_scope,
     should_disable_semantic_fallback,
     try_field_value_assert_items,
-    try_live_scoped_text,
     try_scoped_literal_items,
 )
 from .tab_follow import DEFAULT_SUBMIT_WAIT_MS, follow_active_tab
@@ -755,14 +759,34 @@ class ActionDispatcher:
         """把 action 中的 ${var} 替换为 api_context 中的值."""
         if not self.api_context:
             return
+        refs = collect_placeholder_bindings(
+            action.intent or "",
+            action.value or "",
+            *(v for v in (action.extras or {}).values() if isinstance(v, str)),
+            context=self.api_context,
+        )
+        if refs:
+            ex = dict(action.extras or {})
+            ex[API_PLACEHOLDER_REFS_KEY] = refs
+            action.extras = ex
         if action.value:
             action.value = substitute_variables(action.value, self.api_context)
         action.intent = substitute_variables(action.intent, self.api_context)
-        # 替换 extras 中的字符串值
         if action.extras:
             for k, v in action.extras.items():
+                if k == API_PLACEHOLDER_REFS_KEY:
+                    continue
                 if isinstance(v, str):
                     action.extras[k] = substitute_variables(v, self.api_context)
+            if action.type == "api_call":
+                for part in ("params", "body"):
+                    block = action.extras.get(part)
+                    if isinstance(block, dict):
+                        action.extras[part] = {
+                            sk: substitute_variables(sv, self.api_context)
+                            if isinstance(sv, str) else sv
+                            for sk, sv in block.items()
+                        }
         # assert_table: 残留 ${} 或未解析索引语义 → 从 intent + ops 解析行主键
         if action.type == "assert_table":
             row_key = (action.value or (action.extras or {}).get("row_key") or "").strip()
@@ -1604,13 +1628,18 @@ class ActionDispatcher:
             return False
         return not self._dom_capture_was_settled()
 
-    # ---------- 文本断言 (字面量/scoped → live 兜底 → semantic_assert) ----------
+    # ---------- 文本断言 (字面量/scoped → semantic_assert) ----------
     def _assert_text(self, action: PlannedAction) -> tuple[bool, str]:
         target = (action.value or action.intent or "").strip()
         if not target and not is_or_assert(action):
             return False, "断言缺少目标文本"
         intent = action.intent or ""
         scope = parse_assert_scope(intent, value=target, negate=action.negate)
+        semantic_only = (
+            not action.negate
+            and not is_or_assert(action)
+            and action_prefers_semantic_assert(action)
+        )
 
         items: list[dict] = []
         dom_summary = ""
@@ -1659,31 +1688,24 @@ class ActionDispatcher:
                     "navigation_outcome": live_facts.navigation_outcome,
                 }
 
-            hit = self._assert_text_programmatic(
-                action, target, scope, items, flat_text,
-                submit_ctx=submit_ctx,
-                assert_url=assert_url,
-                live_facts=live_facts,
-                dom_summary=dom_summary,
-            )
-            if hit is not None:
-                return hit
+            if not semantic_only:
+                hit = self._assert_text_programmatic(
+                    action, target, scope, items, flat_text,
+                    submit_ctx=submit_ctx,
+                    assert_url=assert_url,
+                    live_facts=live_facts,
+                    dom_summary=dom_summary,
+                )
+                if hit is not None:
+                    return hit
             if (
                 attempt == 0
+                and not semantic_only
                 and had_fast_cache
                 and self._should_force_refresh_cached_assert(action)
             ):
                 continue
             break
-
-        if not action.negate and not is_or_assert(action):
-            live_hit = try_live_scoped_text(
-                self.page, scope, target, negate=False,
-            )
-            if live_hit is not None:
-                if live_hit[0]:
-                    self._record_literal(action, target)
-                return live_hit
 
         if not self._should_semantic_fallback(scope):
             return False, f"断言未通过: {action.intent!r} (目标文本 {target!r})"
@@ -1707,7 +1729,7 @@ class ActionDispatcher:
         live_facts: Any,
         dom_summary: str,
     ) -> Optional[tuple[bool, str]]:
-        """缓存/区域/字面量等程序化断言; None 表示继续 live 或语义断言."""
+        """缓存/区域/字面量等程序化断言; None 表示继续语义断言."""
         btn_state = self._try_assert_button_state(action, target)
         if btn_state is not None:
             return btn_state
@@ -1919,6 +1941,10 @@ class ActionDispatcher:
         if scope is None:
             target = (action.value or action.intent or "").strip()
             scope = parse_assert_scope(action.intent or "", value=target, negate=action.negate)
+        if or_mode and not scope.explicit_region:
+            scope.region_keys = ["main"]
+            scope.exclude_nav = True
+            scope.explicit_region = True
 
         default_system = """你是 UI 自动化断言校验助手. 根据页面状态判断一个断言是否满足.
 只输出 JSON: {"ok": true/false, "reason": "简短说明"}."""
@@ -1927,8 +1953,9 @@ class ActionDispatcher:
             system = self._prompts.system("semantic_assert", default_system)
         if or_mode:
             system += """
-- **或断言**: intent 描述多个可接受结果 (如「没有A则B，有的话C」「B或C」). 只要当前页面满足**任一分支**的语义, 必须判 ok=true.
-- 禁止因仅不符合其中一支就判 false; value 若只写了其中一支的文案, 仍以 intent 全部分支为准."""
+- **或断言**: intent 描述多个可接受结果. 只要当前页面满足**任一分支**的语义, 必须判 ok=true.
+- **仅依据主内容区** (表格/表单/详情面板), **忽略**左侧导航、侧栏菜单中的重复文案.
+- 禁止因侧栏含某词就判列表分支成立; 须看主内容区是数据表多行列表还是单条表单/详情."""
 
         if not dom_summary:
             return False, "语义断言: 缺少操作后的 DOM 摘要, 请先执行 UI 操作步骤"
@@ -2139,7 +2166,32 @@ class ActionDispatcher:
             sys.stdout.write(f"  ├─ 上下文变量: {self._format_api_context()}\n")
             sys.stdout.flush()
             runner_before = dict(self.api_runner.context)
-            context = self.api_runner.run_preconditions([action.intent])
+            var_refs = (action.extras or {}).get(API_PLACEHOLDER_REFS_KEY) or {}
+            action_extras = {
+                k: action.extras.get(k)
+                for k in ("params", "body")
+                if isinstance((action.extras or {}).get(k), dict)
+            } if action.extras else None
+            context = self.api_runner.run_preconditions(
+                [action.intent],
+                var_refs=var_refs,
+                action_extras=action_extras,
+            )
+            execution = self.api_runner._last_api_execution or {}
+            if execution.get("executed"):
+                self.api_context.update(context)
+                delta = {
+                    k: v for k, v in context.items()
+                    if runner_before.get(k) != v
+                    and k != "ops"
+                }
+                if delta:
+                    summary = ", ".join(f"{k}={v}" for k, v in delta.items())
+                else:
+                    summary = execution.get("response") or "(无返回值)"
+                sys.stdout.write(f"  └─ 返回: {summary}\n")
+                sys.stdout.flush()
+                return True, f"API 调用成功: {summary}"
             if context:
                 self.api_context.update(context)
                 delta = {

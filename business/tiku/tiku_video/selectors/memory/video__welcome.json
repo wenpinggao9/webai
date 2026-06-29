@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/welcome",
-  "saved_at": 1782609336.764148,
+  "saved_at": 1782724494.569015,
   "entries": {
     "click|点击侧栏菜单全部题目进入全部题目页面": {
       "nth": 0,
@@ -10,9 +10,9 @@
       "method": "text",
       "name": "全部题目",
       "exact": true,
-      "success_count": 19,
+      "success_count": 21,
       "created_at": 1782142954.8364859,
-      "updated_at": 1782608593.7477078,
+      "updated_at": 1782708366.359178,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -28,9 +28,9 @@
       "method": "text",
       "name": "全部题目",
       "exact": true,
-      "success_count": 9,
+      "success_count": 13,
       "created_at": 1782144885.995884,
-      "updated_at": 1782443401.8450649,
+      "updated_at": 1782723292.073921,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -47,9 +47,9 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 5,
+      "success_count": 6,
       "created_at": 1782146569.792053,
-      "updated_at": 1782559659.275368,
+      "updated_at": 1782709104.401379,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -66,9 +66,9 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 13,
+      "success_count": 15,
       "created_at": 1782146813.4398952,
-      "updated_at": 1782447537.5262442,
+      "updated_at": 1782718766.029418,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -123,9 +123,9 @@
       "method": "text",
       "name": "任务中心",
       "exact": true,
-      "success_count": 3,
+      "success_count": 4,
       "created_at": 1782468845.2002492,
-      "updated_at": 1782608948.40095,
+      "updated_at": 1782708664.976487,
       "component_library": "generic",
       "selector_type": "css",
       "node_signature": {
@@ -180,9 +180,85 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782608723.888434,
-      "updated_at": 1782608723.888434,
+      "updated_at": 1782708464.886366,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击待前审": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"待前审\"",
+      "method": "text",
+      "name": "待前审",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782709449.416943,
+      "updated_at": 1782709449.416943,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击左侧导航一级菜单大学数据看板展开子菜单": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"大学数据看板\"",
+      "method": "text",
+      "name": "大学数据看板",
+      "exact": true,
+      "success_count": 2,
+      "created_at": 1782714482.735667,
+      "updated_at": 1782717937.504691,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击二级菜单大学数据看板明细": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"大学数据看板明细\"",
+      "method": "text",
+      "name": "大学数据看板明细",
+      "exact": true,
+      "success_count": 2,
+      "created_at": 1782714495.005607,
+      "updated_at": 1782717949.711303,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏一级菜单大学数据看板展开子菜单": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"大学数据看板\"",
+      "method": "text",
+      "name": "大学数据看板",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782718338.4880729,
+      "updated_at": 1782718338.4880729,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
