@@ -160,6 +160,31 @@ _COMPONENT_SUPPLEMENT_TEMPLATE = """
     items.push(item);
   });
 
+  const RADIO_WRAP_SEL = '.ant-radio-wrapper, .el-radio, .el-radio-button, [role="radio"]';
+  document.querySelectorAll(RADIO_WRAP_SEL).forEach(el => {
+    if (!isVisible(el)) return;
+    const text = (el.innerText || el.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 200);
+    if (!text) return;
+    const item = {
+      tag: (el.tagName || 'label').toLowerCase(),
+      role: 'radio', name: '',
+      id: (el.id && !el.id.startsWith('el-id-')) ? el.id : '',
+      _id: el.id || '', _parent_id: parentElementId(el), testid: el.getAttribute('data-testid') || '',
+      text: text,
+      value: '', placeholder: '', type: 'radio', haspopup: '',
+      class: (el.className && typeof el.className === 'string') ? el.className.slice(0, 160) : '',
+      readOnly: false, zIndex: null, scope: findScope(el),
+      in_viewport: isInViewport(el), hidden: isHidden(el),
+      in_dialog: closestMatch(el, DIALOG_SEL), in_form: closestMatch(el, FORM_SEL),
+    };
+    const key = 'radio:' + JSON.stringify({text: item.text, scope: item.scope});
+    const count = seen.get(key) || 0;
+    if (count >= 5) return;
+    seen.set(key, count + 1);
+    item._idx = count;
+    items.push(item);
+  });
+
   const hasDialog = document.querySelector(DIALOG_SEL) !== null;
   return { items: items, has_dialog: hasDialog };
 }
@@ -223,6 +248,33 @@ def normalize_v3_item(raw: dict) -> dict:
     if raw.get("selected") is not None:
         item["selected"] = raw.get("selected")
     return item
+
+
+_RADIO_CLASS_MARKERS = (
+    "ant-radio-wrapper",
+    "el-radio",
+    "el-radio-button",
+    "ant-radio-input",
+)
+_CHECKBOX_CLASS_MARKERS = (
+    "ant-checkbox-wrapper",
+    "el-checkbox",
+    "ant-checkbox-input",
+)
+
+
+def enrich_choice_control_metadata(items: list[dict]) -> None:
+    """为组件库单选/多选包装节点补充 type/role, 供 DOM 摘要与语义断言识别控件模式."""
+    for it in items:
+        cls = str(it.get("class") or "").lower()
+        role = str(it.get("role") or "").lower()
+        typ = str(it.get("type") or "").lower()
+        if role == "radio" or typ == "radio" or any(m in cls for m in _RADIO_CLASS_MARKERS):
+            it["role"] = "radio"
+            it["type"] = "radio"
+        elif role == "checkbox" or typ == "checkbox" or any(m in cls for m in _CHECKBOX_CLASS_MARKERS):
+            it["role"] = "checkbox"
+            it["type"] = "checkbox"
 
 
 def _item_dedup_key(it: dict) -> tuple:
@@ -337,4 +389,5 @@ def collect_snapshot_items(
     if dialog_first:
         merged = _reorder_dialog_form_first(merged, has_dialog)
     attach_parent_indices(merged)
+    enrich_choice_control_metadata(merged)
     return merged

@@ -148,7 +148,7 @@ def test_handoff_copies_screenshots_with_report(tmp_path):
                 "step": "步骤1",
                 "success": False,
                 "message": "err",
-                "screenshot": f"c1/{SCREENSHOTS_SUBDIR}/step_001_fail.png",
+                "screenshot": f"{SCREENSHOTS_SUBDIR}/step_001_fail.png",
             }],
         }],
     }

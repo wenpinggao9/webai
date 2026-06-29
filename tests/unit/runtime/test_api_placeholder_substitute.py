@@ -132,3 +132,77 @@ def test_run_preconditions_marks_executed_when_returns_empty(monkeypatch):
         "executed": True,
         "response": "errNo=0, errMsg=succ, data.desc=stage:分发,splitStatus:waitSplit",
     }
+
+
+def test_normalize_api_flat_params_resolves_planner_chinese_enums():
+    from core.foundation.variable_substitution import normalize_api_flat_params
+
+    tpl = ApiTemplate(
+        method="POST",
+        url="/deliver",
+        body={"tid": "${tid}", "period": "${period}", "subject": "${subject}", "source": "${source}"},
+        param_rules=[
+            {"field": "period", "enum": {"大学": 80}},
+            {"field": "subject", "enum": {"数学": 2}},
+            {"field": "source", "enum": {"策略": 0}},
+        ],
+    )
+    flat = {
+        "period": 80,
+        "subject": "数学",
+        "source": "策略",
+        "grade": "大学",
+    }
+    assert normalize_api_flat_params(flat, tpl) == {
+        "period": 80,
+        "subject": 2,
+        "source": 0,
+    }
+
+
+def test_normalize_api_flat_params_keeps_explicit_order_id_placeholder():
+    from core.foundation.variable_substitution import normalize_api_flat_params
+
+    tpl = ApiTemplate(
+        method="GET",
+        url="/process",
+        params={"orderId": "${orderId}", "op": 7},
+    )
+    flat = {"orderId": "${orderId8}"}
+    assert normalize_api_flat_params(flat, tpl) == {"orderId": "${orderId8}"}
+
+
+def test_deliver_extras_chinese_resolves_to_numeric_body():
+    from core.runtime.integration.api_runner import ApiRunner
+
+    profile = SystemProfile(
+        name="test",
+        base_url="https://example.com",
+        apis={
+            "deliver": ApiTemplate(
+                method="POST",
+                url="https://example.com/deliver",
+                body={"tid": "${tid}", "period": "${period}", "subject": "${subject}", "source": "${source}", "tags": {}},
+                param_rules=[
+                    {"field": "period", "enum": {"大学": 80}},
+                    {"field": "subject", "enum": {"数学": 2}},
+                    {"field": "source", "enum": {"策略": 0}},
+                ],
+                keywords=["投放"],
+            ),
+        },
+    )
+    runner = ApiRunner(APIClient(profile), profile)
+    line = "投放策略来源、大学学段、数学学科的题目，获取 orderId1"
+    api_name, tpl = runner._match_api(line)
+    params = runner._extract_params(line, tpl)
+    params.update({"source": "策略", "grade": "大学", "subject": "数学"})
+    params = __import__(
+        "core.foundation.variable_substitution", fromlist=["normalize_api_flat_params"],
+    ).normalize_api_flat_params(params, tpl)
+    wrapped = runner._wrap_call_extra(tpl, params)
+    preview = runner.client.preview_request(api_name, wrapped, {})
+    assert preview["body"]["subject"] == 2
+    assert preview["body"]["source"] == 0
+    assert preview["body"]["period"] == 80
+    assert "grade" not in preview["body"]

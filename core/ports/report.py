@@ -2,12 +2,13 @@
 from __future__ import annotations
 
 import json
+import shutil
 from datetime import datetime
 from html import escape
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
-from ..foundation.layout import REPORTS_SUBDIR
+from ..foundation.layout import REPORTS_SUBDIR, SCREENSHOTS_SUBDIR
 from ..foundation.watermark import (
     apply_watermark_to_report,
     watermark_html_extras,
@@ -113,6 +114,77 @@ def _case_screenshot_rel(target: str | Path | None, case_out_dir: Path | None) -
     if pos >= 0:
         return text[pos + 1 :]
     return text
+
+
+def screenshot_report_rel(case_id: str, rel: str) -> str:
+    """与批次 HTML 中 _screenshot_href(prefix=case_id/) 一致的报告目录内相对路径."""
+    return _screenshot_href(str(rel or "").replace("\\", "/").strip(), prefix=f"{case_id}/")
+
+
+def _resolve_batch_screenshot_src(
+    batch_dir: Path,
+    case_id: str,
+    rel: str,
+    dest_rel: str,
+    *,
+    project_root: Path | None = None,
+) -> Path | None:
+    """在批次输出目录（及可选项目根）中定位失败截图源文件."""
+    batch = Path(batch_dir)
+    name = Path(rel.replace("\\", "/")).name
+    candidates = [
+        batch / dest_rel,
+        batch / case_id / SCREENSHOTS_SUBDIR / name,
+        batch / rel.replace("\\", "/").lstrip("/"),
+        batch / SCREENSHOTS_SUBDIR / name,
+    ]
+    if project_root is not None:
+        candidates.append(Path(project_root) / SCREENSHOTS_SUBDIR / name)
+    for src in candidates:
+        if src.is_file():
+            return src
+    return None
+
+
+def copy_batch_failure_screenshots(
+    batch_dir: Path,
+    reports_dir: Path,
+    overview: dict[str, Any],
+    *,
+    project_root: Path | None = None,
+) -> None:
+    """复制批次报告中引用的失败截图，使 report_overview.html 内链接可打开."""
+    batch = Path(batch_dir)
+    dest_root = Path(reports_dir)
+    copied: set[tuple[str, str]] = set()
+
+    for case in overview.get("cases") or []:
+        if not isinstance(case, dict):
+            continue
+        case_id = str(case.get("case_id") or "").strip()
+        if not case_id:
+            continue
+        for step in case.get("details") or []:
+            if not isinstance(step, dict) or step.get("success"):
+                continue
+            rel = str(step.get("screenshot") or "").replace("\\", "/").strip()
+            if not rel or rel.startswith(("http://", "https://", "data:")):
+                continue
+            key = (case_id, rel)
+            if key in copied:
+                continue
+            copied.add(key)
+            dest_rel = screenshot_report_rel(case_id, rel)
+            if not dest_rel:
+                continue
+            src = _resolve_batch_screenshot_src(
+                batch, case_id, rel, dest_rel, project_root=project_root,
+            )
+            if src is None:
+                continue
+            dst = dest_root / dest_rel
+            dst.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(src, dst)
 
 
 def _screenshot_href(rel: str, *, prefix: str = "") -> str:

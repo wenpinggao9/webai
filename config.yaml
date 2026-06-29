@@ -1,10 +1,25 @@
 llm:
-  # provider 三选一: ollama | minimax | opus
+  # provider: 默认供应商 (未在 stages 中指定的环节使用, 如定位/断言/后校验)
+  # stages:  按环节覆盖供应商, 例如规划用 opus、执行用 deepseek-v4-pro:
+  #   stages:
+  #     action_plan: opus
+  #     precondition: opus
+  # 也可在 llm.prompts.<stage>.provider 中指定 (stages 优先)
   provider: opus
 
   # 通用参数
   max_tokens: 2048
   temperature: 0.0
+
+  # 按环节指定供应商 (可选; 未列出的环节使用上方 provider)
+  # stages:
+  #   action_plan: opus
+  #   precondition: opus
+  #   case_sort: opus
+  #   element_decide: deepseek-v4
+  #   semantic_assert: deepseek-v4
+  #   readiness: deepseek-v4
+  #   post_check: deepseek-v4
 
   # 本地 Ollama (无需 API Key)
   ollama:
@@ -12,12 +27,12 @@ llm:
     model: deepseek-r1:7b
     timeout_seconds: 120
 
-  # MiniMax (国内代理网关, OpenAI 兼容)
-  minimax:
+  # deepseek (国内代理网关, OpenAI 兼容)
+  deepseek-v4:
     base_url: https://openproxy-cn.zuoyebang.cc/openproxy/rp/v1
-    api_key: "zyb-73e1f689c56330dcd4b7a2752011857f@qa_safe_coding"
-    model: zyb/MiniMax-M2.5
-    timeout_seconds: 60
+    api_key: "zyb-a2e3c5bf0a3a720a9e563154a9b5941a@ZLXN"
+    model: deepseek-v4-pro
+    timeout_seconds: 120
 
   # Opus / 海外 Claude (OpenAI 兼容)
   opus:

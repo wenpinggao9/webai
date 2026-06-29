@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/detail",
-  "saved_at": 1782724494.569015,
+  "saved_at": 1782749847.717054,
   "entries": {
     "click|点击提交按钮": {
       "method": "role",
@@ -11,9 +11,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=button[name=\"提 交\"]",
-      "success_count": 20,
+      "success_count": 25,
       "created_at": 1782121581.957115,
-      "updated_at": 1782723228.634869,
+      "updated_at": 1782745835.876561,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -25,13 +25,13 @@
     "click|点击多题选项": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "text=\"多题\"",
+      "selector": "label:has-text(\"多题\")",
       "method": "text",
       "name": "多题",
-      "exact": true,
-      "success_count": 11,
-      "created_at": 1782172644.151654,
-      "updated_at": 1782707306.1407108,
+      "exact": false,
+      "success_count": 2,
+      "created_at": 1782740803.211231,
+      "updated_at": 1782746180.040687,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -44,13 +44,13 @@
     "click|点击水印题且可做选项": {
       "nth": 0,
       "in_dialog": false,
-      "selector": "text=\"水印题且可做\"",
+      "selector": "label:has-text(\"水印题且可做\")",
       "method": "text",
       "name": "水印题且可做",
-      "exact": true,
-      "success_count": 6,
-      "created_at": 1782463464.0850182,
-      "updated_at": 1782708515.599848,
+      "exact": false,
+      "success_count": 1,
+      "created_at": 1782747760.537455,
+      "updated_at": 1782747760.537455,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -65,9 +65,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"物理\")])[1]",
       "method": "css",
-      "success_count": 6,
+      "success_count": 7,
       "created_at": 1782463487.739725,
-      "updated_at": 1782724308.3574588,
+      "updated_at": 1782747798.713075,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -82,9 +82,9 @@
       "in_dialog": false,
       "selector": "xpath=(//*[contains(@class,'ant-select-dropdown') and not(contains(@style,'display: none'))]//*[contains(@class,'ant-select-item-option') and contains(normalize-space(.), \"大学化学\")])[1]",
       "method": "css",
-      "success_count": 5,
+      "success_count": 6,
       "created_at": 1782463519.7950652,
-      "updated_at": 1782708562.1169548,
+      "updated_at": 1782747840.3717482,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -174,15 +174,35 @@
       "in_dialog": false,
       "selector": "#targetSubject",
       "method": "css",
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782724289.5048242,
-      "updated_at": 1782724289.5048242,
+      "updated_at": 1782747772.195004,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
         "tag": "",
         "text": "",
         "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击提交": {
+      "method": "role",
+      "role": "button",
+      "name": "提 交",
+      "exact": false,
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "role=button[name=\"提 交\"]",
+      "success_count": 1,
+      "created_at": 1782732292.331298,
+      "updated_at": 1782732292.331298,
+      "component_library": "ant-design",
+      "selector_type": "role",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "button",
         "class_pattern": ""
       }
     }

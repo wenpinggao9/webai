@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/userInfo/settlement",
-  "saved_at": 1782724494.569015,
+  "saved_at": 1782749847.717054,
   "entries": {
     "click|点击编辑信息按钮": {
       "method": "role",

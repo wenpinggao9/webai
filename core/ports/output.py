@@ -100,14 +100,27 @@ def publish_project_report(
     *,
     project_root: Path | None = None,
 ) -> tuple[Path, Path]:
-    """将批次汇总报告镜像到 business/<项目>/reports/<时间戳>/ (仅 overview + run_ref)."""
+    """将批次汇总报告镜像到 business/<项目>/reports/<时间戳>/ (overview + 失败截图 + run_ref)."""
+    from .report import copy_batch_failure_screenshots
+
     dest = Path(project_dir) / PROJECT_REPORTS_DIR / batch_dir.name
     dest.mkdir(parents=True, exist_ok=True)
 
+    overview: dict[str, Any] | None = None
     for name in (BATCH_REPORT_JSON, BATCH_REPORT_HTML):
         src = batch_dir / name
         if src.is_file():
             shutil.copy2(src, dest / name)
+            if name == BATCH_REPORT_JSON:
+                try:
+                    overview = json.loads(src.read_text(encoding="utf-8"))
+                except Exception:
+                    overview = None
+
+    if overview:
+        copy_batch_failure_screenshots(
+            batch_dir, dest, overview, project_root=project_root,
+        )
 
     run_dir = batch_dir
     if project_root is not None:

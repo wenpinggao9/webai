@@ -1,0 +1,193 @@
+{
+  "cases": [
+    {
+      "case_id": "vip_前审_021",
+      "module": "vip",
+      "priority": "P1",
+      "origin_case": {
+        "preconditions": [
+          "投放策略来源、大学学段、大学化学学科的题目（1题），获取工单ID为${orderId7}"
+        ],
+        "format": "interleaved",
+        "blocks": [
+          {
+            "steps": [
+              "大学前审老师A从「待前审」页面点击「领取题目」"
+            ],
+            "expectations": [
+              "任务列表不为空"
+            ]
+          },
+          {
+            "steps": [
+              "调用超时接口，传参 orderId=${orderId7}"
+            ],
+            "expectations": []
+          },
+          {
+            "steps": [
+              "大学前审老师A点击「已审核」再回到「待前审」页面"
+            ],
+            "expectations": [
+              "「待前审」的待完成任务列表为空"
+            ]
+          }
+        ]
+      },
+      "actions": [
+        {
+          "type": "api_call",
+          "intent": "投放策略来源、大学学段、大学化学学科的题目（1题），获取工单ID为${orderId7}"
+        },
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'待前审'进入待前审页面"
+        },
+        {
+          "type": "click",
+          "intent": "点击'领取题目'按钮"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证任务列表不为空",
+          "value": ">0"
+        },
+        {
+          "type": "api_call",
+          "intent": "调用超时接口，传参 orderId=${orderId7}",
+          "extras": {
+            "params": {
+              "orderId": "${orderId7}"
+            }
+          }
+        },
+        {
+          "type": "click",
+          "intent": "点击'已审核'"
+        },
+        {
+          "type": "click",
+          "intent": "点击'待前审'回到待前审页面"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证'待前审'的待完成任务列表为空",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "case_id": "vip_前审_022",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [
+          "投放策略来源、大学学段、大学化学学科的题目（1题），获取工单ID为${orderId8}"
+        ],
+        "steps": [
+          "执行超时接口，传参 orderId=${orderId8}"
+        ],
+        "expectations": [
+          "接口执行成功"
+        ]
+      },
+      "actions": [
+        {
+          "type": "api_call",
+          "intent": "投放策略来源、大学学段、大学化学学科的题目（1题），获取工单ID为orderId8"
+        },
+        {
+          "type": "api_call",
+          "intent": "执行超时接口，传参 orderId=${orderId8}",
+          "extras": {
+            "params": {
+              "orderId": "${orderId8}"
+            }
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证接口执行没有失败提示",
+          "value": "失败",
+          "negate": true
+        }
+      ]
+    },
+    {
+      "case_id": "vip_前审_023",
+      "module": "vip",
+      "priority": "P0",
+      "origin_case": {
+        "preconditions": [],
+        "steps": [
+          "管理员点击「全部题目」"
+        ],
+        "expectations": [
+          "工单ID为${orderId7}的生产状态为「待前审」",
+          "工单ID为${orderId8}的生产状态为「待领取」"
+        ]
+      },
+      "actions": [
+        {
+          "type": "click",
+          "intent": "点击'全部题目'"
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证工单ID为${orderId7}的生产状态为待前审",
+          "value": "${orderId7}",
+          "extras": {
+            "column": "生产状态",
+            "expected": "待前审",
+            "row_key_column": "工单ID"
+          }
+        },
+        {
+          "type": "assert_table",
+          "intent": "验证工单ID为${orderId8}的生产状态为待领取",
+          "value": "${orderId8}",
+          "extras": {
+            "column": "生产状态",
+            "expected": "待领取",
+            "row_key_column": "工单ID"
+          }
+        }
+      ]
+    },
+    {
+      "case_id": "vip_前审_024",
+      "module": "vip",
+      "priority": "P1",
+      "origin_case": {
+        "preconditions": [
+          "投放策略来源、大学学段、数学学科的题目（21题）"
+        ],
+        "steps": [
+          "大学前审老师A进入「待前审」页面，点击「领取题目」"
+        ],
+        "expectations": [
+          "待完成任务列表数量为20题（当题池数量≥20时），不超过20题"
+        ]
+      },
+      "actions": [
+        {
+          "type": "api_call",
+          "intent": "投放策略来源、大学学段、数学学科的题目（21题）"
+        },
+        {
+          "type": "click",
+          "intent": "点击侧栏菜单'待前审'进入待前审页面"
+        },
+        {
+          "type": "click",
+          "intent": "点击'领取题目'按钮"
+        },
+        {
+          "type": "assert_count",
+          "intent": "验证待完成任务列表数量为20题",
+          "value": "20"
+        }
+      ]
+    }
+  ]
+}

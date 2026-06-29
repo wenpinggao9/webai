@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "saved_at": 1782724494.571999,
+  "saved_at": 1782749847.720226,
   "pages": {
     "/video/welcome": {
       "route": "/video/welcome",
       "component_library": "ant-design",
-      "dom_signature": "f7d3860c632dd771",
+      "dom_signature": "b0d419a1743c1f91",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -13,18 +13,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 14,
+          "success_count": 16,
           "failure_count": 3
         }
       },
       "learned_at": 1782142954.8372102,
-      "updated_at": 1782718338.4884999,
-      "hit_count": 10
+      "updated_at": 1782742541.490273,
+      "hit_count": 12
     },
     "/video/all-question": {
       "route": "/video/all-question",
       "component_library": "ant-design",
-      "dom_signature": "67a1e4c606d6fe39",
+      "dom_signature": "6ea6482b8a413fa4",
       "rules": {
         "click|button": {
           "action_type": "click",
@@ -32,7 +32,7 @@
           "selector_template": "role=button[name=\"{text}\"]",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 2,
+          "success_count": 4,
           "failure_count": 0
         },
         "click|generic": {
@@ -41,7 +41,7 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 5,
+          "success_count": 6,
           "failure_count": 0
         },
         "click|dropdown_trigger": {
@@ -55,8 +55,8 @@
         }
       },
       "learned_at": 1782143045.140954,
-      "updated_at": 1782724452.5328782,
-      "hit_count": 1
+      "updated_at": 1782746019.9886432,
+      "hit_count": 4
     },
     "/video/wait-preview": {
       "route": "/video/wait-preview",
@@ -78,27 +78,27 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 24,
-          "failure_count": 12
+          "success_count": 25,
+          "failure_count": 14
         }
       },
       "learned_at": 1782146590.337551,
-      "updated_at": 1782724358.140713,
-      "hit_count": 14
+      "updated_at": 1782740881.095955,
+      "hit_count": 15
     },
     "/video/detail": {
       "route": "/video/detail",
       "component_library": "ant-design",
-      "dom_signature": "fc0e0c022de754aa",
+      "dom_signature": "134bd5639cc99af1",
       "rules": {
         "click|generic": {
           "action_type": "click",
           "component_type": "generic",
-          "selector_template": "text=\"{text}\"",
+          "selector_template": "label:has-text(\"{text}\")",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 19,
-          "failure_count": 0
+          "success_count": 22,
+          "failure_count": 2
         },
         "click|dropdown_trigger": {
           "action_type": "click",
@@ -115,13 +115,13 @@
           "selector_template": "role=button[name=\"{text}\"]",
           "selector_type": "role",
           "anchor_type": "text",
-          "success_count": 1,
+          "success_count": 2,
           "failure_count": 0
         }
       },
       "learned_at": 1782172644.151975,
-      "updated_at": 1782724289.50579,
-      "hit_count": 15
+      "updated_at": 1782747760.537923,
+      "hit_count": 17
     },
     "/video/already-self": {
       "route": "/video/already-self",
@@ -143,18 +143,18 @@
           "selector_template": "text=\"{text}\"",
           "selector_type": "css",
           "anchor_type": "text",
-          "success_count": 2,
+          "success_count": 3,
           "failure_count": 1
         }
       },
       "learned_at": 1782172752.178855,
-      "updated_at": 1782722565.622684,
-      "hit_count": 1
+      "updated_at": 1782749640.681081,
+      "hit_count": 2
     },
     "/video/check-history": {
       "route": "/video/check-history",
       "component_library": "ant-design",
-      "dom_signature": "5f41eb741416b21d",
+      "dom_signature": "112d0b0d5f1f2dcf",
       "rules": {
         "click|generic": {
           "action_type": "click",
@@ -162,7 +162,7 @@
           "selector_template": "xpath=(//td[contains(@title, \"{text}\")])[1]",
           "selector_type": "xpath",
           "anchor_type": "text",
-          "success_count": 16,
+          "success_count": 17,
           "failure_count": 7
         },
         "click|dropdown_trigger": {
@@ -194,7 +194,7 @@
         }
       },
       "learned_at": 1782208481.7840261,
-      "updated_at": 1782707578.4987829,
+      "updated_at": 1782741558.886631,
       "hit_count": 8
     },
     "/video/taskindex": {

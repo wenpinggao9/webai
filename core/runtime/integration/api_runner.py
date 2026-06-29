@@ -20,6 +20,7 @@ from ...foundation.variable_substitution import (
     API_PLACEHOLDER_REFS_KEY,
     collect_placeholder_bindings,
     extract_explicit_api_params,
+    normalize_api_flat_params,
     substitute_variables,
 )
 
@@ -84,6 +85,7 @@ class ApiRunner:
                     block = action_extras.get(part)
                     if isinstance(block, dict):
                         params.update(block)
+            params = normalize_api_flat_params(params, api_tpl)
 
             line_refs = collect_placeholder_bindings(line, context=self.context)
             call_refs = {**(var_refs or {}), **line_refs}
@@ -257,9 +259,10 @@ class ApiRunner:
                 success_list.append(extracted)
             total_tried += 1
 
-        if len(success_list) < target_count and on_error != "next_tid":
+        if len(success_list) < target_count:
             raise ValueError(
-                f"API {api_name} 调用未成功 (成功 {len(success_list)}/{target_count})",
+                f"API {api_name} 调用未成功 "
+                f"(成功 {len(success_list)}/{target_count}, 已尝试 {total_tried} 次)",
             )
         return success_list
 

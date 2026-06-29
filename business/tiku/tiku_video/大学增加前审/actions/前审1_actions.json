@@ -22,11 +22,11 @@
       "actions": [
         {
           "type": "api_call",
-          "intent": "投放策略来源、大学学段、数学学科的题目（第1题），获取orderId1"
+          "intent": "投放策略来源、大学学段、数学学科的题目（第1题），获取 orderId1"
         },
         {
           "type": "api_call",
-          "intent": "投放策略来源、大学学段、数学学科的题目（第2题），获取orderId2"
+          "intent": "投放策略来源、大学学段、数学学科的题目（第2题），获取 orderId2"
         },
         {
           "type": "click",
@@ -58,7 +58,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮查看结果"
+          "intent": "点击'提交'按钮"
         },
         {
           "type": "assert_text",
@@ -120,7 +120,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'全部题目'"
+          "intent": "点击'全部题目'进入全部题目页面"
         },
         {
           "type": "click",
@@ -140,7 +140,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮"
+          "intent": "点击'提交'按钮查看结果"
         },
         {
           "type": "assert_table",
@@ -149,7 +149,7 @@
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
-            "row_key_column": "工单ID"
+            "row_key_column": "orderId"
           }
         },
         {
@@ -159,7 +159,7 @@
           "extras": {
             "column": "生产状态",
             "expected": "待前审",
-            "row_key_column": "工单ID"
+            "row_key_column": "orderId"
           }
         }
       ],
@@ -174,7 +174,7 @@
           "大学前审老师A权限且学段是大学，前审角色领取按钮高亮"
         ],
         "steps": [
-          "前审在待前审页面点击领取题目"
+          "前审在待前审页面点击领取"
         ],
         "expectations": [
           "领取成功后展现在待前审列表中",
@@ -189,7 +189,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'领取题目'按钮"
+          "intent": "点击'领取'按钮"
         },
         {
           "type": "assert_text",
@@ -243,61 +243,65 @@
         {
           "type": "assert_text",
           "intent": "验证进入任务详情页",
-          "value": "详情"
+          "value": "详情",
+          "extras": {
+            "semantic": true
+          }
         },
         {
           "type": "assert_text",
-          "intent": "验证最上方标题包含大学数学",
+          "intent": "验证最上方标题包含学段学科大学数学",
           "value": "大学数学"
         },
         {
           "type": "assert_text",
           "intent": "验证详情页左侧展示题目详情",
-          "value": "题目详情"
+          "extras": {
+            "semantic": true
+          }
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'题目内容涉及不良导向/敏感信息'",
+          "intent": "验证审核原因选项包含'题目内容涉及不良导向/敏感信息'",
           "value": "题目内容涉及不良导向/敏感信息"
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'非大学题'",
+          "intent": "验证审核原因选项包含'非大学题'",
           "value": "非大学题"
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'非目标学科'",
+          "intent": "验证审核原因选项包含'非目标学科'",
           "value": "非目标学科"
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'题目不完整或题干残缺'",
+          "intent": "验证审核原因选项包含'题目不完整或题干残缺'",
           "value": "题目不完整或题干残缺"
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'多题'",
+          "intent": "验证审核原因选项包含'多题'",
           "value": "多题"
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'水印题且可做'",
+          "intent": "验证审核原因选项包含'水印题且可做'",
           "value": "水印题且可做"
         },
         {
           "type": "assert_text",
-          "intent": "验证右侧展示审核原因选项包含'题目无任何问题'",
+          "intent": "验证审核原因选项包含'题目无任何问题'",
           "value": "题目无任何问题"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核原因选项只能单选",
-          "value": "单选"
+          "intent": "验证审核原因选项只能单选"
         },
         {
           "type": "assert_text",
-          "intent": "验证详情页不存在放弃选项",
+          "intent": "验证审核原因选项中不存在放弃选项",
           "value": "放弃",
           "negate": true
         }
@@ -337,7 +341,9 @@
         {
           "type": "assert_text",
           "intent": "验证页面自动加载下一个任务的详情页",
-          "value": "详情"
+          "extras": {
+            "semantic": true
+          }
         }
       ],
       "action_count": 4
@@ -362,7 +368,7 @@
       "actions": [
         {
           "type": "click",
-          "intent": "在详情页选择'多题'"
+          "intent": "在详情页选择「多题」"
         },
         {
           "type": "api_call",
@@ -370,21 +376,19 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮"
+          "intent": "点击「提交」按钮"
         },
         {
           "type": "assert_text",
-          "intent": "验证提交后页面自动加载下一个待完成任务详情或详情页关闭",
+          "intent": "验证提交后页面自动加载下一个任务详情或详情页关闭",
           "extras": {
             "any_of": true,
             "branches": [
               {
-                "intent": "验证页面自动加载下一个待完成任务详情页",
-                "value": "任务详情"
+                "intent": "验证页面自动加载下一个待完成任务的详情页"
               },
               {
-                "intent": "验证详情页关闭回到列表页",
-                "value": "待完成"
+                "intent": "验证详情页关闭回到列表页"
               }
             ]
           }
@@ -489,7 +493,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'提交'按钮"
+          "intent": "点击'提交'查看结果"
         },
         {
           "type": "click",
@@ -593,7 +597,7 @@
         },
         {
           "type": "click",
-          "intent": "在'待前审'页面点击'领取题目'按钮"
+          "intent": "在'待前审'页面点击'领取题目'"
         },
         {
           "type": "assert_text",
@@ -613,7 +617,9 @@
         {
           "type": "assert_text",
           "intent": "验证页面进入任务详情页",
-          "value": "任务详情"
+          "extras": {
+            "semantic": true
+          }
         },
         {
           "type": "click",
@@ -625,41 +631,44 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证提交后页面结果为回到待领取页面或自动加载下一个任务详情",
+          "intent": "验证提交后页面结果：没有下一个待完成任务则返回待领取页面，有则自动加载下一个任务详情",
           "extras": {
             "any_of": true,
             "branches": [
               {
-                "intent": "验证页面回到待领取页面",
+                "intent": "验证页面返回到待领取页面",
                 "value": "待领取"
               },
               {
-                "intent": "验证页面自动加载下一个任务详情"
+                "intent": "验证页面自动加载下一个任务详情页",
+                "extras": {
+                  "semantic": true
+                }
               }
             ]
           }
         },
         {
           "type": "click",
-          "intent": "点击'已审核'页面"
+          "intent": "点击侧栏菜单'已审核'进入已审核页面"
         },
         {
           "type": "click",
-          "intent": "点击列表中第一行的'查看'按钮"
+          "intent": "点击列表中最近一条数据的'查看'"
         },
         {
           "type": "assert_text",
-          "intent": "验证审核行为显示为举报",
+          "intent": "验证审核行为为举报",
           "value": "举报"
         },
         {
           "type": "assert_text",
-          "intent": "验证学科显示为数学",
+          "intent": "验证学科为数学",
           "value": "数学"
         },
         {
           "type": "assert_text",
-          "intent": "验证学段显示为大学",
+          "intent": "验证学段为大学",
           "value": "大学"
         }
       ],
@@ -727,7 +736,7 @@
         "steps": [
           "管理员点击「审核历史」",
           "筛选「类型」为「前审」，「学段」为「大学」，「审核行为」为「举报/放弃」",
-          "在筛选区点击「审核时间」日期选择框，在'审核时间'日期面板中选择开始日期2026-06-25，在'审核时间'日期面板中选择结束日期2026-06-26",
+          "在筛选区点击「审核时间」日期选择框，在'审核时间'日期面板中选择开始日期2026-06-28，在'审核时间'日期面板中选择结束日期2026-06-29",
           "「提交」进行查询"
         ],
         "expectations": [
@@ -809,7 +818,7 @@
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为${orderId1001}的举报原因为题目内容涉及不良导向/敏感信息",
+          "intent": "验证工单ID为${orderId1001}的举报原因为「题目内容涉及不良导向/敏感信息」",
           "value": "${orderId1001}",
           "extras": {
             "column": "举报原因",
@@ -824,37 +833,41 @@
           "extras": {
             "column": "审核老师UID",
             "expected": "1001635",
-            "row_key_column": "工单ID"
+            "row_key_column": "工单ID",
+            "multi_row": true
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为${orderId1002}的另一行审核老师UID为1001636",
+          "intent": "验证工单ID为${orderId1002}的其中一行审核老师UID为1001636",
           "value": "${orderId1002}",
           "extras": {
             "column": "审核老师UID",
             "expected": "1001636",
-            "row_key_column": "工单ID"
+            "row_key_column": "工单ID",
+            "multi_row": true
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为${orderId1002}且审核老师UID为1001635的举报原因为多题",
+          "intent": "验证工单ID为${orderId1002}且审核老师UID为1001635的举报原因为「多题」",
           "value": "${orderId1002}",
           "extras": {
             "column": "举报原因",
             "expected": "多题",
-            "row_key_column": "工单ID"
+            "row_key_column": "工单ID",
+            "multi_row": true
           }
         },
         {
           "type": "assert_table",
-          "intent": "验证工单ID为${orderId1002}且审核老师UID为1001636的举报原因为多题",
+          "intent": "验证工单ID为${orderId1002}且审核老师UID为1001636的举报原因为「多题」",
           "value": "${orderId1002}",
           "extras": {
             "column": "举报原因",
             "expected": "多题",
-            "row_key_column": "工单ID"
+            "row_key_column": "工单ID",
+            "multi_row": true
           }
         }
       ],

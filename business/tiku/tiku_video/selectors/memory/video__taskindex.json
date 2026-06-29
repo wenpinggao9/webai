@@ -1,16 +1,16 @@
 {
   "version": 1,
   "route": "/video/taskindex",
-  "saved_at": 1782724494.569015,
+  "saved_at": 1782749847.717054,
   "entries": {
     "click|在筛选区点击学科下拉框": {
       "nth": 0,
       "in_dialog": false,
       "selector": "xpath=(//input[contains(@placeholder, '学科')])[1]",
       "method": "css",
-      "success_count": 4,
+      "success_count": 5,
       "created_at": 1782468911.0657148,
-      "updated_at": 1782708698.324781,
+      "updated_at": 1782748005.4174132,
       "component_library": "ant-design",
       "selector_type": "xpath",
       "node_signature": {
@@ -28,9 +28,9 @@
       "role": "option",
       "name": "大学化学",
       "exact": false,
-      "success_count": 4,
+      "success_count": 5,
       "created_at": 1782468920.615156,
-      "updated_at": 1782708707.627021,
+      "updated_at": 1782748015.551014,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -48,9 +48,9 @@
       "role": "button",
       "name": "领取题目",
       "exact": false,
-      "success_count": 4,
+      "success_count": 5,
       "created_at": 1782468955.364544,
-      "updated_at": 1782708732.6009111,
+      "updated_at": 1782748047.07662,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {
@@ -127,9 +127,9 @@
       "nth": 0,
       "in_dialog": false,
       "selector": "role=link[name=\"待上传\"]",
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782708769.654067,
-      "updated_at": 1782708769.654067,
+      "updated_at": 1782748064.992984,
       "component_library": "ant-design",
       "selector_type": "role",
       "node_signature": {

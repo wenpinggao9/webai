@@ -62,6 +62,63 @@ def resolve_placeholder_alias(
     return None
 
 
+def _enum_maps_from_param_rules(api_tpl: Any) -> dict[str, dict[str, Any]]:
+    """从 API 模板的 param_rules 构建 field → {中文标签: 枚举值}."""
+    rules = getattr(api_tpl, "param_rules", []) or []
+    out: dict[str, dict[str, Any]] = {}
+    for rule in rules:
+        field = str(rule.get("field") or "").strip()
+        enum_map = rule.get("enum") or {}
+        if field and isinstance(enum_map, dict) and enum_map:
+            out[field] = enum_map
+    return out
+
+
+def _resolve_enum_label(field: str, value: Any, enum_maps: dict[str, dict[str, Any]]) -> Any:
+    """将 param_rules 中的中文标签解析为枚举值; 已是数字或 ${var} 则原样返回."""
+    if value is None:
+        return value
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int):
+        return value
+    text = str(value).strip()
+    if not text or "${" in text:
+        return value
+    field_map = enum_maps.get(field) or {}
+    if text in field_map:
+        return field_map[text]
+    if text.isdigit():
+        return int(text)
+    return value
+
+
+def normalize_api_flat_params(
+    flat: dict[str, Any],
+    api_tpl: Any,
+) -> dict[str, Any]:
+    """合并 intent / extras 后的平铺 API 参数: 枚举中文→数字, 去掉模板外字段.
+
+    - deliver 等 param_rules API: extras 里 subject='数学' 会落成 subject=2
+    - timeout 等标量传参: orderId='${orderId8}' 不含枚举, 原样保留
+    - 规划误写的 grade 会映射到 period (若模板有 period 枚举)
+    """
+    if not flat:
+        return {}
+    enum_maps = _enum_maps_from_param_rules(api_tpl)
+    allowed = set((getattr(api_tpl, "params", None) or {}).keys())
+    allowed |= set((getattr(api_tpl, "body", None) or {}).keys())
+
+    out: dict[str, Any] = {}
+    for key, val in flat.items():
+        if allowed and key not in allowed:
+            if key == "grade" and "period" in allowed and "period" not in flat:
+                out["period"] = _resolve_enum_label("period", val, enum_maps)
+            continue
+        out[key] = _resolve_enum_label(key, val, enum_maps)
+    return out
+
+
 def extract_explicit_api_params(line: str) -> dict[str, Any]:
     """从步骤文本解析显式 API 参数: 「传参 orderId=1, op=7」或「params: orderId=1」.
 

@@ -24,7 +24,7 @@
         },
         {
           "type": "click",
-          "intent": "点击'领取题目'"
+          "intent": "点击'领取题目'按钮"
         },
         {
           "type": "assert_count",
@@ -37,7 +37,9 @@
           "value": "大学",
           "negate": true
         }
-      ]
+      ],
+      "action_count": 4
     }
-  ]
+  ],
+  "total_cases": 1
 }

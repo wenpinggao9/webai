@@ -587,6 +587,8 @@ class UITestAgent:
                     profile=profile,
                     session_vars=session_vars,
                     _get_page_for_role=_get_page_for_role if session.roles else None,
+                    fm=fm,
+                    case_id=case.case_id,
                     case=case,
                 )
                 plan_actions_for_save = snapshot_actions_for_plan(actions)
@@ -668,6 +670,8 @@ class UITestAgent:
                     profile=profile,
                     session_vars=session_vars,
                     _get_page_for_role=_get_page_for_role if session.roles else None,
+                    fm=fm,
+                    case_id=case.case_id,
                     case=case,
                 )
                 plan_actions_for_save = snapshot_actions_for_plan(actions)

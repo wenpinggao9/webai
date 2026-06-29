@@ -1,7 +1,7 @@
 {
   "version": 1,
   "route": "/video/welcome",
-  "saved_at": 1782724494.569015,
+  "saved_at": 1782749847.717054,
   "entries": {
     "click|点击侧栏菜单全部题目进入全部题目页面": {
       "nth": 0,
@@ -10,9 +10,9 @@
       "method": "text",
       "name": "全部题目",
       "exact": true,
-      "success_count": 21,
+      "success_count": 23,
       "created_at": 1782142954.8364859,
-      "updated_at": 1782708366.359178,
+      "updated_at": 1782747550.22098,
       "component_library": "ant-design",
       "node_signature": {
         "tag": "",
@@ -28,9 +28,9 @@
       "method": "text",
       "name": "全部题目",
       "exact": true,
-      "success_count": 13,
+      "success_count": 15,
       "created_at": 1782144885.995884,
-      "updated_at": 1782723292.073921,
+      "updated_at": 1782749324.882199,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -47,9 +47,9 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 6,
+      "success_count": 7,
       "created_at": 1782146569.792053,
-      "updated_at": 1782709104.401379,
+      "updated_at": 1782747695.310434,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -66,9 +66,9 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 15,
+      "success_count": 20,
       "created_at": 1782146813.4398952,
-      "updated_at": 1782718766.029418,
+      "updated_at": 1782749131.844061,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -85,9 +85,9 @@
       "method": "text",
       "name": "审核历史",
       "exact": true,
-      "success_count": 2,
+      "success_count": 3,
       "created_at": 1782369550.546016,
-      "updated_at": 1782445374.797696,
+      "updated_at": 1782741477.524862,
       "component_library": "generic",
       "selector_type": "css",
       "node_signature": {
@@ -123,9 +123,9 @@
       "method": "text",
       "name": "任务中心",
       "exact": true,
-      "success_count": 4,
+      "success_count": 5,
       "created_at": 1782468845.2002492,
-      "updated_at": 1782708664.976487,
+      "updated_at": 1782747959.440581,
       "component_library": "generic",
       "selector_type": "css",
       "node_signature": {
@@ -199,9 +199,9 @@
       "method": "text",
       "name": "待前审",
       "exact": true,
-      "success_count": 1,
+      "success_count": 2,
       "created_at": 1782709449.416943,
-      "updated_at": 1782709449.416943,
+      "updated_at": 1782748571.258508,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {
@@ -259,6 +259,44 @@
       "success_count": 1,
       "created_at": 1782718338.4880729,
       "updated_at": 1782718338.4880729,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧栏一级菜单全部题目": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"全部题目\"",
+      "method": "text",
+      "name": "全部题目",
+      "exact": true,
+      "success_count": 2,
+      "created_at": 1782731746.829528,
+      "updated_at": 1782733830.838241,
+      "component_library": "ant-design",
+      "selector_type": "css",
+      "node_signature": {
+        "tag": "",
+        "text": "",
+        "role": "",
+        "class_pattern": ""
+      }
+    },
+    "click|点击侧边栏菜单项全部题目，跳转到全部题目列表页面": {
+      "nth": 0,
+      "in_dialog": false,
+      "selector": "text=\"全部题目\"",
+      "method": "text",
+      "name": "全部题目",
+      "exact": true,
+      "success_count": 1,
+      "created_at": 1782742541.489758,
+      "updated_at": 1782742541.489758,
       "component_library": "ant-design",
       "selector_type": "css",
       "node_signature": {

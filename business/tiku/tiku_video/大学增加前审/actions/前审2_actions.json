@@ -18,7 +18,7 @@
       "actions": [
         {
           "type": "api_call",
-          "intent": "投放策略来源、大学学段、大学化学学科的题目（1题），获取orderId5"
+          "intent": "投放策略来源、大学学段、大学化学学科的题目（1题），获取 orderId5"
         },
         {
           "type": "click",
@@ -139,7 +139,7 @@
       "actions": [
         {
           "type": "click",
-          "intent": "点击'待前审'列表页"
+          "intent": "点击侧栏菜单'待前审'进入待前审列表页"
         },
         {
           "type": "click",
@@ -160,14 +160,16 @@
           "intent": "点击学科为化学一行的'查看'按钮",
           "extras": {
             "row_key": "化学",
-            "row_key_column": "学科",
-            "button": "查看"
+            "button": "查看",
+            "row_key_column": "学科"
           }
         },
         {
           "type": "assert_text",
-          "intent": "验证页面打开前审任务详情页",
-          "value": "详情"
+          "intent": "验证页面已打开前审任务详情页",
+          "extras": {
+            "semantic": true
+          }
         },
         {
           "type": "click",
@@ -227,13 +229,15 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证提交后页面自动加载下一个任务详情页或回到待前审页面",
+          "intent": "验证提交后页面自动加载下一个任务的详情页或回到待前审页面",
           "extras": {
             "any_of": true,
             "branches": [
               {
                 "intent": "验证页面自动加载下一个任务的详情页",
-                "value": "详情"
+                "extras": {
+                  "semantic": true
+                }
               },
               {
                 "intent": "验证页面回到待前审页面",
@@ -248,7 +252,7 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证'审核行为'为'审核通过'",
+          "intent": "验证页面中'审核行为'为「审核通过」",
           "value": "审核通过"
         }
       ],
@@ -419,7 +423,7 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证已进入任务详情页面，页面含'题干'或'题目ID'",
+          "intent": "验证页面已进入任务详情，包含'题干'或'题目ID'",
           "extras": {
             "any_of": true,
             "branches": [
@@ -436,12 +440,19 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证页面展示题目内容区域包含'提交视频'按钮",
+          "intent": "验证页面展示题目内容",
+          "extras": {
+            "semantic": true
+          }
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证右下角存在'提交视频'按钮",
           "value": "提交视频"
         },
         {
           "type": "assert_text",
-          "intent": "验证页面展示'制作PPT'按钮",
+          "intent": "验证右下角存在'制作PPT'按钮",
           "value": "制作PPT"
         },
         {
@@ -461,7 +472,9 @@
         {
           "type": "assert_text",
           "intent": "验证页面展示加载进度条",
-          "value": "进度"
+          "extras": {
+            "semantic": true
+          }
         },
         {
           "type": "wait",
@@ -488,24 +501,30 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证提交后页面结果：无剩余待办时含暂无题目或请去任务中心领题，有剩余待办时进入下一条任务详情",
+          "intent": "验证提交后页面不存在提交失败提示",
+          "value": "提交失败",
+          "negate": true
+        },
+        {
+          "type": "assert_text",
+          "intent": "验证提交成功后页面结果：无剩余待办时含暂无题目或请去任务中心领题，有剩余待办时进入下一条任务详情页",
           "extras": {
             "any_of": true,
             "branches": [
               {
-                "intent": "验证页面包含暂无题目",
+                "intent": "验证页面包含暂无题目提示",
                 "value": "暂无题目"
               },
               {
-                "intent": "验证页面包含请去任务中心领题",
+                "intent": "验证页面包含请去任务中心领题提示",
                 "value": "请去任务中心领题"
               },
               {
-                "intent": "验证页面包含题干（进入下一条任务详情）",
+                "intent": "验证页面包含题干标识表示进入下一条任务详情",
                 "value": "题干"
               },
               {
-                "intent": "验证页面包含题目ID（进入下一条任务详情）",
+                "intent": "验证页面包含题目ID标识表示进入下一条任务详情",
                 "value": "题目ID"
               }
             ]
@@ -530,10 +549,9 @@
         },
         {
           "type": "assert_text",
-          "intent": "验证状态筛选已清空，筛选框显示为默认占位文本而非选中值",
-          "value": "请选择",
+          "intent": "验证状态筛选已清空，筛选框中无已选状态值",
           "extras": {
-            "context": "状态筛选区域"
+            "semantic": true
           }
         },
         {
@@ -571,7 +589,7 @@
           }
         }
       ],
-      "action_count": 29
+      "action_count": 31
     }
   ],
   "total_cases": 4

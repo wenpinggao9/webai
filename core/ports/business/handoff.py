@@ -499,33 +499,9 @@ def _copy_accel_snapshot(
 
 def _copy_case_screenshots_for_batch(batch: Path, reports_dir: Path, overview: dict[str, Any]) -> None:
     """复制批次报告中引用的失败截图，使 delivery/reports/*.html 内链接可打开."""
-    copied: set[tuple[str, str]] = set()
-    for case in overview.get("cases") or []:
-        if not isinstance(case, dict):
-            continue
-        case_id = str(case.get("case_id") or "").strip()
-        if not case_id:
-            continue
-        for step in case.get("details") or []:
-            if not isinstance(step, dict) or step.get("success"):
-                continue
-            rel = str(step.get("screenshot") or "").replace("\\", "/").strip()
-            if not rel or rel.startswith(("http://", "https://", "data:")):
-                continue
-            key = (case_id, rel)
-            if key in copied:
-                continue
-            copied.add(key)
-            src = batch / rel
-            if not src.is_file():
-                # 兼容仅文件名：在 case 目录 screenshots/ 下查找
-                alt = batch / case_id / SCREENSHOTS_SUBDIR / Path(rel).name
-                src = alt if alt.is_file() else src
-            if not src.is_file():
-                continue
-            dst = reports_dir / rel
-            dst.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(src, dst)
+    from ...ports.report import copy_batch_failure_screenshots
+
+    copy_batch_failure_screenshots(batch, reports_dir, overview)
 
 
 def _copy_reports(dest: Path, batches_by_stem: dict[str, Path]) -> list[dict[str, Any]]:
