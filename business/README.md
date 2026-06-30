@@ -56,11 +56,27 @@ web_automation/business/tiku/tiku_video/
 `.env` 字段须与用例里 `角色:` 一致，例如：
 
 ```env
+ENV=test
 BASE_URL=https://www-gwp11-bc.suanshubang.com/video
+VPSAPI_BASE_URL=https://www-gwp11-bc.suanshubang.com
+VPSCORE_BASE_URL=https://wendamis-gwp11-cc.suanshubang.cc
+
 admin_USERNAME=18600638431
 admin_VERIFY_CODE=111111
+
 teacherA_USERNAME=13621190002
 teacherA_VERIFY_CODE=111111
+teacherA_UID=1001636
+
+teacherB_USERNAME=13621190001
+teacherB_VERIFY_CODE=111111
+teacherB_UID=1001635
+
+teacherC_k12_USERNAME=18810812516
+teacherC_k12_VERIFY_CODE=111111
+
+recording_USERNAME=15212240001
+recording_VERIFY_CODE=111111
 ```
 
 ### 5. 验证安装
